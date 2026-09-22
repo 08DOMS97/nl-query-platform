@@ -4,6 +4,7 @@ import { testConnectionHandler } from './functions/testConnection.js';
 import { getSchemaHandler } from './functions/getSchema.js';
 import { generateSQLHandler } from './functions/generateSQL.js';
 import { executeQueryHandler } from './functions/executeQuery.js';
+import { getUsageStatsHandler } from './functions/getUsageStats.js';
 import { verifyFirebaseAuth } from './middleware/auth.middleware.js';
 
 /**
@@ -23,6 +24,7 @@ app.get('/testConnection', verifyFirebaseAuth, testConnectionHandler);
 app.get('/getSchema', verifyFirebaseAuth, getSchemaHandler);
 app.post('/generateSQL', verifyFirebaseAuth, generateSQLHandler);
 app.post('/executeQuery', verifyFirebaseAuth, executeQueryHandler);
+app.get('/getUsageStats', verifyFirebaseAuth, getUsageStatsHandler);
 
 const port = Number(process.env.PORT ?? 8080);
 app.listen(port, () => {

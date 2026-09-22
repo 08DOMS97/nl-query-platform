@@ -65,16 +65,25 @@ function stripMarkdownFences(text: string): string {
     .trim();
 }
 
+export interface GenerateSqlResult {
+  sql: string;
+  tokensInput: number;
+  tokensOutput: number;
+  tokensTotal: number;
+}
+
 /**
  * Genera SQL a partir de lenguaje natural usando Vertex AI Gemini Pro.
  * El resultado NUNCA debe ejecutarse sin pasar antes por
  * `querySafety.service.ts` — este servicio no valida seguridad, solo genera.
+ * Devuelve además los tokens consumidos (`usageMetadata` de la respuesta),
+ * que usa el módulo de uso y costos para estimar el gasto de cada llamada.
  */
 export async function generateSql(
   engine: DbEngine,
   schema: SchemaInfo,
   naturalLanguageQuery: string,
-): Promise<string> {
+): Promise<GenerateSqlResult> {
   const projectId = process.env.GCP_PROJECT_ID;
   const location = process.env.GCP_LOCATION ?? 'us-central1';
   const model = process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-pro';
@@ -100,5 +109,12 @@ export async function generateSql(
     throw new Error('Vertex AI no devolvió texto en la respuesta.');
   }
 
-  return stripMarkdownFences(text);
+  const usage = result.response.usageMetadata;
+
+  return {
+    sql: stripMarkdownFences(text),
+    tokensInput: usage?.promptTokenCount ?? 0,
+    tokensOutput: usage?.candidatesTokenCount ?? 0,
+    tokensTotal: usage?.totalTokenCount ?? 0,
+  };
 }

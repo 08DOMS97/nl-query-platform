@@ -2,6 +2,7 @@ import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
 import { runQuery } from '../services/connectionManager.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
+import { recordUsageEvent } from '../services/usageTracking.service.js';
 import { DB_ENGINES, type DbEngine, type ExecuteQueryRequest } from '../types/index.js';
 
 function isDbEngine(value: unknown): value is DbEngine {
@@ -34,10 +35,28 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
     return;
   }
 
+  const uid = (req as Request & { uid?: string }).uid ?? null;
+  const startedAt = Date.now();
+
   try {
     const result = await runQuery(body.engine, body.sql);
+    await recordUsageEvent({
+      type: 'executeQuery',
+      engine: body.engine,
+      uid,
+      success: true,
+      latencyMs: Date.now() - startedAt,
+    });
     res.status(200).json({ columns: result.columns, rows: result.rows, rowCount: result.rowCount });
   } catch (err) {
+    await recordUsageEvent({
+      type: 'executeQuery',
+      engine: body.engine,
+      uid,
+      success: false,
+      latencyMs: Date.now() - startedAt,
+      errorReason: err instanceof Error ? err.message : String(err),
+    });
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 };

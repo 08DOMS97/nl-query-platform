@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import admin from 'firebase-admin';
+import { getFirebaseAdmin } from '../services/firebaseAdmin.service.js';
 
 /**
  * Verifica el JWT de Firebase Auth enviado como `Authorization: Bearer <idToken>`.
@@ -15,16 +15,6 @@ import admin from 'firebase-admin';
  * `FIREBASE_PROJECT_ID` la inicialización de firebase-admin falla y todo intento de
  * verificar el token da 401, en vez de saltarse la verificación.
  */
-
-let initialized = false;
-
-function ensureFirebaseInitialized(): void {
-  if (initialized) return;
-  if (admin.apps.length === 0) {
-    admin.initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID });
-  }
-  initialized = true;
-}
 
 export async function verifyFirebaseAuth(
   req: Request,
@@ -51,8 +41,7 @@ export async function verifyFirebaseAuth(
   const idToken = header.slice('Bearer '.length);
 
   try {
-    ensureFirebaseInitialized();
-    const decoded = await admin.auth().verifyIdToken(idToken);
+    const decoded = await getFirebaseAdmin().auth().verifyIdToken(idToken);
     (req as Request & { uid?: string }).uid = decoded.uid;
     next();
   } catch (err) {

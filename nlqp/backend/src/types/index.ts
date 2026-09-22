@@ -76,3 +76,13 @@ export interface ExecuteQueryResponse {
   rows: Record<string, unknown>[];
   rowCount: number;
 }
+
+/** Respuesta agregada del módulo de uso y costos (`GET /getUsageStats`). */
+export interface GetUsageStatsResponse {
+  periodDays: number;
+  totalCalls: number;
+  totalCostUsd: number;
+  callsByType: { generateSQL: number; executeQuery: number };
+  callsByEngine: Record<DbEngine, number>;
+  errorCount: number;
+}
