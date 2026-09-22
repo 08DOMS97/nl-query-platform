@@ -1,11 +1,14 @@
 # Plan de trabajo actualizado — NLQP
 
-Estado al 21 de septiembre de 2026 (reescrito completo; la versión anterior era
-del 19/09). Cambios principales desde entonces: los dos bloqueos de cuentas de
-nube se resolvieron, el Módulo 3 (NL2SQL + Query Safety Engine) quedó completo
-y verificado con una llamada real a Vertex AI, el repositorio ya tiene
-commits y está en GitHub, y se agregó una actividad nueva no contemplada en el
-plan original — el módulo de uso y costos.
+Estado al 21 de septiembre de 2026 (misma fecha, actualizado dos veces en el
+día). Cambios del día: los dos bloqueos de cuentas de nube se resolvieron, el
+Módulo 3 (NL2SQL + Query Safety Engine) quedó completo y verificado con una
+llamada real a Vertex AI, el repositorio ya tiene commits y está en GitHub, se
+agregó una actividad nueva no contemplada en el plan original (el módulo de
+uso y costos), y arrancó una primera versión del Frontend Next.js — login,
+registro y la pantalla principal del flujo (motor → pregunta en lenguaje
+natural → SQL generado → ejecutar → resultados), verificada con un navegador
+real.
 
 Alcance de la entrega en curso: **Capítulo 6 hasta la sección 6.2 inclusive**
 (sin cambios — ver §3, es una decisión de alcance ya tomada, no de avance
@@ -19,10 +22,10 @@ técnico).
 |---|---|
 | Actividades del Capítulo 6 (plan original) | 13 |
 | Terminadas y verificadas | 8 |
-| Parciales | 2 |
+| Parciales | 3 (suma el Frontend, ahora v1 en curso) |
 | Bloqueadas por cuentas de nube | 0 (antes 4) |
-| No iniciadas | 3 |
-| Actividad nueva fuera del plan original | 1 (módulo de uso y costos — backend terminado) |
+| No iniciadas | 2 |
+| Actividad nueva fuera del plan original | 1 (módulo de uso y costos — backend terminado; el frontend v1 es avance de una actividad ya planeada, no una actividad nueva) |
 | **Incluidas en esta entrega** | **3** (Módulo 1 y las dos de Módulo 2, sin cambios) |
 
 El avance técnico sigue por delante del alcance de esta entrega. Se documenta
@@ -44,7 +47,7 @@ hasta 6.2 por decisión de alcance, no por falta de material.
 | · Integración con Vertex AI Gemini Pro | **Completo y verificado** — proyecto `proyectog-340d3`, llamada real confirmada | Siguiente |
 | · Implementación del Query Safety Engine | Completo y verificado, 17/17 | Siguiente |
 | · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales | Siguiente |
-| Frontend Next.js y autenticación de interfaz | No iniciado — infraestructura lista (Firebase Auth habilitado), ya no bloqueado | Posterior |
+| Frontend Next.js y autenticación de interfaz | **Parcial (v1)** — login/registro y pantalla principal del flujo completo funcionando, verificado con navegador real; falta historial, herramientas técnicas y dashboard de uso/costos | Posterior |
 | Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado | Posterior |
 | Módulo 5: Historial y gestión de consultas guardadas | No iniciado — infraestructura lista (Firestore habilitado), ya no bloqueado | Posterior |
 | Integración de módulos y pruebas del sistema | Parcial: revisión de seguridad y pruebas multimotor hechas; falta integrar con frontend | Siguiente |
@@ -90,6 +93,7 @@ Conviene tenerlo presente para la planificación, porque no requiere trabajo adi
 | Revisión de seguridad (6.7) | Completa | 6 hallazgos: 3 corregidos, 3 documentados |
 | **Integración con Vertex AI Gemini Pro** | **Verificado con llamada real** | Nuevo desde 19/09 — texto aún no redactado en `CAPITULO_6_Y_PLAN.md` |
 | **Módulo de uso y costos** | **Completo (backend)** | Actividad nueva, fuera del alcance original — ver `nlqp/docs/USO_Y_COSTOS.md`; falta decidir su numeración formal en la tesis y redactar el texto |
+| **Frontend v1 (login + flujo principal)** | **Funcionando, verificado con navegador real** | Primera parte del Frontend Next.js — texto aún no redactado; falta decidir si se documenta ya o cuando el frontend esté más completo (historial, herramientas técnicas, dashboard) |
 
 El Query Safety Engine sigue siendo el componente más defendible y verificado. La
 integración con Vertex AI ahora también está verificada end-to-end — es la pieza que
@@ -122,9 +126,12 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 3. ~~Crear el proyecto de Firebase.~~ **Hecho (21/09).** Authentication y Firestore
    habilitados.
 
-4. **Construir el frontend**, y con él las herramientas técnicas y el historial. Es la mayor
-   carga de trabajo restante, pero ya sin bloqueos externos. También es lo que habilita el
-   dashboard visual del módulo de uso y costos.
+4. **Construir el frontend.** ~~No iniciado~~ **v1 en curso (21/09):** login,
+   registro y la pantalla principal del flujo (motor → pregunta → SQL
+   generado → ejecutar → resultados) ya funcionan, verificado con navegador
+   real. Falta: historial de consultas, herramientas técnicas (Módulo 4 del
+   plan) y el dashboard visual del módulo de uso y costos — sigue siendo la
+   mayor carga de trabajo restante, pero ya con una base funcionando.
 
 5. **Integración final y prototipo funcional.**
 
