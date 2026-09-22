@@ -37,22 +37,25 @@ Si Docker Desktop no responde: en esta máquina está instalado en
 `C:\Users\david\AppData\Local\Programs\DockerDesktop\Docker Desktop.exe` (no en
 `Program Files`).
 
-## Estado (última actualización: 2026-09-17)
+## Estado (última actualización: 2026-09-21)
 
 Completado y validado end-to-end contra los 4 motores reales:
 - **Módulo 1 — ConnectionManager**: pools pg/mysql2/mssql, `testConnection` OK en los 4.
 - **Módulo 2 — SchemaExtractor**: introspección normalizada, 8 tablas + 8 FKs en los 4 motores.
 - **Módulo 3 — SchemaPruning**: incluye sinónimos ES→EN (las consultas NL son en español, el esquema en inglés).
+- **Módulo 4 — VertexAIService/generateSQL**: proyecto GCP+Firebase unificado `proyectog-340d3` creado, Vertex AI habilitada, `GCP_PROJECT_ID`/`FIREBASE_PROJECT_ID` configurados en `nlqp/backend/.env`. Probado en vivo: pregunta en español → Gemini genera SQL correcto → Query Safety Engine lo aprueba → se ejecuta contra Postgres real. Ya no es un bloqueo.
 - **Módulo 5 — Query Safety Engine**: 17/17 en batería de seguridad, 100% bloqueo. Revisado por seguridad (ver `nlqp/docs/SEGURIDAD.md`) y corregido un bypass real en SQL Server.
 - **Módulo 6 — executeQuery**: probado end-to-end en los 4 motores.
-- **50 consultas de prueba** (`nlqp/docs/consultas_prueba_50.json`): 200/200 ejecuciones OK, 50/50 consistentes entre motores. Re-ejecutar con `node nlqp/docs/run_consultas_prueba.mjs` (requiere Docker + backend arriba).
+- **50 consultas de prueba** (`nlqp/docs/consultas_prueba_50.json`): 200/200 ejecuciones OK, 50/50 consistentes entre motores. Re-ejecutar con `node nlqp/docs/run_consultas_prueba.mjs` (requiere Docker + backend arriba). **Nota:** esa corrida usó el SQL de referencia, no generación real vía Vertex AI — repetirla generando con Gemini es el siguiente hito de métricas pendiente.
+- **Firebase Authentication + Firestore**: proyecto `proyectog-340d3`, Authentication (proveedor email/contraseña) y Firestore (`(default)`) habilitados. Al haber `FIREBASE_PROJECT_ID` configurado, el bypass de auth de `auth.middleware.ts` ya no aplica — todas las pruebas (Postman/curl) requieren un ID token real. Usar `npm run test:token` (`nlqp/backend/scripts/get_test_token.mjs`) para conseguir uno de un usuario de prueba (expira a la hora).
+- **Repo en GitHub**: `https://github.com/08DOMS97/nl-query-platform`, branch `main`, primer commit hecho y pusheado.
 
-Bloqueado, pendiente de David (ver §8 de las instrucciones iniciales):
-- **Módulo 4 — VertexAIService/generateSQL**: código escrito (`vertexAI.service.ts`), sin probar — falta `GCP_PROJECT_ID` en `nlqp/backend/.env` (proyecto GCP con Vertex AI habilitado).
-- **Módulo 7 — Historial/Firestore**: no empezado, depende de proyecto Firebase.
-- **Módulo 8 — Frontend Next.js**: no empezado, depende de Firebase Auth. `auth.middleware.ts` ya tiene bypass de desarrollo listo para cuando exista el proyecto.
-- Repo GitHub vacío para el primer push — no hay commits todavía en este repo.
+Bloqueado o pendiente, pero ya sin depender de cuentas de nube:
+- **Módulo 7 — Historial/Firestore**: infraestructura lista (Firestore habilitado), código no empezado.
+- **Módulo 8 — Frontend Next.js**: infraestructura lista (Firebase Auth habilitado), código no empezado.
+- Vertex AI **no tiene crédito de prueba disponible** en esta cuenta de Google — cualquier llamada real se factura (mínima, fracciones de centavo por consulta con el esquema podado, pero real). Avisar antes de disparar llamadas que generen SQL con Gemini.
 - Confirmar si `../db/` (fuera de este repo, no existe en disco por ahora) es relevante.
+- Coordinar los 35 participantes de la encuesta (ver `nlqp/docs/PLAN_DE_TRABAJO.md` §6) — no depende de código, conviene arrancarlo en paralelo.
 
 ## Reglas que no hay que romper
 

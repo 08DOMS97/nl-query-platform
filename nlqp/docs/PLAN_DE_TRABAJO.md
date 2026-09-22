@@ -1,6 +1,12 @@
 # Plan de trabajo actualizado — NLQP
 
-Estado al 19 de septiembre de 2026.
+Estado al 19 de septiembre de 2026, actualizado el 21 de septiembre de 2026: los
+dos bloqueos de cuentas de nube (§5) ya se resolvieron — proyecto GCP+Firebase
+unificado `proyectog-340d3`, Vertex AI habilitada y verificada generando SQL real,
+Firebase Authentication y Firestore habilitados. El resto de este documento
+(estado por actividad, riesgos) queda como estaba al 19/09 salvo lo anotado en
+esta nota; se reescribe completo en la próxima entrega.
+
 Alcance de la entrega en curso: **Capítulo 6 hasta la sección 6.2 inclusive.**
 
 ---

@@ -6,6 +6,7 @@
     "build": "tsc",
     "dev": "node --watch --env-file=.env lib/index.js",
     "start": "node --env-file=.env lib/index.js",
+    "test:token": "node --env-file=.env scripts/get_test_token.mjs",
     "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
