@@ -1,0 +1,143 @@
+{
+  "info": {
+    "name": "NLQP - NL Query Platform",
+    "description": "Colección de pruebas para el backend de NLQP (tesis de David Monterroso, UMG). Usa la variable {{baseUrl}} (definida en el Environment adjunto) para apuntar al backend local.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" }
+  ],
+  "item": [
+    {
+      "name": "0. Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      }
+    },
+    {
+      "name": "1. Test Connection - los 4 motores",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/testConnection", "host": ["{{baseUrl}}"], "path": ["testConnection"] }
+      }
+    },
+    {
+      "name": "1b. Test Connection - un solo motor (postgres)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/testConnection?engine=postgres",
+          "host": ["{{baseUrl}}"],
+          "path": ["testConnection"],
+          "query": [{ "key": "engine", "value": "postgres" }]
+        }
+      }
+    },
+    {
+      "name": "2. Get Schema - esquema completo (postgres)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/getSchema?engine=postgres",
+          "host": ["{{baseUrl}}"],
+          "path": ["getSchema"],
+          "query": [{ "key": "engine", "value": "postgres" }]
+        }
+      }
+    },
+    {
+      "name": "2b. Get Schema - con schema pruning (naturalLanguageQuery)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/getSchema?engine=postgres&naturalLanguageQuery=cuanto ha gastado cada cliente",
+          "host": ["{{baseUrl}}"],
+          "path": ["getSchema"],
+          "query": [
+            { "key": "engine", "value": "postgres" },
+            { "key": "naturalLanguageQuery", "value": "cuanto ha gastado cada cliente" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2c. Get Schema - SQL Server",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/getSchema?engine=mssql",
+          "host": ["{{baseUrl}}"],
+          "path": ["getSchema"],
+          "query": [{ "key": "engine", "value": "mssql" }]
+        }
+      }
+    },
+    {
+      "name": "3. Execute Query - SELECT valido (debe dar 200)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"engine\": \"postgres\",\n  \"sql\": \"SELECT c.first_name, c.last_name, COUNT(o.order_id) AS pedidos FROM customers c LEFT JOIN orders o ON c.customer_id = o.customer_id GROUP BY c.customer_id, c.first_name, c.last_name ORDER BY pedidos DESC LIMIT 10\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/executeQuery", "host": ["{{baseUrl}}"], "path": ["executeQuery"] }
+      }
+    },
+    {
+      "name": "3b. Execute Query - mismo SELECT contra SQL Server (TOP en vez de LIMIT)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"engine\": \"mssql\",\n  \"sql\": \"SELECT TOP 10 c.first_name, c.last_name, COUNT(o.order_id) AS pedidos FROM customers c LEFT JOIN orders o ON c.customer_id = o.customer_id GROUP BY c.customer_id, c.first_name, c.last_name ORDER BY pedidos DESC\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/executeQuery", "host": ["{{baseUrl}}"], "path": ["executeQuery"] }
+      }
+    },
+    {
+      "name": "4. Query Safety Engine - DELETE bloqueado (debe dar 403)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"engine\": \"postgres\",\n  \"sql\": \"DELETE FROM customers WHERE customer_id = 1\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/executeQuery", "host": ["{{baseUrl}}"], "path": ["executeQuery"] }
+      }
+    },
+    {
+      "name": "4b. Query Safety Engine - sentencia apilada bloqueada (debe dar 403)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"engine\": \"postgres\",\n  \"sql\": \"SELECT * FROM customers; DROP TABLE customers\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/executeQuery", "host": ["{{baseUrl}}"], "path": ["executeQuery"] }
+      }
+    },
+    {
+      "name": "5. Generate SQL (NL2SQL) - requiere GCP_PROJECT_ID configurado",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"engine\": \"postgres\",\n  \"naturalLanguageQuery\": \"cuanto ha gastado cada cliente\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/generateSQL", "host": ["{{baseUrl}}"], "path": ["generateSQL"] }
+      }
+    }
+  ]
+}

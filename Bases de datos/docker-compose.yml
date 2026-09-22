@@ -1,0 +1,184 @@
+# ============================================================
+#  Entorno LOCAL de pruebas - 4 motores de base de datos
+# ------------------------------------------------------------
+#  SQL Server 2022 | PostgreSQL 16 | MySQL 8.0 | MariaDB 11.4
+#
+#  Cada motor en su propio contenedor, su propio volumen y su
+#  propio puerto de host. Red bridge dedicada. La app externa
+#  (en Windows) se conecta por localhost + puerto publicado.
+#
+#  NO levantar a la vez que  ../db/docker-compose.yml : usan los
+#  mismos puertos de host.
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL 16  ->  host ${POSTGRES_HOST_PORT} / cont. 5432
+  # Init automatico:  /docker-entrypoint-initdb.d/*.sql
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: nlqp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+      POSTGRES_DB: ${TEST_DB_NAME}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init/postgres:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nlqp_testnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER} -d ${TEST_DB_NAME} -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # ----------------------------------------------------------
+  # MySQL 8.0  ->  host ${MYSQL_HOST_PORT} / cont. 3306
+  # La imagen crea DB + testuser (ALL PRIVILEGES en la DB) via env.
+  # Init automatico:  /docker-entrypoint-initdb.d/*.sql
+  # ----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: nlqp-mysql
+    restart: unless-stopped
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${TEST_DB_NAME}
+      MYSQL_USER: ${TEST_DB_USER}
+      MYSQL_PASSWORD: ${TEST_DB_PASSWORD}
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init/mysql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nlqp_testnet
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # ----------------------------------------------------------
+  # MariaDB 11.4 (LTS)  ->  host ${MARIADB_HOST_PORT} / cont. 3306
+  # La imagen crea DB + testuser (ALL PRIVILEGES en la DB) via env.
+  # Init automatico:  /docker-entrypoint-initdb.d/*.sql
+  # ----------------------------------------------------------
+  mariadb:
+    image: mariadb:11.4
+    container_name: nlqp-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${TEST_DB_NAME}
+      MARIADB_USER: ${TEST_DB_USER}
+      MARIADB_PASSWORD: ${TEST_DB_PASSWORD}
+    ports:
+      - "${MARIADB_HOST_PORT:-3307}:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./init/mariadb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nlqp_testnet
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # ----------------------------------------------------------
+  # SQL Server 2022 (Developer)  ->  host ${MSSQL_HOST_PORT} / cont. 1433
+  # No tiene carpeta de init automatica: lo hace el servicio
+  # sqlserver-init (abajo) cuando este contenedor esta "healthy".
+  # ----------------------------------------------------------
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: nlqp-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    ports:
+      - "${MSSQL_HOST_PORT:-1433}:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - nlqp_testnet
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -N -b -Q \"SELECT 1\" -o /dev/null || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -b -Q \"SELECT 1\" -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  # ----------------------------------------------------------
+  # Inicializador de SQL Server (un solo uso).
+  # Reutiliza la imagen ya descargada de SQL Server (trae sqlcmd).
+  # Espera a que 'sqlserver' este healthy, crea DB + usuario +
+  # esquema + datos, y termina. Scripts idempotentes.
+  # ----------------------------------------------------------
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: nlqp-sqlserver-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      TEST_DB_NAME: ${TEST_DB_NAME}
+      TEST_DB_USER: ${TEST_DB_USER}
+      TEST_DB_PASSWORD: ${TEST_DB_PASSWORD}
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        SQLCMD=/opt/mssql-tools18/bin/sqlcmd
+        OPTS="-C"
+        if [ ! -x "$$SQLCMD" ]; then SQLCMD=/opt/mssql-tools/bin/sqlcmd; OPTS=""; fi
+        run() { "$$SQLCMD" -S sqlserver -U sa -P "$$MSSQL_SA_PASSWORD" $$OPTS -b "$$@"; }
+        echo "[init] esperando a SQL Server..."
+        for i in $$(seq 1 60); do
+          run -Q "SELECT 1" -o /dev/null 2>/dev/null && break
+          sleep 2
+          [ "$$i" = "60" ] && { echo "[init] TIMEOUT"; exit 1; }
+        done
+        echo "[init] creando base de datos $$TEST_DB_NAME"
+        run -Q "IF DB_ID(N'$$TEST_DB_NAME') IS NULL CREATE DATABASE [$$TEST_DB_NAME];"
+        echo "[init] aplicando esquema"
+        run -d "$$TEST_DB_NAME" -i /init/01-schema.sql
+        echo "[init] creando login/usuario de aplicacion"
+        run -d "$$TEST_DB_NAME" -v APP_USER="$$TEST_DB_USER" APP_PASSWORD="$$TEST_DB_PASSWORD" DB_NAME="$$TEST_DB_NAME" -i /init/02-users.sql
+        echo "[init] insertando datos de prueba"
+        run -d "$$TEST_DB_NAME" -i /init/03-seed.sql
+        echo "[init] completado OK"
+    volumes:
+      - ./init/sqlserver:/init:ro
+    networks:
+      - nlqp_testnet
+    restart: "no"
+
+networks:
+  nlqp_testnet:
+    name: nlqp_testnet
+    driver: bridge
+
+volumes:
+  pg_data:
+  mysql_data:
+  mariadb_data:
+  mssql_data:

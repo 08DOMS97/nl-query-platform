@@ -1,0 +1,5 @@
+# Credenciales locales del banco de pruebas (nunca al repositorio)
+.env
+
+# Nada mas de este directorio necesita ignorarse: los datos viven en
+# volumenes Docker con nombre, no en el arbol de archivos.

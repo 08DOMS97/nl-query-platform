@@ -1,0 +1,2610 @@
+[
+  {
+    "id": "S01",
+    "category": "simple",
+    "nl": "¿Cuántos clientes hay en total?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "200"
+        },
+        "latencyMs": 50
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 200
+        },
+        "latencyMs": 26
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 200
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 200
+        },
+        "latencyMs": 16
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S02",
+    "category": "simple",
+    "nl": "¿Cuántos clientes están activos?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "158"
+        },
+        "latencyMs": 4
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 158
+        },
+        "latencyMs": 8
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 158
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 158
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S03",
+    "category": "simple",
+    "nl": "Lista los 10 productos más caros",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Stark Graphics Card (Max)",
+          "price": "4999.99"
+        },
+        "latencyMs": 21
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Stark Graphics Card (Max)",
+          "price": "4999.99"
+        },
+        "latencyMs": 4
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Stark Graphics Card (Max)",
+          "price": "4999.99"
+        },
+        "latencyMs": 11
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Stark Graphics Card (Max)",
+          "price": 4999.99
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S04",
+    "category": "simple",
+    "nl": "¿Cuántos productos están agotados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "10"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 10
+        },
+        "latencyMs": 15
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 10
+        },
+        "latencyMs": 17
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 10
+        },
+        "latencyMs": 23
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S05",
+    "category": "simple",
+    "nl": "Muestra los productos con stock menor a 10",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 26,
+        "sample": {
+          "name": "Hooli Popular Science Reader",
+          "stock": 0
+        },
+        "latencyMs": 12
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 26,
+        "sample": {
+          "name": "Initech Soundbar",
+          "stock": 0
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 26,
+        "sample": {
+          "name": "Initech Soundbar",
+          "stock": 0
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 26,
+        "sample": {
+          "name": "Initech Soundbar",
+          "stock": 0
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S06",
+    "category": "simple",
+    "nl": "¿Cuántas categorías de productos existen?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "15"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 15
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 15
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 15
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S07",
+    "category": "simple",
+    "nl": "Lista las categorías activas",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 13,
+        "sample": {
+          "name": "Beauty & Personal Care"
+        },
+        "latencyMs": 16
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 13,
+        "sample": {
+          "name": "Beauty & Personal Care"
+        },
+        "latencyMs": 20
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 13,
+        "sample": {
+          "name": "Beauty & Personal Care"
+        },
+        "latencyMs": 14
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 13,
+        "sample": {
+          "name": "Beauty & Personal Care"
+        },
+        "latencyMs": 21
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S08",
+    "category": "simple",
+    "nl": "¿Cuántos pedidos hay en total?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "300"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 300
+        },
+        "latencyMs": 15
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 300
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 300
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S09",
+    "category": "simple",
+    "nl": "¿Cuántos pedidos fueron cancelados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "42"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 42
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 42
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 42
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S10",
+    "category": "simple",
+    "nl": "¿Cuántos pedidos se hicieron en 2025?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "104"
+        },
+        "latencyMs": 12
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 104
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 104
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 104
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S11",
+    "category": "simple",
+    "nl": "Muestra los 5 pedidos más recientes",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "order_id": 48,
+          "order_date": "2026-08-26T16:45:00.000Z",
+          "total": "9954.36"
+        },
+        "latencyMs": 3
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "order_id": 48,
+          "order_date": "2026-08-26T22:45:00.000Z",
+          "total": "9954.36"
+        },
+        "latencyMs": 10
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "order_id": 48,
+          "order_date": "2026-08-26T22:45:00.000Z",
+          "total": "9954.36"
+        },
+        "latencyMs": 5
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "order_id": 48,
+          "order_date": "2026-08-26T16:45:00.000Z",
+          "total": 9954.36
+        },
+        "latencyMs": 17
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S12",
+    "category": "simple",
+    "nl": "¿Cuántos pagos fueron rechazados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "49"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 49
+        },
+        "latencyMs": 3
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 49
+        },
+        "latencyMs": 12
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 49
+        },
+        "latencyMs": 17
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S13",
+    "category": "simple",
+    "nl": "¿Cuántos envíos están en tránsito?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "7"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 7
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 7
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 7
+        },
+        "latencyMs": 10
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S14",
+    "category": "simple",
+    "nl": "Lista los métodos de pago disponibles",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "BANK_TRANSFER"
+        },
+        "latencyMs": 2
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "BANK_TRANSFER"
+        },
+        "latencyMs": 11
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "BANK_TRANSFER"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "BANK_TRANSFER"
+        },
+        "latencyMs": 6
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "S15",
+    "category": "simple",
+    "nl": "¿Cuál es el precio promedio de los productos?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "precio_promedio": "692.13"
+        },
+        "latencyMs": 9
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "precio_promedio": "692.13"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "precio_promedio": "692.13"
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "precio_promedio": 692.13
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M01",
+    "category": "intermedio",
+    "nl": "¿Cuántos productos tiene cada categoría?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "productos": "14"
+        },
+        "latencyMs": 16
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "productos": 14
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "productos": 14
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "productos": 14
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M02",
+    "category": "intermedio",
+    "nl": "¿Cuántos pedidos ha hecho cada cliente?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "pedidos": "9"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "pedidos": 9
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "pedidos": 9
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "pedidos": 9
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M03",
+    "category": "intermedio",
+    "nl": "¿Cuánto ha gastado cada cliente?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 17
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 200,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": 61262.38
+        },
+        "latencyMs": 21
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M04",
+    "category": "intermedio",
+    "nl": "¿Cuáles son los 10 productos más vendidos por unidades?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Kixel Eau de Parfum 100ml",
+          "unidades": "160"
+        },
+        "latencyMs": 12
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Kixel Eau de Parfum 100ml",
+          "unidades": "160"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Kixel Eau de Parfum 100ml",
+          "unidades": "160"
+        },
+        "latencyMs": 13
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "name": "Kixel Eau de Parfum 100ml",
+          "unidades": 160
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M05",
+    "category": "intermedio",
+    "nl": "¿Cuáles clientes nunca han hecho un pedido?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 55,
+        "sample": {
+          "customer_id": 106,
+          "first_name": "Kevin",
+          "last_name": "Juarez"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 55,
+        "sample": {
+          "customer_id": 5,
+          "first_name": "Marta",
+          "last_name": "Lemus"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 55,
+        "sample": {
+          "customer_id": 5,
+          "first_name": "Marta",
+          "last_name": "Lemus"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 55,
+        "sample": {
+          "customer_id": 5,
+          "first_name": "Marta",
+          "last_name": "Lemus"
+        },
+        "latencyMs": 13
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M06",
+    "category": "intermedio",
+    "nl": "¿Qué productos nunca se han vendido?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 19,
+        "sample": {
+          "product_id": 82,
+          "name": "Kixel Collectible Figure (Gen2)"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 19,
+        "sample": {
+          "product_id": 3,
+          "name": "Hooli Bluetooth Speaker (Gen2)"
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 19,
+        "sample": {
+          "product_id": 3,
+          "name": "Hooli Bluetooth Speaker (Gen2)"
+        },
+        "latencyMs": 11
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 19,
+        "sample": {
+          "product_id": 3,
+          "name": "Hooli Bluetooth Speaker (Gen2)"
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M07",
+    "category": "intermedio",
+    "nl": "¿Cuál es el total de ventas por categoría?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "ventas": "548676.66"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "ventas": "548676.66"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "ventas": "548676.66"
+        },
+        "latencyMs": 4
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "ventas": 548676.66
+        },
+        "latencyMs": 16
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M08",
+    "category": "intermedio",
+    "nl": "¿Cuál es el total vendido por método de pago?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "CREDIT_CARD",
+          "total": "570246.24"
+        },
+        "latencyMs": 12
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "CREDIT_CARD",
+          "total": "570246.24"
+        },
+        "latencyMs": 3
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "CREDIT_CARD",
+          "total": "570246.24"
+        },
+        "latencyMs": 12
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "payment_method": "CREDIT_CARD",
+          "total": 570246.24
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M09",
+    "category": "intermedio",
+    "nl": "¿Cuántos pedidos tiene cada estado?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 6,
+        "sample": {
+          "status": "DELIVERED",
+          "total": "195"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 6,
+        "sample": {
+          "status": "DELIVERED",
+          "total": 195
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 6,
+        "sample": {
+          "status": "DELIVERED",
+          "total": 195
+        },
+        "latencyMs": 20
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 6,
+        "sample": {
+          "status": "DELIVERED",
+          "total": 195
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M10",
+    "category": "intermedio",
+    "nl": "¿Cuáles son las 5 ciudades con más clientes?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "city": "Guatemala City",
+          "n": "47"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "city": "Guatemala City",
+          "n": 47
+        },
+        "latencyMs": 15
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "city": "Guatemala City",
+          "n": 47
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "city": "Guatemala City",
+          "n": 47
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M11",
+    "category": "intermedio",
+    "nl": "¿Cuántos clientes hay por país?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 9,
+        "sample": {
+          "country": "Guatemala",
+          "n": "107"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 9,
+        "sample": {
+          "country": "Guatemala",
+          "n": 107
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 9,
+        "sample": {
+          "country": "Guatemala",
+          "n": 107
+        },
+        "latencyMs": 20
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 9,
+        "sample": {
+          "country": "Guatemala",
+          "n": 107
+        },
+        "latencyMs": 5
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M12",
+    "category": "intermedio",
+    "nl": "¿Cuál es el ticket promedio por año?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 4,
+        "sample": {
+          "anio": "2023",
+          "ticket_promedio": "5457.74"
+        },
+        "latencyMs": 10
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 4,
+        "sample": {
+          "anio": 2023,
+          "ticket_promedio": "5457.74"
+        },
+        "latencyMs": 3
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 4,
+        "sample": {
+          "anio": 2023,
+          "ticket_promedio": "5457.74"
+        },
+        "latencyMs": 13
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 4,
+        "sample": {
+          "anio": 2023,
+          "ticket_promedio": 5457.74
+        },
+        "latencyMs": 21
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M13",
+    "category": "intermedio",
+    "nl": "¿Cuántos pedidos y cuánto se vendió cada mes de 2025?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 12,
+        "sample": {
+          "mes": "1",
+          "pedidos": "10",
+          "ventas": "64646.51"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 12,
+        "sample": {
+          "mes": 1,
+          "pedidos": 10,
+          "ventas": "64646.51"
+        },
+        "latencyMs": 2
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 12,
+        "sample": {
+          "mes": 1,
+          "pedidos": 10,
+          "ventas": "64646.51"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 12,
+        "sample": {
+          "mes": 1,
+          "pedidos": 10,
+          "ventas": 64646.51
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M14",
+    "category": "intermedio",
+    "nl": "¿Qué clientes tienen más de 3 pedidos?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 18,
+        "sample": {
+          "customer_id": 88,
+          "pedidos": "9"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 18,
+        "sample": {
+          "customer_id": 88,
+          "pedidos": 9
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 18,
+        "sample": {
+          "customer_id": 88,
+          "pedidos": 9
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 18,
+        "sample": {
+          "customer_id": 88,
+          "pedidos": 9
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M15",
+    "category": "intermedio",
+    "nl": "¿Cuáles categorías no tienen productos activos?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 3
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 11
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 2
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 17
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M16",
+    "category": "intermedio",
+    "nl": "¿Cuál es el valor total de inventario por categoría?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "valor_inventario": "4930726.47"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "valor_inventario": "4930726.47"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "valor_inventario": "4930726.47"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "valor_inventario": 4930726.47
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M17",
+    "category": "intermedio",
+    "nl": "¿Cuántos pedidos están pagados pero aún no enviados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": "24"
+        },
+        "latencyMs": 2
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 24
+        },
+        "latencyMs": 12
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 24
+        },
+        "latencyMs": 17
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "total": 24
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M18",
+    "category": "intermedio",
+    "nl": "¿Cuál es el porcentaje de pedidos cancelados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pct_cancelados": "14.00"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pct_cancelados": "14.00"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pct_cancelados": "14.00"
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pct_cancelados": 14
+        },
+        "latencyMs": 17
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M19",
+    "category": "intermedio",
+    "nl": "¿Cuáles son los 10 clientes con más direcciones registradas?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 97,
+          "first_name": "Marta",
+          "last_name": "Franco",
+          "direcciones": "2"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 19,
+          "first_name": "Andres",
+          "last_name": "Juarez",
+          "direcciones": 2
+        },
+        "latencyMs": 4
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 13,
+          "first_name": "Rosa",
+          "last_name": "Castro",
+          "direcciones": 2
+        },
+        "latencyMs": 10
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 8,
+          "first_name": "Tania",
+          "last_name": "Interiano",
+          "direcciones": 2
+        },
+        "latencyMs": 22
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "M20",
+    "category": "intermedio",
+    "nl": "¿Cuál es el tiempo promedio entre el envío y la entrega, en días?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "dias_promedio": "5.30"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "dias_promedio": "5.43"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "dias_promedio": "5.43"
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "dias_promedio": 5.43
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C01",
+    "category": "complejo",
+    "nl": "¿Quién es el cliente que más ha gastado y cuánto?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 17
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": 61262.38
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C02",
+    "category": "complejo",
+    "nl": "Muestra el top 3 de productos más vendidos de cada categoría",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 42,
+        "sample": {
+          "categoria": "Automotive",
+          "producto": "Nakatomi Handheld Car Vacuum",
+          "unidades": "7"
+        },
+        "latencyMs": 16
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 42,
+        "sample": {
+          "categoria": "Automotive",
+          "producto": "Nakatomi Handheld Car Vacuum",
+          "unidades": "7"
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 42,
+        "sample": {
+          "categoria": "Automotive",
+          "producto": "Nakatomi Handheld Car Vacuum",
+          "unidades": "7"
+        },
+        "latencyMs": 14
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 42,
+        "sample": {
+          "categoria": "Automotive",
+          "producto": "Nakatomi Handheld Car Vacuum",
+          "unidades": 7
+        },
+        "latencyMs": 65
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C03",
+    "category": "complejo",
+    "nl": "¿Qué clientes han gastado más que el promedio general?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 54,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 5
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 54,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 54,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": "61262.38"
+        },
+        "latencyMs": 14
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 54,
+        "sample": {
+          "customer_id": 63,
+          "first_name": "Luis",
+          "last_name": "Vargas",
+          "gastado": 61262.38
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C04",
+    "category": "complejo",
+    "nl": "¿Cuáles son los 5 clientes con más pedidos entregados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 112,
+          "first_name": "Daniela",
+          "last_name": "Herrera",
+          "entregados": "5"
+        },
+        "latencyMs": 15
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "entregados": 5
+        },
+        "latencyMs": 20
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "entregados": 5
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "entregados": 5
+        },
+        "latencyMs": 17
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C05",
+    "category": "complejo",
+    "nl": "¿Qué categorías generan más del 15% de las ventas totales?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Computers",
+          "ventas": "521122.41",
+          "pct": "38.33"
+        },
+        "latencyMs": 17
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Computers",
+          "ventas": "521122.41",
+          "pct": "38.33"
+        },
+        "latencyMs": 19
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Computers",
+          "ventas": "521122.41",
+          "pct": "38.33"
+        },
+        "latencyMs": 16
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Computers",
+          "ventas": 521122.41,
+          "pct": 38.33
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C06",
+    "category": "complejo",
+    "nl": "¿Qué pedidos tienen un total distinto a la suma de subtotal, impuestos y envío?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 9
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 15
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C07",
+    "category": "complejo",
+    "nl": "¿Cuáles son los 5 clientes con más productos distintos comprados?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "productos_distintos": "21"
+        },
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "productos_distintos": 21
+        },
+        "latencyMs": 22
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "productos_distintos": 21
+        },
+        "latencyMs": 10
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "productos_distintos": 21
+        },
+        "latencyMs": 23
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C08",
+    "category": "complejo",
+    "nl": "¿Cuáles son los 5 productos con mayor ingreso generado, junto con su categoría?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "categoria": "Computers",
+          "ingreso": "292150.86"
+        },
+        "latencyMs": 12
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "categoria": "Computers",
+          "ingreso": "292150.86"
+        },
+        "latencyMs": 16
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "categoria": "Computers",
+          "ingreso": "292150.86"
+        },
+        "latencyMs": 22
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "categoria": "Computers",
+          "ingreso": 292150.86
+        },
+        "latencyMs": 8
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C09",
+    "category": "complejo",
+    "nl": "¿Qué clientes han comprado productos de más de 5 categorías distintas?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 38,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "categorias": "12"
+        },
+        "latencyMs": 4
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 38,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "categorias": 12
+        },
+        "latencyMs": 21
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 38,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "categorias": 12
+        },
+        "latencyMs": 12
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 38,
+        "sample": {
+          "customer_id": 88,
+          "first_name": "Camilo",
+          "last_name": "Ibanez",
+          "categorias": 12
+        },
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C10",
+    "category": "complejo",
+    "nl": "¿Qué clientes tienen pagos incompletos frente al total de sus pedidos?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 157,
+          "first_name": "Monica",
+          "last_name": "Ortega",
+          "total_pedidos": "32165.07",
+          "total_pagado": "14668.28"
+        },
+        "latencyMs": 18
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 157,
+          "first_name": "Monica",
+          "last_name": "Ortega",
+          "total_pedidos": "32165.07",
+          "total_pagado": "14668.28"
+        },
+        "latencyMs": 18
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 157,
+          "first_name": "Monica",
+          "last_name": "Ortega",
+          "total_pedidos": "32165.07",
+          "total_pagado": "14668.28"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 10,
+        "sample": {
+          "customer_id": 157,
+          "first_name": "Monica",
+          "last_name": "Ortega",
+          "total_pedidos": 32165.07,
+          "total_pagado": 14668.28
+        },
+        "latencyMs": 8
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C11",
+    "category": "complejo",
+    "nl": "¿Cuáles son los 3 productos más vendidos dentro de la categoría con mayores ventas?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "unidades": "120"
+        },
+        "latencyMs": 7
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "unidades": "120"
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "unidades": "120"
+        },
+        "latencyMs": 13
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 3,
+        "sample": {
+          "name": "Umbra Desktop Tower",
+          "unidades": 120
+        },
+        "latencyMs": 20
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C12",
+    "category": "complejo",
+    "nl": "¿Cuántos pedidos superan el promedio de artículos por pedido?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pedidos_sobre_promedio": "139"
+        },
+        "latencyMs": 11
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pedidos_sobre_promedio": 139
+        },
+        "latencyMs": 23
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pedidos_sobre_promedio": 139
+        },
+        "latencyMs": 18
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 1,
+        "sample": {
+          "pedidos_sobre_promedio": 139
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C13",
+    "category": "complejo",
+    "nl": "¿Qué clientes han hecho pedidos con envío a más de un país?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 13
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 2
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 13
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 0,
+        "latencyMs": 18
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C14",
+    "category": "complejo",
+    "nl": "¿Cuál es el precio mínimo, máximo y promedio por categoría?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "min_precio": "841.00",
+          "max_precio": "4999.99",
+          "precio_promedio": "2204.62"
+        },
+        "latencyMs": 17
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "min_precio": "841.00",
+          "max_precio": "4999.99",
+          "precio_promedio": "2204.62"
+        },
+        "latencyMs": 15
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "min_precio": "841.00",
+          "max_precio": "4999.99",
+          "precio_promedio": "2204.62"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 15,
+        "sample": {
+          "name": "Computers",
+          "min_precio": 841,
+          "max_precio": 4999.99,
+          "precio_promedio": 2204.62
+        },
+        "latencyMs": 19
+      }
+    },
+    "consistent": true
+  },
+  {
+    "id": "C15",
+    "category": "complejo",
+    "nl": "¿Cuáles son los 5 clientes con mayor gasto promedio por pedido, considerando solo clientes con más de un pedido?",
+    "perEngine": {
+      "postgres": {
+        "engine": "postgres",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 66,
+          "first_name": "Javier",
+          "last_name": "Franco",
+          "pedidos": "2",
+          "gasto_promedio": "14818.21"
+        },
+        "latencyMs": 14
+      },
+      "mysql": {
+        "engine": "mysql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 66,
+          "first_name": "Javier",
+          "last_name": "Franco",
+          "pedidos": 2,
+          "gasto_promedio": "14818.21"
+        },
+        "latencyMs": 17
+      },
+      "mariadb": {
+        "engine": "mariadb",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 66,
+          "first_name": "Javier",
+          "last_name": "Franco",
+          "pedidos": 2,
+          "gasto_promedio": "14818.21"
+        },
+        "latencyMs": 15
+      },
+      "mssql": {
+        "engine": "mssql",
+        "ok": true,
+        "status": 200,
+        "rowCount": 5,
+        "sample": {
+          "customer_id": 66,
+          "first_name": "Javier",
+          "last_name": "Franco",
+          "pedidos": 2,
+          "gasto_promedio": 14818.21
+        },
+        "latencyMs": 23
+      }
+    },
+    "consistent": true
+  }
+]
