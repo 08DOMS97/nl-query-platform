@@ -37,13 +37,14 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
   try {
     const schema = await extractSchema(body.engine);
     const prunedSchema = pruneSchema(schema, body.naturalLanguageQuery);
-    const { sql, tokensInput, tokensOutput, tokensTotal } = await generateSql(
+    const { sql, tokensInput, tokensOutput, tokensThinking, tokensTotal } = await generateSql(
       body.engine,
       prunedSchema,
       body.naturalLanguageQuery,
     );
     const safety = validateQuerySafety(sql);
-    const costUsd = estimateCostUsd(tokensInput, tokensOutput);
+    // El razonamiento interno se factura como salida, aunque no sea visible.
+    const costUsd = estimateCostUsd(tokensInput, tokensOutput + tokensThinking);
 
     await recordUsageEvent({
       type: 'generateSQL',
@@ -53,6 +54,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       latencyMs: Date.now() - startedAt,
       tokensInput,
       tokensOutput,
+      tokensThinking,
       tokensTotal,
       costUsd,
       safe: safety.safe,

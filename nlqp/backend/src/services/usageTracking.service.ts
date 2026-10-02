@@ -14,6 +14,7 @@ export interface UsageEvent {
   errorReason?: string;
   tokensInput?: number;
   tokensOutput?: number;
+  tokensThinking?: number;
   tokensTotal?: number;
   costUsd?: number;
   safe?: boolean;

@@ -27,7 +27,8 @@ con esta forma (`UsageEvent`, ver `src/services/usageTracking.service.ts`):
 | `latencyMs` | `number` | Siempre |
 | `errorReason` | `string` | Solo si `success: false` |
 | `tokensInput` / `tokensOutput` / `tokensTotal` | `number` | Solo en `generateSQL` exitoso |
-| `costUsd` | `number` | Solo en `generateSQL` exitoso |
+| `tokensThinking` | `number` | Solo en `generateSQL` exitoso — razonamiento interno de Gemini 2.5 Pro, no visible pero facturado como salida |
+| `costUsd` | `number` | Solo en `generateSQL` exitoso (entrada + salida visible + razonamiento) |
 | `safe` | `boolean` | Solo en `generateSQL` exitoso (resultado del Query Safety Engine) |
 | `timestamp` | fecha | Siempre, asignada por el backend al escribir |
 
