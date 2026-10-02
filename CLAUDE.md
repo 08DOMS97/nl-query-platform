@@ -57,6 +57,10 @@ Bloqueado o pendiente, pero ya sin depender de cuentas de nube:
 - **Módulo 8 — Frontend Next.js**: infraestructura lista (Firebase Auth habilitado), código no empezado.
 - Vertex AI **no tiene crédito de prueba disponible** en esta cuenta de Google — cualquier llamada real se factura (mínima, fracciones de centavo por consulta con el esquema podado, pero real). Avisar antes de disparar llamadas que generen SQL con Gemini.
 - Confirmar si `../db/` (fuera de este repo, no existe en disco por ahora) es relevante.
+- **Despliegue:** la tesis se presenta **en local** (decisión 01/10/2026), no hace
+  falta desplegar. Si más adelante se necesita acceso remoto a las bases de Docker,
+  la solución ya está analizada en `nlqp/docs/ACCESO_REMOTO.md` (túnel HTTPS al
+  backend local; nunca exponer las bases directamente).
 - Coordinar los 35 participantes de la encuesta (ver `nlqp/docs/PLAN_DE_TRABAJO.md` §6) — no depende de código, conviene arrancarlo en paralelo.
 
 ## Reglas que no hay que romper
