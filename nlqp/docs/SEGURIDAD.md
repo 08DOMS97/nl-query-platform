@@ -24,7 +24,9 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 3 | `trustServerCertificate` fijo en `true` para SQL Server | Media | Corregido |
 | 4 | CORS sin restricción de origen en el servidor de desarrollo | Baja | Documentado, no corregido |
 | 5 | Mensajes de error del driver expuestos tal cual al cliente | Baja | Documentado, no corregido |
-| 6 | 14 vulnerabilidades moderadas transitivas (`npm audit`) | Baja | Documentado, no corregido |
+| 6 | 14 vulnerabilidades moderadas transitivas (`npm audit`) | Baja | Documentado, no corregido (actualizado 02/10: 16, ver §6) |
+| 7 | Caída del backend completo ante un resultado demasiado grande (02/10) | **Alta** | Corregido |
+| 8 | Endpoint de descarga de CSV sin autenticación de Firebase (02/10) | Baja | Mitigado por diseño |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -269,6 +271,54 @@ SDKs para generar IDs de request, fuera de cualquier ruta con entrada del usuari
 Revisar cuando esas SDKs publiquen versiones mayores que ya traigan `uuid`
 actualizado.
 
+**Actualización 02/10/2026:** `npm audit` reporta ahora 16 (13 moderadas, 3
+altas). Ninguna proviene de `pg-cursor`, la única dependencia agregada ese día:
+siguen siendo transitivas de las SDKs de Google/Firebase y de `mssql`. Las 3 altas
+son avisos publicados después de esta revisión: `@grpc/grpc-js` (`getAuthContext`
+puede devolver certificados no autorizados en ciertas configuraciones),
+`node-forge` (verificación de firmas RSA PKCS#1 v1.5) y, a través de ellas,
+`firebase-admin`. Mismo criterio que arriba: revisar al actualizar las SDKs, sin
+`--force`.
+
+---
+
+## 7. Caída del backend completo ante un resultado demasiado grande — ALTA (corregido, 02/10/2026)
+
+Encontrado al probar la capa de snapshots de resultados
+(`RENDIMIENTO_E_INTEGRIDAD.md`), antes de llegar a producción.
+
+**El problema:** cuando un resultado superaba `NLQP_RESULT_MAX_BYTES`, el archivo
+temporal se descartaba con escrituras todavía pendientes. Esas escrituras emitían
+un evento `error` sin manejador, y Node termina el proceso ante eso. Cualquier
+usuario autenticado podía tumbar el backend para todos con una sola consulta que
+devolviera muchas filas (denegación de servicio). Hallazgos relacionados: en
+MySQL/MariaDB/SQL Server el error dejaba archivos en disco, y una descarga de CSV
+cancelada por el cliente dejaba la escritura esperando para siempre.
+
+**La corrección:** el stream de escritura tiene siempre un manejador de `error`; se
+espera su cierre sin `events.once` (que rechaza ante un `error` y se saltaba el
+borrado); las esperas de `drain` también se liberan ante `close`.
+
+**Verificación:** con un tope de 100 KB, los 4 motores responden `413`, el backend
+sigue vivo, no queda ningún archivo en disco y no hay salida en stderr. Una
+descarga cortada por el cliente no afecta al backend.
+
+---
+
+## 8. Endpoint de descarga de CSV sin autenticación de Firebase — BAJA (mitigado por diseño, 02/10/2026)
+
+`GET /exportResultCsv` no pasa por `verifyFirebaseAuth`: la descarga es una
+navegación del navegador (para que el archivo vaya directo a disco), y una
+navegación no puede llevar el encabezado `Authorization`. Poner el ID token de
+Firebase en la URL lo expondría en el historial y en logs.
+
+**Mitigación:** el endpoint solo acepta un token aleatorio (UUID v4, 122 bits) que
+emite `POST /createResultExport` — autenticado — y únicamente al dueño del
+resultado. El token es de **un solo uso** y vence a los **2 minutos**; el resultado
+mismo vence a los 30. Riesgo residual: si la URL se filtra dentro de esos 2 minutos
+y antes de usarse, quien la tenga puede descargar ese resultado una vez. Las páginas
+(`/getResultPage`) sí exigen Firebase y verifican que el `uid` sea el del dueño.
+
 ---
 
 ## Archivos modificados en esta revisión
@@ -285,3 +335,11 @@ actualizado.
   `DB_MSSQL_TRUST_SERVER_CERTIFICATE=true` (valores de desarrollo local).
 - `nlqp/backend/.env.example` — mismas variables con los valores seguros por
   defecto (`false`).
+
+Revisión del 02/10/2026 (§7 y §8):
+
+- `nlqp/backend/src/services/resultStore.service.ts` — manejo de errores del stream
+  de escritura, cierre antes de borrar, esperas de `drain` liberadas ante `close`,
+  tokens de descarga de un solo uso.
+- `nlqp/backend/src/functions/resultPages.ts` — `exportResultCsv` fuera del
+  middleware de Firebase, autorizado por token.

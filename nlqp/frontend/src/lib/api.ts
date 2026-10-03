@@ -1,6 +1,6 @@
 import type { User } from 'firebase/auth';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080';
+export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080';
 
 /**
  * Llama al backend adjuntando el ID token de Firebase del usuario logueado.

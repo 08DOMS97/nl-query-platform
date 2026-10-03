@@ -10,6 +10,14 @@ registro y la pantalla principal del flujo (motor → pregunta en lenguaje
 natural → SQL generado → ejecutar → resultados), verificada con un navegador
 real.
 
+**Actualización 2 de octubre de 2026:** preparación de la corrida de las 50
+consultas generando con Gemini (`PREPARACION_EVALUACION_GEMINI.md`) y nueva capa
+de rendimiento e integridad de resultados (`RENDIMIENTO_E_INTEGRIDAD.md`): timeout
+de 60 s del lado del servidor en los 4 motores, ejecución única con resultado
+completo paginado y descargable como CSV (sin truncar filas). Se agregó como
+requisito que las consultas generadas sean eficientes en entornos con muchos
+datos, y se corrigieron 5 consultas de referencia que eran inconsistentes entre sí.
+
 Alcance de la entrega en curso: **Capítulo 6 hasta la sección 6.2 inclusive**
 (sin cambios — ver §3, es una decisión de alcance ya tomada, no de avance
 técnico).
@@ -43,11 +51,11 @@ hasta 6.2 por decisión de alcance, no por falta de material.
 | · Inspección de esquema: PostgreSQL y MySQL | Completo | **Esta entrega** |
 | · Inspección de esquema: MariaDB y SQL Server; normalización | Completo | **Esta entrega** |
 | Módulo 3: Generación NL2SQL y Query Safety Engine | **Completo** | Siguiente |
-| · Diseño de prompt y estrategia de schema pruning | Completo y verificado | Siguiente |
+| · Diseño de prompt y estrategia de schema pruning | Completo y verificado; ampliado 02/10 con valores de los `CHECK` y reglas de dominio. Pendiente: índices y reglas de rendimiento | Siguiente |
 | · Integración con Vertex AI Gemini Pro | **Completo y verificado** — proyecto `proyectog-340d3`, llamada real confirmada | Siguiente |
 | · Implementación del Query Safety Engine | Completo y verificado, 17/17 | Siguiente |
-| · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales | Siguiente |
-| Frontend Next.js y autenticación de interfaz | **Parcial (v1)** — login/registro y pantalla principal del flujo completo funcionando, verificado con navegador real; falta historial, herramientas técnicas y dashboard de uso/costos | Posterior |
+| · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales. Preparación en curso (02/10), ver `PREPARACION_EVALUACION_GEMINI.md` | Siguiente |
+| Frontend Next.js y autenticación de interfaz | **Parcial (v1)** — login/registro y pantalla principal del flujo completo funcionando, verificado con navegador real; desde 02/10 con resultados paginados y descarga CSV completa; falta historial, herramientas técnicas y dashboard de uso/costos | Posterior |
 | Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado | Posterior |
 | Módulo 5: Historial y gestión de consultas guardadas | No iniciado — infraestructura lista (Firestore habilitado), ya no bloqueado | Posterior |
 | Integración de módulos y pruebas del sistema | Parcial: revisión de seguridad y pruebas multimotor hechas; falta integrar con frontend | Siguiente |
@@ -57,6 +65,7 @@ hasta 6.2 por decisión de alcance, no por falta de material.
 | Entrega PG2 | — | Final |
 | **Fuera del plan original** | | |
 | Módulo de uso y costos (registro de tokens/costo de Vertex AI y uso general en Firestore, endpoint de estadísticas) | **Completo y verificado (backend)** — dashboard visual pendiente del frontend | A definir dónde encaja en la estructura formal de tesis |
+| Rendimiento e integridad de resultados (timeout en el motor, ejecución única con snapshot, paginación, CSV completo) — 02/10 | **Completo y verificado** en los 4 motores y en el navegador | A definir; candidato natural junto a 6.3 (validación y ejecución) |
 
 ---
 
@@ -119,9 +128,11 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 2. **Ejecutar el conjunto de cincuenta consultas generando el SQL** en lugar de usar el de
    referencia. Es el paso pendiente más importante ahora mismo: cierra la sección de
    pruebas de generación y produce las métricas de precisión, reducción de tokens,
-   robustez lingüística y consistencia que sostienen la hipótesis de la tesis. Como cada
-   corrida llama a Vertex AI 50 veces, tiene un costo real (pequeño, del orden de
-   fracciones de dólar en total con el pricing actual) — confirmar antes de correrla.
+   robustez lingüística y consistencia que sostienen la hipótesis de la tesis, y
+   desde el 02/10 también de eficiencia. **Preparación en curso**: lista de pasos en
+   `PREPARACION_EVALUACION_GEMINI.md` §8. Costo corregido: ~$1–5 en total (400
+   llamadas con las paráfrasis; la estimación anterior no contaba el razonamiento
+   de Gemini) — confirmar antes de correrla.
 
 3. ~~Crear el proyecto de Firebase.~~ **Hecho (21/09).** Authentication y Firestore
    habilitados.
@@ -150,4 +161,6 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 | El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas: la cifra es irreproducible | Sustituir por la medición real cuando exista |
 | Las bases de datos corren en contenedores locales | No serán alcanzables desde el backend desplegado | Decidir dónde vivirán para la evaluación |
 | Cambios documentales pendientes en los capítulos 1 a 4 | Modelo de organización, esquema cacheado, índices y versión de Node | Aplicar antes de la entrega final |
+| Las referencias de las 50 consultas eran inconsistentes con respecto a los pedidos cancelados (corregidas 02/10) | Los resultados 200/200 publicados se obtuvieron con las referencias anteriores | Volver a correr la verificación con las referencias corregidas y mencionarlo en 6.3.4 |
+| El banco de pruebas tiene pocos datos (200 clientes, 300 pedidos): no permite medir eficiencia | Sin medición, el requisito de eficiencia no se puede demostrar | Banco de volumen alto en los 4 motores (pendiente) |
 | Sin crédito de prueba en la cuenta de Google Cloud, cualquier uso de Vertex AI se factura de verdad | Bajo (fracciones de centavo por llamada), pero hay que avisar antes de cada corrida grande | Confirmar con David antes de corridas masivas (ej. las 50 consultas) |

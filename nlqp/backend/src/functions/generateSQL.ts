@@ -6,14 +6,19 @@ import { generateSql } from '../services/vertexAI.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { estimateCostUsd } from '../services/vertexAiPricing.service.js';
 import { recordUsageEvent } from '../services/usageTracking.service.js';
-import { DB_ENGINES, type DbEngine, type GenerateSqlRequest } from '../types/index.js';
+import {
+  DB_ENGINES,
+  type DbEngine,
+  type GenerateSqlMetrics,
+  type GenerateSqlRequest,
+} from '../types/index.js';
 
 function isDbEngine(value: unknown): value is DbEngine {
   return typeof value === 'string' && (DB_ENGINES as string[]).includes(value);
 }
 
 /**
- * POST /generateSQL  { engine, naturalLanguageQuery } -> { sql, engine }
+ * POST /generateSQL  { engine, naturalLanguageQuery } -> { sql, engine, safety, metrics }
  *
  * Solo genera y hace una validación informativa de seguridad para la respuesta.
  * El Query Safety Engine se vuelve a aplicar de forma obligatoria en `executeQuery`
@@ -45,13 +50,14 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     const safety = validateQuerySafety(sql);
     // El razonamiento interno se factura como salida, aunque no sea visible.
     const costUsd = estimateCostUsd(tokensInput, tokensOutput + tokensThinking);
+    const latencyMs = Date.now() - startedAt;
 
     await recordUsageEvent({
       type: 'generateSQL',
       engine: body.engine,
       uid,
       success: true,
-      latencyMs: Date.now() - startedAt,
+      latencyMs,
       tokensInput,
       tokensOutput,
       tokensThinking,
@@ -60,7 +66,17 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       safe: safety.safe,
     });
 
-    res.status(200).json({ sql, engine: body.engine, safety });
+    const metrics: GenerateSqlMetrics = {
+      tokensInput,
+      tokensOutput,
+      tokensThinking,
+      tokensTotal,
+      costUsd,
+      latencyMs,
+      tablesSent: prunedSchema.tables.length,
+      tablesTotal: schema.tables.length,
+    };
+    res.status(200).json({ sql, engine: body.engine, safety, metrics });
   } catch (err) {
     await recordUsageEvent({
       type: 'generateSQL',

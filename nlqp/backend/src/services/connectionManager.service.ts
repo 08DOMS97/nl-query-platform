@@ -1,5 +1,7 @@
 import pg from 'pg';
+import Cursor from 'pg-cursor';
 import mysql from 'mysql2/promise';
+import type { Connection as MysqlCoreConnection } from 'mysql2';
 import mssql from 'mssql';
 import type { DbEngine, EngineConnectionConfig, TestConnectionResult } from '../types/index.js';
 import { DB_ENGINES } from '../types/index.js';
@@ -36,6 +38,37 @@ export function readEngineConfig(engine: DbEngine): EngineConnectionConfig {
   return { host, port: Number(port), database, user, password };
 }
 
+/**
+ * Tiempo máximo de ejecución de una consulta. Se aplica DEL LADO DEL SERVIDOR en
+ * los 4 motores: al vencer, el propio motor cancela la sentencia y libera sus
+ * recursos (no basta con que el cliente deje de esperar mientras la consulta
+ * sigue consumiendo la base). Es todo o nada: una consulta cancelada devuelve
+ * error, nunca un resultado parcial.
+ */
+export const QUERY_TIMEOUT_MS = Number(process.env.NLQP_QUERY_TIMEOUT_MS ?? 60_000);
+
+/** La consulta superó `QUERY_TIMEOUT_MS` y el motor la canceló. */
+export class QueryTimeoutError extends Error {
+  constructor(engine: DbEngine) {
+    super(
+      `La consulta superó el tiempo máximo de ${QUERY_TIMEOUT_MS / 1000} s y ${engine} la canceló. ` +
+        'Intenta acotarla (por ejemplo, a un rango de fechas).',
+    );
+    this.name = 'QueryTimeoutError';
+  }
+}
+
+/** Reconoce el error de cancelación por tiempo de cada driver. */
+function isTimeoutError(err: unknown): boolean {
+  const e = err as { code?: unknown; errno?: unknown };
+  return (
+    e?.code === '57014' || // postgres: query_canceled (statement_timeout)
+    e?.errno === 3024 || // mysql: ER_QUERY_TIMEOUT (max_execution_time)
+    e?.errno === 1969 || // mariadb: ER_STATEMENT_TIMEOUT (max_statement_time)
+    e?.code === 'ETIMEOUT' // mssql: requestTimeout (el driver envía ATTENTION al servidor)
+  );
+}
+
 // Pools cacheados por motor — se crean una sola vez y se reutilizan (lazy singleton).
 let pgPool: pg.Pool | undefined;
 let mysqlPool: mysql.Pool | undefined;
@@ -54,6 +87,7 @@ function getPgPool(): pg.Pool {
       max: 5,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
+      statement_timeout: QUERY_TIMEOUT_MS,
     });
   }
   return pgPool;
@@ -71,6 +105,11 @@ function getMysqlPool(): mysql.Pool {
       connectionLimit: 5,
       connectTimeout: 5_000,
     });
+    // max_execution_time (ms) solo aplica a SELECT de solo lectura, que es lo único
+    // que deja pasar el Query Safety Engine.
+    mysqlPool.pool.on('connection', (conn) => {
+      conn.query(`SET SESSION max_execution_time = ${QUERY_TIMEOUT_MS}`);
+    });
   }
   return mysqlPool;
 }
@@ -86,6 +125,10 @@ function getMariadbPool(): mysql.Pool {
       password: cfg.password,
       connectionLimit: 5,
       connectTimeout: 5_000,
+    });
+    // MariaDB no tiene max_execution_time: su equivalente es max_statement_time, en segundos.
+    mariadbPool.pool.on('connection', (conn) => {
+      conn.query(`SET SESSION max_statement_time = ${QUERY_TIMEOUT_MS / 1000}`);
     });
   }
   return mariadbPool;
@@ -112,7 +155,7 @@ async function getMssqlPool(): Promise<mssql.ConnectionPool> {
         trustServerCertificate: process.env.DB_MSSQL_TRUST_SERVER_CERTIFICATE === 'true',
       },
       connectionTimeout: 5_000,
-      requestTimeout: 15_000,
+      requestTimeout: QUERY_TIMEOUT_MS,
     }).connect();
   }
   return mssqlPoolPromise;
@@ -120,6 +163,15 @@ async function getMssqlPool(): Promise<mssql.ConnectionPool> {
 
 /** Ejecuta una consulta contra el motor indicado y normaliza el resultado. */
 export async function runQuery(engine: DbEngine, sql: string): Promise<RawQueryResult> {
+  try {
+    return await runQueryOnDriver(engine, sql);
+  } catch (err) {
+    if (isTimeoutError(err)) throw new QueryTimeoutError(engine);
+    throw err;
+  }
+}
+
+async function runQueryOnDriver(engine: DbEngine, sql: string): Promise<RawQueryResult> {
   switch (engine) {
     case 'postgres': {
       const result = await getPgPool().query(sql);
@@ -149,6 +201,194 @@ export async function runQuery(engine: DbEngine, sql: string): Promise<RawQueryR
       throw new Error(`Motor no soportado: ${exhaustive}`);
     }
   }
+}
+
+export interface StreamHandlers {
+  onColumns(columns: string[]): void;
+  /**
+   * Recibe cada fila. Si devuelve una promesa, la lectura se pausa hasta que se
+   * resuelva (contrapresión: un consumidor lento, como una descarga, no obliga
+   * a acumular el resultado en memoria). Si lanza, la consulta se cancela.
+   */
+  onRow(row: Record<string, unknown>): void | Promise<void>;
+}
+
+/** Filas por lote al leer con cursor en Postgres (menos lotes = menos idas y vueltas). */
+const PG_CURSOR_BATCH = 2000;
+
+/**
+ * Ejecuta una consulta entregando las filas una a una, sin cargar el resultado
+ * completo en memoria. Además del timeout del motor (que en un cursor aplica a
+ * cada lote), se exige un plazo total de QUERY_TIMEOUT_MS desde el inicio: si
+ * se vence, o si `onRow` lanza, la consulta se cancela en el motor y la promesa
+ * se rechaza — nunca se resuelve con un resultado a medias.
+ */
+export async function streamQuery(
+  engine: DbEngine,
+  sql: string,
+  handlers: StreamHandlers,
+): Promise<{ rowCount: number }> {
+  const deadline = Date.now() + QUERY_TIMEOUT_MS;
+  let rowCount = 0;
+  // Solo devuelve promesa si el consumidor pidió pausa: esperar en cada fila
+  // (cientos de miles) cuesta más que leerlas.
+  const onRow: RowFn = (row) => {
+    if (Date.now() > deadline) throw new QueryTimeoutError(engine);
+    rowCount++;
+    return handlers.onRow(row);
+  };
+
+  try {
+    switch (engine) {
+      case 'postgres':
+        await streamPostgres(sql, handlers.onColumns, onRow);
+        break;
+      case 'mysql':
+        await streamMysqlFamily(getMysqlPool(), sql, handlers.onColumns, onRow);
+        break;
+      case 'mariadb':
+        await streamMysqlFamily(getMariadbPool(), sql, handlers.onColumns, onRow);
+        break;
+      case 'mssql':
+        await streamMssql(sql, handlers.onColumns, onRow);
+        break;
+      default: {
+        const exhaustive: never = engine;
+        throw new Error(`Motor no soportado: ${exhaustive}`);
+      }
+    }
+  } catch (err) {
+    if (isTimeoutError(err)) throw new QueryTimeoutError(engine);
+    throw err;
+  }
+  return { rowCount };
+}
+
+type RowFn = (row: Record<string, unknown>) => void | Promise<void>;
+
+/** Llama a `onRow` convirtiendo una excepción síncrona en promesa rechazada. */
+function callRow(onRow: RowFn, row: Record<string, unknown>): Promise<void> | void {
+  try {
+    return onRow(row);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+async function streamPostgres(sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
+  const client = await getPgPool().connect();
+  const cursor = client.query(new Cursor(sql));
+  let failed = false;
+  try {
+    let first = true;
+    for (;;) {
+      const rows = await cursor.read(PG_CURSOR_BATCH);
+      if (first) {
+        // `_result.fields` es la descripción de columnas que pg-cursor guarda al
+        // recibir RowDescription; está disponible incluso si no hay filas.
+        const fields = (cursor as unknown as { _result?: { fields?: { name: string }[] } })._result
+          ?.fields;
+        onColumns((fields ?? []).map((f) => f.name));
+        first = false;
+      }
+      if (rows.length === 0) break;
+      for (const row of rows) {
+        const wait = onRow(row);
+        if (wait) await wait;
+      }
+    }
+  } catch (err) {
+    failed = true;
+    throw err;
+  } finally {
+    await cursor.close().catch(() => undefined);
+    // Tras un error la conexión puede quedar en un estado inconsistente: se descarta.
+    client.release(failed);
+  }
+}
+
+async function streamMysqlFamily(
+  pool: mysql.Pool,
+  sql: string,
+  onColumns: (c: string[]) => void,
+  onRow: RowFn,
+) {
+  const conn = await pool.getConnection();
+  // API de eventos del driver base (con pause()/resume()); los tipos de
+  // mysql2/promise la declaran como la conexión con promesas.
+  const raw = (conn as unknown as { connection: MysqlCoreConnection }).connection;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      let settled = false;
+      let pending: Promise<void> = Promise.resolve();
+      const fail = (err: unknown) => {
+        if (settled) return;
+        settled = true;
+        // Destruir el socket corta la consulta en el servidor: al no poder enviar
+        // más filas, el motor la aborta. La conexión no vuelve al pool.
+        raw.destroy();
+        reject(err);
+      };
+      raw
+        .query(sql)
+        .on('fields', (fields: { name: string }[]) => onColumns((fields ?? []).map((f) => f.name)))
+        .on('result', (row: Record<string, unknown>) => {
+          const wait = callRow(onRow, row);
+          if (!wait) return;
+          raw.pause();
+          pending = wait.then(() => {
+            if (!settled) raw.resume();
+          }, fail);
+        })
+        .on('error', fail)
+        .on('end', () => {
+          pending.then(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          }, fail);
+        });
+    });
+  } finally {
+    // Si se destruyó, release() simplemente la descarta del pool.
+    conn.release();
+  }
+}
+
+async function streamMssql(sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
+  const pool = await getMssqlPool();
+  const request = pool.request();
+  request.stream = true;
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    let pending: Promise<void> = Promise.resolve();
+    const fail = (err: unknown) => {
+      if (settled) return;
+      settled = true;
+      request.cancel(); // envía ATTENTION: el servidor aborta la sentencia.
+      reject(err);
+    };
+    request.on('recordset', (columns: Record<string, unknown>) => onColumns(Object.keys(columns)));
+    request.on('row', (row: Record<string, unknown>) => {
+      const wait = callRow(onRow, row);
+      if (!wait) return;
+      request.pause();
+      pending = wait.then(() => {
+        if (!settled) request.resume();
+      }, fail);
+    });
+    request.on('error', fail);
+    request.on('done', () => {
+      pending.then(() => {
+        if (!settled) {
+          settled = true;
+          resolve();
+        }
+      }, fail);
+    });
+    request.query(sql);
+  });
 }
 
 /** Verifica conectividad de un motor con una consulta trivial y mide latencia. */

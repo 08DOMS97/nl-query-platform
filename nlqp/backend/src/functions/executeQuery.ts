@@ -1,6 +1,7 @@
 import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
-import { runQuery } from '../services/connectionManager.service.js';
+import { QueryTimeoutError } from '../services/connectionManager.service.js';
+import { createResult, readPage, ResultTooLargeError } from '../services/resultStore.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { recordUsageEvent } from '../services/usageTracking.service.js';
 import { DB_ENGINES, type DbEngine, type ExecuteQueryRequest } from '../types/index.js';
@@ -10,7 +11,14 @@ function isDbEngine(value: unknown): value is DbEngine {
 }
 
 /**
- * POST /executeQuery  { engine, sql } -> { columns, rows, rowCount }
+ * POST /executeQuery  { engine, sql }
+ *   -> { resultId, columns, rows, rowCount, totalRows, page, pageSize, totalPages }
+ *
+ * Ejecuta la consulta UNA vez, guarda el resultado completo como snapshot (ver
+ * `resultStore.service.ts`) y devuelve la primera página con el total de filas.
+ * El resto se pide con `/getResultPage` o se descarga completo como CSV con
+ * `/createResultExport`: ninguna fila se pierde ni se trunca. `rowCount` es el
+ * total del resultado (igual que `totalRows`), no el de la página.
  *
  * Único punto de ejecución real de SQL contra las bases de datos. NUNCA debe
  * ejecutarse SQL aquí sin pasar antes por el Query Safety Engine (RF-07),
@@ -39,7 +47,8 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   const startedAt = Date.now();
 
   try {
-    const result = await runQuery(body.engine, body.sql);
+    const stored = await createResult(body.engine, body.sql, uid);
+    const firstPage = await readPage(stored.id, uid, 1);
     await recordUsageEvent({
       type: 'executeQuery',
       engine: body.engine,
@@ -47,7 +56,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
       success: true,
       latencyMs: Date.now() - startedAt,
     });
-    res.status(200).json({ columns: result.columns, rows: result.rows, rowCount: result.rowCount });
+    res.status(200).json({ ...firstPage, rowCount: firstPage.totalRows });
   } catch (err) {
     await recordUsageEvent({
       type: 'executeQuery',
@@ -57,7 +66,9 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
       latencyMs: Date.now() - startedAt,
       errorReason: err instanceof Error ? err.message : String(err),
     });
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    const status =
+      err instanceof QueryTimeoutError ? 504 : err instanceof ResultTooLargeError ? 413 : 500;
+    res.status(status).json({ error: err instanceof Error ? err.message : String(err) });
   }
 };
 

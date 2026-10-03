@@ -47,6 +47,21 @@ exacto. Los precios se pueden ajustar sin tocar código vía
 `VERTEX_AI_PRICE_INPUT_PER_1M_USD` / `VERTEX_AI_PRICE_OUTPUT_PER_1M_USD` en
 `.env`.
 
+## Métricas en la respuesta de `/generateSQL` (02/10/2026)
+
+Además de registrarse en `usageEvents`, cada respuesta exitosa de `/generateSQL`
+incluye `metrics` con los mismos datos: `tokensInput`, `tokensOutput`,
+`tokensThinking` (razonamiento interno de Gemini, que se factura como salida),
+`tokensTotal`, `costUsd`, `latencyMs`, y además `tablesSent`/`tablesTotal` (tablas
+enviadas al modelo tras el pruning frente al total del esquema). Lo usa el runner
+de evaluación para medir costo y reducción de esquema por consulta sin leer
+Firestore (ver `PREPARACION_EVALUACION_GEMINI.md`).
+
+`/executeQuery` sigue registrando un evento por ejecución. Desde el 02/10 la
+consulta se ejecuta una sola vez y las páginas y el CSV se leen de un snapshot
+(`RENDIMIENTO_E_INTEGRIDAD.md`), así que navegar páginas o descargar el CSV no
+genera eventos nuevos ni carga la base.
+
 ## Endpoint
 
 `GET /getUsageStats?periodDays=30` (autenticado, igual que el resto de la

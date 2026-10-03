@@ -5,6 +5,7 @@ import {
   type UsageMetadata,
 } from '@google-cloud/vertexai';
 import type { DbEngine, SchemaInfo } from '../types/index.js';
+import { DOMAIN_RULES } from './domainRules.service.js';
 
 /**
  * Notas de dialecto por motor que se inyectan en el prompt (ver tabla de
@@ -34,6 +35,7 @@ function formatSchemaForPrompt(schema: SchemaInfo): string {
         const flags: string[] = [];
         if (c.isPrimaryKey) flags.push('PK');
         if (c.isForeignKey) flags.push(`FK -> ${c.referencesTable}.${c.referencesColumn}`);
+        if (c.allowedValues) flags.push(`valores: ${c.allowedValues.map((v) => `'${v}'`).join('|')}`);
         const flagStr = flags.length ? ` [${flags.join(', ')}]` : '';
         return `${c.name} (${c.dataType}${c.nullable ? ', nullable' : ''})${flagStr}`;
       })
@@ -43,7 +45,7 @@ function formatSchemaForPrompt(schema: SchemaInfo): string {
   return lines.join('\n');
 }
 
-function buildPrompt(engine: DbEngine, schema: SchemaInfo, naturalLanguageQuery: string): string {
+export function buildPrompt(engine: DbEngine, schema: SchemaInfo, naturalLanguageQuery: string): string {
   return `Eres un generador experto de SQL. Tu única tarea es traducir la solicitud del \
 usuario a UNA sola sentencia SQL de solo lectura (SELECT), válida para ${engine}.
 
@@ -51,7 +53,11 @@ Reglas estrictas:
 - Responde ÚNICAMENTE con la sentencia SQL, sin explicaciones, sin markdown, sin \`\`\`.
 - Debe ser una única sentencia SELECT (o WITH ... SELECT). Nunca INSERT/UPDATE/DELETE/DDL.
 - Usa solo las tablas y columnas listadas a continuación; no inventes nombres.
+- Para columnas con "valores" listados, usa exactamente esos literales.
 - ${DIALECT_NOTES[engine]}
+
+Reglas del dominio:
+${DOMAIN_RULES.map((r) => `- ${r}`).join('\n')}
 
 Esquema disponible (base de datos "${schema.database}"):
 ${formatSchemaForPrompt(schema)}
@@ -94,6 +100,39 @@ type GenerationConfigWithThinking = GenerationConfig & {
 };
 type UsageMetadataWithThinking = UsageMetadata & { thoughtsTokenCount?: number };
 
+function getModel(generationConfig?: GenerationConfigWithThinking) {
+  const projectId = process.env.GCP_PROJECT_ID;
+  const location = process.env.GCP_LOCATION ?? 'us-central1';
+  const model = process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-pro';
+
+  if (!projectId) {
+    throw new Error(
+      'GCP_PROJECT_ID no está configurado. Generación NL2SQL requiere un proyecto de Google ' +
+        'Cloud con Vertex AI habilitado (ver pendientes en INSTRUCCIONES_INICIALES_CLAUDE_CODE.md §8).',
+    );
+  }
+
+  const vertexAI = new VertexAI({ project: projectId, location });
+  return vertexAI.getGenerativeModel({ model, generationConfig });
+}
+
+/**
+ * Cuenta los tokens de entrada que tendría el prompt, sin generar nada. La API
+ * countTokens de Vertex AI no se factura: sirve para medir cuánto ahorra el
+ * pruning comparando el prompt podado contra el del esquema completo.
+ */
+export async function countPromptTokens(
+  engine: DbEngine,
+  schema: SchemaInfo,
+  naturalLanguageQuery: string,
+): Promise<number> {
+  const prompt = buildPrompt(engine, schema, naturalLanguageQuery);
+  const result = await getModel().countTokens({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+  });
+  return result.totalTokens;
+}
+
 export interface GenerateSqlResult {
   sql: string;
   tokensInput: number;
@@ -116,24 +155,12 @@ export async function generateSql(
   schema: SchemaInfo,
   naturalLanguageQuery: string,
 ): Promise<GenerateSqlResult> {
-  const projectId = process.env.GCP_PROJECT_ID;
-  const location = process.env.GCP_LOCATION ?? 'us-central1';
-  const model = process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-pro';
-
-  if (!projectId) {
-    throw new Error(
-      'GCP_PROJECT_ID no está configurado. Generación NL2SQL requiere un proyecto de Google ' +
-        'Cloud con Vertex AI habilitado (ver pendientes en INSTRUCCIONES_INICIALES_CLAUDE_CODE.md §8).',
-    );
-  }
-
-  const vertexAI = new VertexAI({ project: projectId, location });
   const generationConfig: GenerationConfigWithThinking = {
     temperature: 0,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     thinkingConfig: { thinkingBudget: THINKING_BUDGET_TOKENS },
   };
-  const generativeModel = vertexAI.getGenerativeModel({ model, generationConfig });
+  const generativeModel = getModel(generationConfig);
 
   const prompt = buildPrompt(engine, schema, naturalLanguageQuery);
   const result = await generativeModel.generateContent(prompt);

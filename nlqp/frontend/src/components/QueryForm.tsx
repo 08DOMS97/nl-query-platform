@@ -114,7 +114,7 @@ export function QueryForm({ user }: { user: User }) {
         </div>
       )}
 
-      {result && <QueryResult result={result} />}
+      {result && <QueryResult key={result.resultId} initial={result} user={user} />}
     </div>
   );
 }

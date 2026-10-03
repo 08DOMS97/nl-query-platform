@@ -99,8 +99,20 @@ funciona ahí (usa `sys.*`/`INFORMATION_SCHEMA` internamente).
 ### 3. Execute Query - SELECT válido
 `POST /executeQuery` con un cuerpo JSON `{"engine": "postgres", "sql": "SELECT ..."}`
 (lo ves en la pestaña **Body** del centro, ya escrito). Debe dar `200 OK` con
-`columns`, `rows` y `rowCount`. Este es el endpoint que de verdad ejecuta SQL contra
-la base de datos — pasa primero por el Query Safety Engine.
+`resultId`, `columns`, `rows` (las primeras 1000 filas), `totalRows` (el total
+real), `page`, `pageSize` y `totalPages`. `rowCount` también es el total. Este
+es el endpoint que de verdad ejecuta SQL contra la base de datos — pasa primero
+por el Query Safety Engine.
+
+Resultados grandes, sin perder filas: la consulta se ejecuta **una sola vez** y
+el resultado completo queda guardado 30 minutos. Para ver más:
+- `GET /getResultPage?resultId=<resultId>&page=2` — otra página (no re-ejecuta).
+- `POST /createResultExport` con `{"resultId": "<resultId>"}` — devuelve un `path`;
+  `GET <path>` descarga el CSV completo (el enlace sirve una sola vez y vence en 2 min).
+
+Límites (todo o nada, nunca un resultado parcial): si la consulta tarda más de
+60 s (`NLQP_QUERY_TIMEOUT_MS`) el propio motor la cancela y responde `504`; si el
+resultado pesa más de 1 GB (`NLQP_RESULT_MAX_BYTES`) responde `413`.
 
 Puedes editar el `sql` del Body para probar tus propias consultas. Recuerda: solo
 `SELECT` (o `WITH ... SELECT`) — cualquier otra cosa la bloquea el sistema (ver
@@ -150,4 +162,7 @@ el endpoint 3 (Execute Query).
 | "Could not send request" / "ECONNREFUSED" | El backend no está corriendo | `npm run dev` en `nlqp/backend` (paso 3b) |
 | `testConnection` da `ok: false` en algún motor | Docker no está arriba o el contenedor aún no terminó de iniciar | `docker compose up -d` en `Bases de datos/`, esperar ~10s |
 | `generateSQL` da 500 "GCP_PROJECT_ID no está configurado" | Esperado — falta el proyecto de Google Cloud | Pendiente de que se configure `GCP_PROJECT_ID` en `nlqp/backend/.env` |
+| `executeQuery` da 504 | La consulta superó los 60 s y el motor la canceló | Acotarla (rango de fechas, filtros); no es un error del sistema |
+| `executeQuery` da 413 | El resultado completo supera 1 GB | Acotar la consulta o agregar filtros |
+| `getResultPage` da 404 | El resultado venció (30 min) o el backend se reinició | Volver a ejecutar la consulta |
 | `executeQuery` da 403 en un SELECT que parece válido | El SQL no empieza exactamente con `SELECT`/`WITH`, tiene un `;` de más, o usa una palabra bloqueada (ver `querySafety.service.ts`) | Revisar el campo `reason` de la respuesta — te dice exactamente por qué |
