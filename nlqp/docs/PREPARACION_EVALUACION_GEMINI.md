@@ -134,6 +134,41 @@ los sinónimos ES→EN del pruning cubren el vocabulario:
 Cubren el dataset de e-commerce del banco de pruebas; en producción serían
 configuración por cliente.
 
+### Índices en el esquema
+
+`SchemaExtractor` lee también los índices secundarios de los 4 motores
+(`pg_index`, `information_schema.STATISTICS`, `sys.indexes`) y los guarda completos
+en `TableInfo.indexes` (sirven para la auditoría con `EXPLAIN`). Al prompt solo va
+una marca `IDX` en las columnas que son **primera columna** de algún índice — que es
+lo que importa para que un filtro o un JOIN pueda usarlo — para gastar pocos
+tokens. Los índices difieren entre motores donde el banco de pruebas difiere de
+verdad: en MySQL/MariaDB `order_items.order_id` no tiene índice propio porque lo
+cubre el único compuesto `(order_id, product_id)`; las columnas marcadas `IDX`
+quedan idénticas en los 4.
+
+### Reglas de rendimiento
+
+Se agregaron al prompt (`PERFORMANCE_RULES` en `vertexAI.service.ts`). Ninguna
+cambia **qué** filas devuelve la consulta, solo **cómo** las obtiene:
+
+- Solo las columnas necesarias; nunca `SELECT *`.
+- No aplicar funciones a columnas `IDX` al filtrar o unir; para fechas, rangos
+  (`col >= '2025-01-01' AND col < '2026-01-01'`) en vez de `YEAR(col) = 2025`.
+- `NOT EXISTS` (o `LEFT JOIN ... IS NULL`) para "los que no tienen / nunca han", no
+  `NOT IN` con subconsulta (que además falla con NULL).
+- Evitar subconsultas correlacionadas en el `SELECT`.
+- No usar `DISTINCT` para tapar duplicados de un JOIN: agregar antes de unir.
+- `LIMIT`/`TOP` solo si la pregunta pide una cantidad o un máximo/mínimo; nunca
+  recortar un listado completo (ver `RENDIMIENTO_E_INTEGRIDAD.md`).
+
+Se corrigieron además las notas de dialecto, que decían "usa `EXTRACT(YEAR FROM
+col)` para fechas" sin distinguir: ahora indican esas funciones solo para
+**agrupar o mostrar**, no para filtrar.
+
+Costo en tokens (medido con `countTokens`, gratis): los valores de `CHECK` + marcas
+`IDX` agregan 85–230 tokens por prompt (~$0.0003 por llamada). Ejemplo: "¿Cuántos
+envíos están en tránsito?" → 730 tokens podado vs. 1236 con el esquema completo.
+
 ### Métricas en la respuesta de `/generateSQL`
 
 `/generateSQL` devuelve ahora `metrics`: `tokensInput`, `tokensOutput`,
@@ -185,10 +220,13 @@ Se confirma con David antes de cada corrida pagada.
 ## 8. Pendiente antes de la corrida
 
 1. ~~Streaming, paginación y CSV~~ — hecho (`RENDIMIENTO_E_INTEGRIDAD.md`).
-2. Índices en el esquema enviado al modelo + reglas de rendimiento en el prompt
-   (rangos sobre columnas indexadas en vez de funciones, sin `SELECT *`,
-   `NOT EXISTS` en vez de `NOT IN`, evitar subconsultas correlacionadas, no agregar
-   `LIMIT` no pedido).
+2. ~~Índices en el esquema + reglas de rendimiento en el prompt~~ — hecho (§4).
+2b. **Riesgo nuevo:** el SDK `@google-cloud/vertexai` está deprecado y su aviso
+   indica eliminación el 24/06/2026 (ya pasada). Sigue respondiendo al 02/10/2026,
+   pero puede dejar de hacerlo en cualquier momento, incluso a mitad de la corrida.
+   Reemplazo oficial: `@google/genai` (modo Vertex AI), que además tipa de forma
+   nativa `thinkingConfig` y `thoughtsTokenCount`. Conviene migrar antes de la
+   corrida pagada.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con

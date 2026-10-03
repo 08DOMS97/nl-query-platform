@@ -1,5 +1,12 @@
 import { runQuery, readEngineConfig } from './connectionManager.service.js';
-import type { ColumnInfo, DbEngine, ForeignKeyInfo, SchemaInfo, TableInfo } from '../types/index.js';
+import type {
+  ColumnInfo,
+  DbEngine,
+  ForeignKeyInfo,
+  IndexInfo,
+  SchemaInfo,
+  TableInfo,
+} from '../types/index.js';
 
 interface RawColumnRow {
   table_name: string;
@@ -12,6 +19,14 @@ interface RawColumnRow {
 interface RawKeyRow {
   table_name: string;
   column_name: string;
+}
+
+interface RawIndexRow {
+  table_name: string;
+  index_name: string;
+  column_name: string;
+  ordinal: number;
+  is_unique: boolean | number;
 }
 
 interface RawCheckRow {
@@ -33,7 +48,7 @@ interface RawFkRow {
  */
 const QUERIES: Record<
   DbEngine,
-  { columns: string; primaryKeys: string; foreignKeys: string; checks: string }
+  { columns: string; primaryKeys: string; foreignKeys: string; checks: string; indexes: string }
 > = {
   postgres: {
     columns: `
@@ -71,6 +86,15 @@ const QUERIES: Record<
       SELECT conrelid::regclass::text AS table_name, pg_get_constraintdef(oid) AS check_clause
       FROM pg_constraint
       WHERE contype = 'c' AND connamespace = 'public'::regnamespace`,
+    indexes: `
+      SELECT t.relname AS table_name, i.relname AS index_name, a.attname AS column_name,
+             k.ord AS ordinal, ix.indisunique AS is_unique
+      FROM pg_index ix
+      JOIN pg_class t ON t.oid = ix.indrelid
+      JOIN pg_class i ON i.oid = ix.indexrelid
+      CROSS JOIN LATERAL unnest(ix.indkey) WITH ORDINALITY AS k(attnum, ord)
+      JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k.attnum
+      WHERE t.relnamespace = 'public'::regnamespace AND NOT ix.indisprimary`,
   },
   mysql: {
     columns: `
@@ -97,6 +121,11 @@ const QUERIES: Record<
        AND tc.CONSTRAINT_NAME = cc.CONSTRAINT_NAME
        AND tc.CONSTRAINT_TYPE = 'CHECK'
       WHERE cc.CONSTRAINT_SCHEMA = DATABASE()`,
+    indexes: `
+      SELECT TABLE_NAME AS table_name, INDEX_NAME AS index_name, COLUMN_NAME AS column_name,
+             SEQ_IN_INDEX AS ordinal, NON_UNIQUE = 0 AS is_unique
+      FROM information_schema.STATISTICS
+      WHERE TABLE_SCHEMA = DATABASE() AND INDEX_NAME <> 'PRIMARY'`,
   },
   // Mismo dialecto de information_schema que MySQL.
   mariadb: {
@@ -120,6 +149,11 @@ const QUERIES: Record<
       SELECT TABLE_NAME AS table_name, CHECK_CLAUSE AS check_clause
       FROM information_schema.CHECK_CONSTRAINTS
       WHERE CONSTRAINT_SCHEMA = DATABASE()`,
+    indexes: `
+      SELECT TABLE_NAME AS table_name, INDEX_NAME AS index_name, COLUMN_NAME AS column_name,
+             SEQ_IN_INDEX AS ordinal, NON_UNIQUE = 0 AS is_unique
+      FROM information_schema.STATISTICS
+      WHERE TABLE_SCHEMA = DATABASE() AND INDEX_NAME <> 'PRIMARY'`,
   },
   mssql: {
     columns: `
@@ -155,6 +189,15 @@ const QUERIES: Record<
       JOIN sys.tables t ON t.object_id = cc.parent_object_id
       JOIN sys.schemas s ON s.schema_id = t.schema_id
       WHERE s.name = 'dbo'`,
+    indexes: `
+      SELECT t.name AS table_name, i.name AS index_name, c.name AS column_name,
+             ic.key_ordinal AS ordinal, i.is_unique AS is_unique
+      FROM sys.indexes i
+      JOIN sys.tables t ON t.object_id = i.object_id
+      JOIN sys.schemas s ON s.schema_id = t.schema_id
+      JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+      JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+      WHERE s.name = 'dbo' AND i.is_primary_key = 0 AND i.type > 0 AND ic.is_included_column = 0`,
   },
 };
 
@@ -218,6 +261,37 @@ async function readAllowedValues(engine: DbEngine): Promise<Map<string, string[]
   return allowed;
 }
 
+/**
+ * Índices secundarios por tabla. Igual que los CHECK, es un enriquecimiento
+ * opcional: si la consulta falla, el esquema sale sin índices.
+ */
+async function readIndexes(engine: DbEngine): Promise<Map<string, IndexInfo[]>> {
+  const byTable = new Map<string, IndexInfo[]>();
+  try {
+    const result = await runQuery(engine, QUERIES[engine].indexes);
+    const rows = (result.rows as unknown as RawIndexRow[]).sort(
+      (a, b) => Number(a.ordinal) - Number(b.ordinal),
+    );
+    const byKey = new Map<string, IndexInfo>();
+    for (const row of rows) {
+      const key = `${row.table_name}.${row.index_name}`;
+      let index = byKey.get(key);
+      if (!index) {
+        index = { name: row.index_name, columns: [], unique: Boolean(Number(row.is_unique)) };
+        byKey.set(key, index);
+        const list = byTable.get(row.table_name) ?? [];
+        list.push(index);
+        byTable.set(row.table_name, list);
+      }
+      index.columns.push(row.column_name);
+    }
+    for (const list of byTable.values()) list.sort((a, b) => a.name.localeCompare(b.name));
+  } catch {
+    // Sin índices el modelo sigue funcionando, solo sin pistas de rendimiento.
+  }
+  return byTable;
+}
+
 function toBool(isNullable: string): boolean {
   return String(isNullable).toUpperCase() === 'YES';
 }
@@ -226,11 +300,12 @@ function toBool(isNullable: string): boolean {
 export async function extractSchema(engine: DbEngine): Promise<SchemaInfo> {
   const q = QUERIES[engine];
 
-  const [columnsResult, pkResult, fkResult, allowedValues] = await Promise.all([
+  const [columnsResult, pkResult, fkResult, allowedValues, indexesByTable] = await Promise.all([
     runQuery(engine, q.columns),
     runQuery(engine, q.primaryKeys),
     runQuery(engine, q.foreignKeys),
     readAllowedValues(engine),
+    readIndexes(engine),
   ]);
 
   const columnRows = columnsResult.rows as unknown as RawColumnRow[];
@@ -245,9 +320,16 @@ export async function extractSchema(engine: DbEngine): Promise<SchemaInfo> {
   const tablesByName = new Map<string, TableInfo>();
   for (const row of columnRows) {
     if (!tablesByName.has(row.table_name)) {
-      tablesByName.set(row.table_name, { name: row.table_name, columns: [] });
+      tablesByName.set(row.table_name, {
+        name: row.table_name,
+        columns: [],
+        indexes: indexesByTable.get(row.table_name) ?? [],
+      });
     }
     const key = `${row.table_name}.${row.column_name}`;
+    const indexed = (indexesByTable.get(row.table_name) ?? []).some(
+      (ix) => ix.columns[0] === row.column_name,
+    );
     const fk = fkByColumn.get(key);
     const column: ColumnInfo = {
       name: row.column_name,
@@ -259,6 +341,7 @@ export async function extractSchema(engine: DbEngine): Promise<SchemaInfo> {
       referencesColumn: fk?.references_column,
       defaultValue: row.column_default ?? null,
       allowedValues: allowedValues.get(key.toLowerCase()),
+      indexed: indexed || undefined,
     };
     tablesByName.get(row.table_name)!.columns.push(column);
   }

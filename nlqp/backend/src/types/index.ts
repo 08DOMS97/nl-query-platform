@@ -34,12 +34,26 @@ export interface ColumnInfo {
    * que adivinar los literales exactos de las columnas categóricas.
    */
   allowedValues?: string[];
+  /**
+   * Es la primera columna de algún índice (sin contar la PK, que ya va marcada).
+   * Un filtro o JOIN sobre ella puede usar el índice si no se le aplica una función.
+   */
+  indexed?: boolean;
+}
+
+/** Índice de una tabla, con sus columnas en orden. */
+export interface IndexInfo {
+  name: string;
+  columns: string[];
+  unique: boolean;
 }
 
 /** Tabla normalizada, independiente del motor de origen. */
 export interface TableInfo {
   name: string;
   columns: ColumnInfo[];
+  /** Índices secundarios (sin la PK). */
+  indexes?: IndexInfo[];
 }
 
 export interface ForeignKeyInfo {

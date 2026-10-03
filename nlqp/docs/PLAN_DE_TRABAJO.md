@@ -51,7 +51,7 @@ hasta 6.2 por decisión de alcance, no por falta de material.
 | · Inspección de esquema: PostgreSQL y MySQL | Completo | **Esta entrega** |
 | · Inspección de esquema: MariaDB y SQL Server; normalización | Completo | **Esta entrega** |
 | Módulo 3: Generación NL2SQL y Query Safety Engine | **Completo** | Siguiente |
-| · Diseño de prompt y estrategia de schema pruning | Completo y verificado; ampliado 02/10 con valores de los `CHECK` y reglas de dominio. Pendiente: índices y reglas de rendimiento | Siguiente |
+| · Diseño de prompt y estrategia de schema pruning | Completo y verificado; ampliado 02/10 con valores de los `CHECK`, reglas de dominio, índices (`IDX`) y reglas de rendimiento | Siguiente |
 | · Integración con Vertex AI Gemini Pro | **Completo y verificado** — proyecto `proyectog-340d3`, llamada real confirmada | Siguiente |
 | · Implementación del Query Safety Engine | Completo y verificado, 17/17 | Siguiente |
 | · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales. Preparación en curso (02/10), ver `PREPARACION_EVALUACION_GEMINI.md` | Siguiente |
@@ -163,4 +163,5 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 | Cambios documentales pendientes en los capítulos 1 a 4 | Modelo de organización, esquema cacheado, índices y versión de Node | Aplicar antes de la entrega final |
 | Las referencias de las 50 consultas eran inconsistentes con respecto a los pedidos cancelados (corregidas 02/10) | Los resultados 200/200 publicados se obtuvieron con las referencias anteriores | Volver a correr la verificación con las referencias corregidas y mencionarlo en 6.3.4 |
 | El banco de pruebas tiene pocos datos (200 clientes, 300 pedidos): no permite medir eficiencia | Sin medición, el requisito de eficiencia no se puede demostrar | Banco de volumen alto en los 4 motores (pendiente) |
+| El SDK `@google-cloud/vertexai` está deprecado con eliminación anunciada para el 24/06/2026 (ya pasada); sigue funcionando al 02/10 | Si Google lo corta, la generación de SQL deja de funcionar, incluso a mitad de la corrida | Migrar a `@google/genai` antes de la corrida pagada |
 | Sin crédito de prueba en la cuenta de Google Cloud, cualquier uso de Vertex AI se factura de verdad | Bajo (fracciones de centavo por llamada), pero hay que avisar antes de cada corrida grande | Confirmar con David antes de corridas masivas (ej. las 50 consultas) |

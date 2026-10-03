@@ -14,18 +14,40 @@ import { DOMAIN_RULES } from './domainRules.service.js';
  */
 const DIALECT_NOTES: Record<DbEngine, string> = {
   postgres:
-    'PostgreSQL: usa LIMIT n para limitar filas. Usa EXTRACT(YEAR FROM col) / ' +
-    'EXTRACT(MONTH FROM col) para fechas. Concatena con || o CONCAT(). Booleanos TRUE/FALSE.',
+    'PostgreSQL: para limitar filas usa LIMIT n. Para agrupar o mostrar por año/mes usa ' +
+    'EXTRACT(YEAR FROM col) / EXTRACT(MONTH FROM col). Concatena con || o CONCAT(). ' +
+    'Booleanos TRUE/FALSE.',
   mysql:
-    'MySQL: usa LIMIT n para limitar filas. Usa YEAR(col) / MONTH(col) o EXTRACT(...) para ' +
-    'fechas. Concatena con CONCAT() (no existe ||). Booleanos son TINYINT(1) (1/0).',
+    'MySQL: para limitar filas usa LIMIT n. Para agrupar o mostrar por año/mes usa ' +
+    'YEAR(col) / MONTH(col). Concatena con CONCAT() (no existe ||). Booleanos son TINYINT(1) (1/0).',
   mariadb:
-    'MariaDB: mismo dialecto que MySQL. Usa LIMIT n. Usa YEAR(col) / MONTH(col). Concatena ' +
-    'con CONCAT(). Booleanos son TINYINT(1) (1/0).',
+    'MariaDB: mismo dialecto que MySQL. Para limitar filas usa LIMIT n. Para agrupar o mostrar ' +
+    'por año/mes usa YEAR(col) / MONTH(col). Concatena con CONCAT(). Booleanos son TINYINT(1) (1/0).',
   mssql:
-    'SQL Server (T-SQL): usa SELECT TOP n en vez de LIMIT (LIMIT no existe). Usa YEAR(col) / ' +
-    'MONTH(col) / DATEPART(...) para fechas. Concatena con + o CONCAT(). Booleanos son BIT (0/1).',
+    'SQL Server (T-SQL): para limitar filas usa SELECT TOP n (LIMIT no existe). Para agrupar o ' +
+    'mostrar por año/mes usa YEAR(col) / MONTH(col). Concatena con + o CONCAT(). ' +
+    'Booleanos son BIT (0/1).',
 };
+
+/**
+ * Reglas para que el SQL sea eficiente en una base con muchos datos (requisito
+ * del 02/10/2026, ver nlqp/docs/PREPARACION_EVALUACION_GEMINI.md). Ninguna
+ * cambia QUÉ filas devuelve la consulta, solo CÓMO las obtiene: la eficiencia no
+ * puede costar integridad (ver nlqp/docs/RENDIMIENTO_E_INTEGRIDAD.md), por eso
+ * la regla de LIMIT prohíbe agregar límites que el usuario no pidió.
+ */
+const PERFORMANCE_RULES: string[] = [
+  'Selecciona solo las columnas necesarias para responder; nunca SELECT *.',
+  'Las columnas marcadas IDX tienen índice. Al filtrar o unir por ellas no les apliques ' +
+    "funciones: para fechas usa rangos (col >= '2025-01-01' AND col < '2026-01-01') en vez " +
+    'de YEAR(col) = 2025 o EXTRACT(...) = 2025.',
+  'Para "los que no tienen / nunca han" usa NOT EXISTS (o LEFT JOIN ... IS NULL), no NOT IN ' +
+    'con subconsulta.',
+  'Evita subconsultas correlacionadas en el SELECT; usa JOIN con GROUP BY o funciones de ventana.',
+  'No uses DISTINCT para tapar filas duplicadas por un JOIN: agrega antes de unir.',
+  'Limita filas (LIMIT/TOP) solo si la pregunta pide una cantidad o un máximo/mínimo ' +
+    '("los 5...", "el que más..."); nunca recortes un listado completo.',
+];
 
 function formatSchemaForPrompt(schema: SchemaInfo): string {
   const lines: string[] = [];
@@ -35,6 +57,7 @@ function formatSchemaForPrompt(schema: SchemaInfo): string {
         const flags: string[] = [];
         if (c.isPrimaryKey) flags.push('PK');
         if (c.isForeignKey) flags.push(`FK -> ${c.referencesTable}.${c.referencesColumn}`);
+        if (c.indexed) flags.push('IDX');
         if (c.allowedValues) flags.push(`valores: ${c.allowedValues.map((v) => `'${v}'`).join('|')}`);
         const flagStr = flags.length ? ` [${flags.join(', ')}]` : '';
         return `${c.name} (${c.dataType}${c.nullable ? ', nullable' : ''})${flagStr}`;
@@ -58,6 +81,9 @@ Reglas estrictas:
 
 Reglas del dominio:
 ${DOMAIN_RULES.map((r) => `- ${r}`).join('\n')}
+
+Reglas de rendimiento (la base puede tener millones de filas):
+${PERFORMANCE_RULES.map((r) => `- ${r}`).join('\n')}
 
 Esquema disponible (base de datos "${schema.database}"):
 ${formatSchemaForPrompt(schema)}
