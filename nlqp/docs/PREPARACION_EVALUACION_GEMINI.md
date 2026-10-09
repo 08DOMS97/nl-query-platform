@@ -1,4 +1,4 @@
-# Preparación de la evaluación con Gemini (2026-10-02)
+# Preparación de la evaluación con Gemini (2026-10-02, actualizada 2026-10-08)
 
 Trabajo previo a correr las 50 consultas de prueba **generando el SQL con Gemini**
 (hasta ahora se habían corrido con el SQL de referencia escrito a mano). Objetivo:
@@ -227,12 +227,43 @@ Se confirma con David antes de cada corrida pagada.
    Reemplazo oficial: `@google/genai` (modo Vertex AI), que además tipa de forma
    nativa `thinkingConfig` y `thoughtsTokenCount`. Conviene migrar antes de la
    corrida pagada.
+2c. **Riesgo nuevo (verificado 02/10/2026): retiro del modelo `gemini-2.5-pro` en
+   Vertex AI.** La página oficial de versiones de modelos de Vertex AI indica
+   "Not before October 16, 2026" como fecha de retiro; fuentes externas reportan que
+   la página nueva de ciclo de vida ya muestra el 20/10/2026, y en la Gemini API la
+   fecha del 16/10 se retiró sin aviso. La fecha se está moviendo, pero en cualquier
+   caso cae junto a la presentación del prototipo (14/10) y la entrega de PG2 (17/10).
+   Después del retiro, las llamadas a `gemini-2.5-pro` fallan: tanto la corrida como
+   cualquier demo posterior.
+   - **Actualización 08/10/2026:** la página oficial de Vertex AI ("Model versions
+     and lifecycle" y la ficha de Gemini 2.5 Pro) muestra ahora **20/10/2026** como
+     fecha más temprana de retiro. El 16/10 corresponde al calendario de la Gemini
+     API, que es otro producto. Sigue siendo provisoria; el reemplazo que sugiere
+     Google es la familia Gemini 3.x Flash.
+   - Hacer el piloto y la corrida completa **antes de la presentación (14/10)**; en
+     ningún caso después del 16/10.
+   - Antes de cada corrida, confirmar la fecha vigente en la consola de Google Cloud.
+   - El modelo se cambia por `VERTEX_AI_MODEL` en `.env`, pero cambiar de modelo
+     obliga a revisar el prompt, la configuración de razonamiento y los precios de
+     `vertexAiPricing.service.ts`, y los resultados medidos quedan atados al modelo
+     con el que se corrieron (dejar registrado cuál fue).
+   - Hacer la migración del SDK (2b) y este cambio de modelo, si hace falta, en la
+     misma pasada.
+2d. ~~Volver a verificar las referencias corregidas el 02/10~~ — hecho 08/10/2026:
+   200/200 ejecuciones, 0 inconsistencias entre motores (cada consulta pasada por
+   `validateQuerySafety()` y ejecutada con `runQuery()`, usando `overrides` por motor).
+2e. **Antes de la corrida (08/10):** endurecer el Query Safety Engine
+   (`SEGURIDAD.md` §9–11) y versionar la batería, para que la corrida mida el
+   validador definitivo.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con
    `EXTRACT(YEAR FROM order_date) = 2025`, que impide usar el índice
    `ix_orders_date`; lo eficiente es un rango de fechas.
-5. Paráfrasis (50), revisadas por David antes de guardarlas.
+5. Paráfrasis (50), revisadas por David antes de guardarlas. (08/10: si no se
+   revisan antes del piloto, quedan como trabajo futuro; el banco de volumen alto
+   (punto 3) puede hacerse después de la corrida, porque `EXPLAIN` sobre el SQL ya
+   generado no necesita a Gemini.)
 6. Runner nuevo: modo de prueba gratuito, piloto, guardado incremental (no repetir
    llamadas pagadas), renovación del token, reintentos ante 429, comparación de
    resultados, `EXPLAIN`/antipatrones/latencia.

@@ -191,6 +191,13 @@ lectura se hace efectiva mediante la verificación de que la sentencia correspon
 exclusivamente a una operación de consulta, complementada por los permisos restringidos de
 la cuenta de base de datos utilizada.
 
+> **⚠ Corrección pendiente (08/10/2026), ver `SEGURIDAD.md` §9–11:** (1) las
+> funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) **no** las bloquea
+> el validador, las frenan los permisos del motor; (2) las palabras reservadas y el
+> `;` dentro de literales **sí** se bloquean, al contrario de lo que dice el
+> penúltimo párrafo del hallazgo; (3) la batería no está versionada. Ajustar este
+> texto (o el validador) antes de pegarlo.
+
 Se construyó una batería de diecisiete casos de prueba que comprende operaciones de
 modificación de datos, operaciones de definición de estructura, sentencias encadenadas,
 intentos de acceso al sistema de archivos del servidor y variaciones de capitalización de
@@ -255,6 +262,12 @@ manualmente y adaptadas al dialecto de cada motor. No fueron generadas por el mo
 lenguaje, cuya integración se encuentra pendiente según se indica en la sección 6.3.2. Esta
 prueba verifica, por tanto, la capa de validación y ejecución y la capa de abstracción de
 dialectos, y no la precisión del proceso de conversión de lenguaje natural a SQL.
+
+> **Nota (08/10/2026):** el 02/10 se corrigieron 5 referencias (M03, M07, M12, M13,
+> C11). Re-verificado el 08/10 con las referencias corregidas: 200/200 y 50/50
+> consistentes; la tabla sigue siendo válida. Mencionar la corrección en el texto.
+> Además, este párrafo dice que la integración con el modelo está "pendiente": ya
+> no lo está (verificada el 21/09), actualizarlo.
 
 **Tabla 14.** Ejecución controlada del conjunto de prueba en los cuatro motores. Fuente: Elaboración propia.
 
@@ -386,6 +399,9 @@ completa.
 ---
 
 # PARTE 2 — Plan de trabajo actualizado
+
+> **Desactualizado (histórico, 19/09/2026).** El plan vigente está en
+> `PLAN_DE_TRABAJO.md` y el estado diario en `BITACORA.md`.
 
 Estado al 19 de septiembre de 2026, sobre la estructura de tu plan.
 

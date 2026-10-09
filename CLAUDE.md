@@ -9,7 +9,8 @@ Auth. Soporta 4 motores (PostgreSQL, MySQL, MariaDB, SQL Server). Solo permite
 1. `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` (raíz) — contexto original, credenciales
    del banco de pruebas, orden de construcción de los 8 módulos.
 2. `nlqp/docs/SEGURIDAD.md` — hallazgos de seguridad ya corregidos, no repetirlos.
-3. Este archivo, para el estado actual y cómo levantar todo.
+3. Este archivo, para el estado actual, el próximo paso y cómo levantar todo.
+   Historial fechado: `nlqp/docs/BITACORA.md`.
 4. Si se trabaja en la evaluación con Gemini: `nlqp/docs/PREPARACION_EVALUACION_GEMINI.md`;
    si se toca la ejecución de consultas: `nlqp/docs/RENDIMIENTO_E_INTEGRIDAD.md`.
 
@@ -19,7 +20,7 @@ Auth. Soporta 4 motores (PostgreSQL, MySQL, MariaDB, SQL Server). Solo permite
 Bases de datos/     banco de pruebas Docker (NO es código de NLQP, ver su propio README.md)
 nlqp/backend/        backend real (Node 22, TS, ESM, Cloud Functions 2nd gen)
 nlqp/frontend/        frontend Next.js (v1: login + flujo principal, resultados paginados)
-nlqp/docs/            consultas de prueba, resultados, manual de Postman, SEGURIDAD.md,
+nlqp/docs/            BITACORA.md (historial fechado), consultas de prueba, resultados, manual de Postman, SEGURIDAD.md,
                       USO_Y_COSTOS.md, RENDIMIENTO_E_INTEGRIDAD.md, PREPARACION_EVALUACION_GEMINI.md
 ```
 
@@ -40,32 +41,83 @@ Si Docker Desktop no responde: en esta máquina está instalado en
 `C:\Users\david\AppData\Local\Programs\DockerDesktop\Docker Desktop.exe` (no en
 `Program Files`).
 
-## Estado (última actualización: 2026-10-02)
+## Al iniciar una sesión
 
-Completado y validado end-to-end contra los 4 motores reales:
-- **Módulo 1 — ConnectionManager**: pools pg/mysql2/mssql, `testConnection` OK en los 4.
-- **Módulo 2 — SchemaExtractor**: introspección normalizada, 8 tablas + 8 FKs en los 4 motores.
-- **Módulo 3 — SchemaPruning**: incluye sinónimos ES→EN (las consultas NL son en español, el esquema en inglés).
-- **Módulo 4 — VertexAIService/generateSQL**: proyecto GCP+Firebase unificado `proyectog-340d3` creado, Vertex AI habilitada, `GCP_PROJECT_ID`/`FIREBASE_PROJECT_ID` configurados en `nlqp/backend/.env`. Probado en vivo: pregunta en español → Gemini genera SQL correcto → Query Safety Engine lo aprueba → se ejecuta contra Postgres real. Ya no es un bloqueo.
-- **Módulo 5 — Query Safety Engine**: 17/17 en batería de seguridad, 100% bloqueo. Revisado por seguridad (ver `nlqp/docs/SEGURIDAD.md`) y corregido un bypass real en SQL Server.
-- **Módulo 6 — executeQuery**: probado end-to-end en los 4 motores.
-- **50 consultas de prueba** (`nlqp/docs/consultas_prueba_50.json`): 200/200 ejecuciones OK, 50/50 consistentes entre motores. **Nota:** esa corrida usó el SQL de referencia, no generación real vía Vertex AI — repetirla generando con Gemini es el siguiente hito de métricas pendiente. El 02/10 se corrigieron 5 referencias (M03, M07, M12, M13, C11) que eran inconsistentes respecto de los pedidos cancelados, así que el 200/200 corresponde a las referencias anteriores. `run_consultas_prueba.mjs` ya no funciona tal cual (no manda token de Firebase y espera la respuesta vieja de `/executeQuery`); lo reemplazará el runner nuevo.
-- **Firebase Authentication + Firestore**: proyecto `proyectog-340d3`, Authentication (proveedor email/contraseña) y Firestore (`(default)`) habilitados. Al haber `FIREBASE_PROJECT_ID` configurado, el bypass de auth de `auth.middleware.ts` ya no aplica — todas las pruebas (Postman/curl) requieren un ID token real. Usar `npm run test:token` (`nlqp/backend/scripts/get_test_token.mjs`) para conseguir uno de un usuario de prueba (expira a la hora).
-- **Repo en GitHub**: `https://github.com/08DOMS97/nl-query-platform`, branch `main`, primer commit hecho y pusheado.
-- **Módulo de uso y costos** (nuevo, ver `nlqp/docs/USO_Y_COSTOS.md`): registra en Firestore (`usageEvents`) cada llamada a `/generateSQL` y `/executeQuery` — tokens, costo estimado, motor, éxito/error, latencia. Endpoint `GET /getUsageStats`. Verificado en vivo (incluida una llamada real a Vertex AI: `$0.00063375`). Backend únicamente; el dashboard en tiempo real depende del Módulo 8 (frontend).
-- **Módulo 8 — Frontend Next.js (v1)**: arrancado en `nlqp/frontend/` (App Router + TypeScript + Tailwind + SDK de Firebase). Cubre login/registro (email+contraseña) y la pantalla principal del flujo: elegir motor → preguntar en lenguaje natural → ver SQL generado y resultado del Query Safety Engine → ejecutar → ver resultados. Verificado con navegador real (Playwright): redirección a `/login` sin sesión, login contra Firebase Auth real, pantalla principal renderiza sin errores de consola. El 02/10 se verificó en navegador "Ejecutar" + paginación + descarga CSV contra el backend real, interceptando `/generateSQL` para no llamar a Vertex AI; el click de "Generar SQL" con Gemini real en la UI todavía no se probó (el endpoint sí, por curl). Pendiente: historial y dashboard de uso/costos (el deploy ya no hace falta, ver Despliegue).
-- **Rendimiento e integridad de resultados** (02/10, ver `nlqp/docs/RENDIMIENTO_E_INTEGRIDAD.md`): timeout de 60 s aplicado dentro del motor en los 4 (`NLQP_QUERY_TIMEOUT_MS`); `/executeQuery` ejecuta UNA vez, guarda el resultado completo como snapshot y devuelve la página 1 con el total; `/getResultPage` y descarga CSV completa (`/createResultExport` → `/exportResultCsv`). Verificado en los 4 motores y en navegador.
-- **Preparación de la corrida con Gemini** (02/10, en curso, ver `nlqp/docs/PREPARACION_EVALUACION_GEMINI.md` §8): valores de los `CHECK`, reglas de dominio, índices (`IDX`) y reglas de rendimiento ya en el prompt; `/generateSQL` devuelve `metrics`. **Riesgo:** el SDK `@google-cloud/vertexai` está deprecado (eliminación anunciada 24/06/2026, sigue funcionando al 02/10) — migrar a `@google/genai` antes de la corrida pagada. Falta: banco de volumen alto en los 4 motores, auditoría de eficiencia de las referencias, paráfrasis, runner nuevo, piloto y corrida.
+Si David saluda o pregunta "cómo vamos" / "qué sigue", responder **muy resumido**
+(5–8 líneas): días que faltan para la próxima fecha del calendario, qué está hecho
+en una línea, y **el próximo paso** de la sección de abajo. Sin re-revisar el repo
+salvo que lo pida — este archivo es la fuente. Si algo de acá contradice al código,
+decirlo.
 
-Bloqueado o pendiente, pero ya sin depender de cuentas de nube:
-- **Módulo 7 — Historial/Firestore**: infraestructura lista (Firestore habilitado), código no empezado.
-- Vertex AI **no tiene crédito de prueba disponible** en esta cuenta de Google — cualquier llamada real se factura (hasta ~$0.011 por llamada contando el razonamiento de Gemini 2.5 Pro, ver `PREPARACION_EVALUACION_GEMINI.md` §6). Avisar antes de disparar llamadas que generen SQL con Gemini.
-- Confirmar si `../db/` (fuera de este repo, no existe en disco por ahora) es relevante.
-- **Despliegue:** la tesis se presenta **en local** (decisión 01/10/2026), no hace
-  falta desplegar. Si más adelante se necesita acceso remoto a las bases de Docker,
-  la solución ya está analizada en `nlqp/docs/ACCESO_REMOTO.md` (túnel HTTPS al
-  backend local; nunca exponer las bases directamente).
-- Coordinar los 35 participantes de la encuesta (ver `nlqp/docs/PLAN_DE_TRABAJO.md` §6) — no depende de código, conviene arrancarlo en paralelo.
+**Al cerrar cada sesión de trabajo:** agregar una entrada fechada en
+`nlqp/docs/BITACORA.md`, actualizar "Estado" y "Próximo paso" de este archivo
+(con la fecha) y el doc del tema que se tocó.
+
+## Calendario (fechas duras)
+
+| Fecha | Qué |
+|---|---|
+| 12–13/10/2026 | Integración de módulos y pruebas (plan) |
+| **14/10/2026** | **Presentación del prototipo funcional** |
+| 15–16/10/2026 | Conclusiones y revisión final del documento |
+| **17/10/2026** | **Entrega PG2** |
+| ~20/10/2026 | Retiro más temprano de `gemini-2.5-pro` en Vertex AI (provisorio, verificado 08/10) |
+
+Plan con fechas: `Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx`.
+
+## Próximo paso (actualizado 2026-10-08)
+
+Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
+
+1. **Endurecer el Query Safety Engine** (gratis): bloquear funciones de archivo
+   (`SEGURIDAD.md` §10), decidir qué hacer con literales (§9), guardar la batería de
+   seguridad en el repo como script, regresión completa (batería + 50 × 4) y
+   ajustar el texto de 6.3.3.
+2. **Corrida con Gemini** (crítico, antes del 14/10): migrar a `@google/genai`,
+   corregir S10/M13 (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
+   corrida completa (~$2–3, **pedir confirmación antes**). Ver
+   `PREPARACION_EVALUACION_GEMINI.md` §8.
+3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
+4. Si no da el tiempo: Módulo 4 (herramientas técnicas, atrasado desde 07/10),
+   banco de volumen alto y paráfrasis → alcance reducido / trabajo futuro.
+
+## Estado (actualizado 2026-10-08)
+
+Historial fechado completo en `nlqp/docs/BITACORA.md`.
+
+**Hecho y verificado:**
+- Módulos 1–3, 5 y 6 del backend (conexiones, esquema, poda con sinónimos ES→EN,
+  Gemini vía Vertex AI en `proyectog-340d3`, Query Safety Engine, ejecución) en los
+  4 motores.
+- 50 consultas de referencia (con las 5 corregidas el 02/10): **200/200, 0
+  inconsistencias** (re-verificado 08/10). Es SQL de referencia, **no** generado
+  por Gemini. `run_consultas_prueba.mjs` ya no sirve (no manda token ni entiende la
+  respuesta paginada); el runner nuevo es parte del paso 2.
+- Firebase Auth + Firestore: todas las llamadas exigen ID token real
+  (`npm run test:token`, expira a la hora).
+- Uso y costos (`USO_Y_COSTOS.md`): backend, `GET /getUsageStats`. Sin dashboard.
+- Frontend v1 (Módulo 8): login, flujo motor → pregunta → SQL → ejecutar →
+  resultados paginados + CSV. Falta probar "Generar SQL" con Gemini real desde la UI.
+- Rendimiento e integridad (`RENDIMIENTO_E_INTEGRIDAD.md`): timeout 60 s en el
+  motor, snapshot, paginación, CSV completo.
+- Prompt preparado para la corrida (CHECKs, reglas de dominio, índices, reglas de
+  rendimiento); `/generateSQL` devuelve `metrics`.
+
+**Abierto:**
+- Query Safety Engine: hallazgos §9 y §10 de `SEGURIDAD.md` (08/10). La batería de
+  17 casos no está en el repo.
+- Texto de tesis: 6.3.3 de `CAPITULO_6_Y_PLAN.md` afirma cosas que no son ciertas
+  (ver avisos dentro del archivo); Cap. 5 cita 42 tablas / 71 % (el banco tiene 8);
+  correcciones de figuras del Cap. 5 en 0 %; cambios pendientes en Cap. 1–4.
+- Módulo 4 (herramientas técnicas) y Módulo 5 (historial): sin empezar.
+- Dashboard de uso/costos en el frontend: sin empezar.
+- Riesgos: SDK `@google-cloud/vertexai` deprecado (sigue funcionando); retiro de
+  `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
+  factura (hasta ~$0.011), avisar antes.
+- Coordinar los 35 participantes de la encuesta (no depende de código).
+- Despliegue: no hace falta, se presenta **en local** (decisión 01/10). Acceso
+  remoto analizado en `ACCESO_REMOTO.md`, no implementado.
+- Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.
 
 ## Reglas que no hay que romper
 

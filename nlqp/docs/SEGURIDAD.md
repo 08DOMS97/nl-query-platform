@@ -1,4 +1,4 @@
-# Revisión de seguridad — backend NLQP (2026-09-17)
+# Revisión de seguridad — backend NLQP (2026-09-17, actualizada 2026-10-08)
 
 Revisión manual del backend construido hasta el momento (módulos 1, 2, 3, 5 y 6:
 ConnectionManager, SchemaExtractor, SchemaPruning, Query Safety Engine,
@@ -27,6 +27,9 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 6 | 14 vulnerabilidades moderadas transitivas (`npm audit`) | Baja | Documentado, no corregido (actualizado 02/10: 16, ver §6) |
 | 7 | Caída del backend completo ante un resultado demasiado grande (02/10) | **Alta** | Corregido |
 | 8 | Endpoint de descarga de CSV sin autenticación de Firebase (02/10) | Baja | Mitigado por diseño |
+| 9 | Palabras reservadas y `;` dentro de literales se bloquean; el texto de 6.3.3 dice lo contrario (08/10) | Baja | Abierto |
+| 10 | Funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) pasan el validador; las frenan los permisos del motor (08/10) | Baja | Abierto |
+| 11 | La batería de 17 casos no está versionada en el repo (08/10) | Baja | Abierto |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -318,6 +321,91 @@ resultado. El token es de **un solo uso** y vence a los **2 minutos**; el result
 mismo vence a los 30. Riesgo residual: si la URL se filtra dentro de esos 2 minutos
 y antes de usarse, quien la tenga puede descargar ese resultado una vez. Las páginas
 (`/getResultPage`) sí exigen Firebase y verifican que el `uid` sea el del dueño.
+
+---
+
+## 9. Falsos positivos: palabras reservadas y `;` dentro de literales — BAJA (abierto, 08/10/2026)
+
+**Archivo:** `nlqp/backend/src/services/querySafety.service.ts` (`KEYWORD_PATTERN` y
+el chequeo de `;` en `validateQuerySafety()`)
+
+**El problema:** la lista de palabras prohibidas y la búsqueda de `;` se aplican al
+texto completo de la consulta, **incluidos los literales de texto**. Solo
+`hasUnauthorizedStackedStatement()` ignora los literales. Verificado el 08/10:
+
+| Consulta | Resultado |
+|---|---|
+| `SELECT * FROM customers WHERE name = 'Update Corp'` | Bloqueada por "Update" |
+| `SELECT * FROM products WHERE name LIKE '%Replace%'` | Bloqueada por "Replace" |
+| `SELECT 'a;b' AS x` | Bloqueada por el `;` |
+
+Falla en el sentido seguro (bloquea, no deja pasar), así que no es una
+vulnerabilidad. Pero:
+
+- **El texto de tesis es inexacto:** 6.3.3 en `CAPITULO_6_Y_PLAN.md` afirma que "las
+  consultas que contienen palabras reservadas dentro de literales de texto continúan
+  ejecutándose". No es así.
+- **Impacto en la corrida con Gemini:** ninguno hoy. Ningún valor de los `CHECK` del
+  banco (`ACTIVE`, `INACTIVE`, `DISCONTINUED`, `BILLING`, `SHIPPING`, `HOME`, …) ni
+  ninguna de las 50 consultas cae en esto (200/200 pasan).
+
+**Opciones:** (a) corregir el texto de 6.3.3 para describir el comportamiento real
+(conservador: ante la duda, bloquea); o (b) aplicar la lista de palabras y el `;`
+solo fuera de literales, reutilizando el recorrido de
+`hasUnauthorizedStackedStatement()`. La (b) cambia `querySafety.service.ts` y exige
+la regresión completa. Decisión pendiente de David.
+
+## 10. Funciones de lectura de archivos no bloqueadas por el validador — BAJA (abierto, 08/10/2026)
+
+**Archivo:** `nlqp/backend/src/services/querySafety.service.ts`
+
+**El problema:** `SELECT pg_read_file('/etc/passwd')` y
+`SELECT LOAD_FILE('/etc/passwd')` **pasan** el Query Safety Engine: empiezan con
+`SELECT`, no tienen `;` y no contienen ninguna palabra de la lista. Lo mismo aplica,
+por construcción, a otras funciones con efectos fuera de la consulta
+(`pg_read_binary_file`, `pg_ls_dir`, `pg_stat_file`, `lo_import`, `lo_export`,
+`dblink*`, `pg_terminate_backend`, `pg_cancel_backend`, `set_config`, …).
+
+**Por qué no es explotable hoy (verificado en vivo el 08/10, pasando por el
+validador):**
+
+| Motor | Prueba | Resultado |
+|---|---|---|
+| PostgreSQL | `pg_read_file('PG_VERSION')`, `pg_read_file('/etc/hostname')` | `permission denied for function pg_read_file` |
+| PostgreSQL | `current_setting('is_superuser')` | `off` |
+| MySQL | `LOAD_FILE('/etc/hostname')` | `NULL` (`secure_file_priv = /var/lib/mysql-files/`) |
+| MariaDB | `LOAD_FILE('/etc/hostname')` | `NULL` |
+| SQL Server | `IS_SRVROLEMEMBER('sysadmin')` | `0` |
+
+Lo que lo frena son los **permisos del motor**, no el validador. Es la defensa en
+profundidad funcionando, pero:
+
+- **El texto de tesis es inexacto:** 6.3.3 dice que la batería incluye "intentos de
+  acceso al sistema de archivos del servidor" y que el componente los bloqueó. Los
+  casos de la batería original eran, casi seguro, `INTO OUTFILE` / `OPENROWSET` /
+  `BULK` (que sí están en la lista); las funciones de lectura no.
+- Con una cuenta con más privilegios (superusuario, `FILE` en MySQL), sí filtraría
+  archivos del servidor.
+
+**Corrección propuesta:** lista de funciones prohibidas (patrón `\bnombre\s*\(`)
+con las de arriba + `LOAD_FILE`, `SLEEP`/`pg_sleep`/`WAITFOR` (ya acotadas por el
+timeout, pero no tienen uso legítimo), y casos nuevos en la batería. Exige la
+regresión completa.
+
+## 11. La batería de seguridad no está versionada — BAJA (abierto, 08/10/2026)
+
+La batería de 17 casos que respalda el "17/17" de 6.3.3 y de este documento **no
+existe como archivo en el repo**; solo está descrita en texto. No se puede repetir
+tal cual, y la regla de "volver a correr la batería ante cualquier cambio a
+`querySafety.service.ts`" depende de reconstruirla.
+
+El 08/10 se reconstruyó una de 22 casos en un script temporal (DML, DDL,
+sentencias encadenadas con y sin `;`, acceso a archivos, `xp_cmdshell`,
+mayúsculas/minúsculas mezcladas, `WITH … DELETE`, `GRANT`, más 3 consultas legítimas
+de control). Resultado: **19/22** — fallan los dos casos de §10 y el de `;` dentro
+de literal de §9. **Pendiente:** guardarla como script en el repo (junto con la
+corrida de las 50 consultas vía `validateQuerySafety()` + `runQuery()`) para que
+sea reproducible.
 
 ---
 

@@ -10,6 +10,14 @@ registro y la pantalla principal del flujo (motor → pregunta en lenguaje
 natural → SQL generado → ejecutar → resultados), verificada con un navegador
 real.
 
+**Actualización 8 de octubre de 2026:** revisión completa sin costo de Vertex AI
+(detalle en `BITACORA.md`). Las 50 referencias corregidas dan 200/200 y 0
+inconsistencias. Tres hallazgos nuevos en el Query Safety Engine (`SEGURIDAD.md`
+§9–11) que vuelven inexacto parte del texto de 6.3.3. Contra el Excel del plan:
+Módulo 4 atrasado (plan 05–07/10, sin empezar), Módulo 5 previsto 08–09/10,
+correcciones de figuras del Cap. 5 en 0 %. Presentación 14/10, entrega 17/10.
+Retiro de `gemini-2.5-pro` en Vertex AI: ahora 20/10 como fecha más temprana.
+
 **Actualización 2 de octubre de 2026:** preparación de la corrida de las 50
 consultas generando con Gemini (`PREPARACION_EVALUACION_GEMINI.md`) y nueva capa
 de rendimiento e integridad de resultados (`RENDIMIENTO_E_INTEGRIDAD.md`): timeout
@@ -56,8 +64,8 @@ hasta 6.2 por decisión de alcance, no por falta de material.
 | · Implementación del Query Safety Engine | Completo y verificado, 17/17 | Siguiente |
 | · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales. Preparación en curso (02/10), ver `PREPARACION_EVALUACION_GEMINI.md` | Siguiente |
 | Frontend Next.js y autenticación de interfaz | **Parcial (v1)** — login/registro y pantalla principal del flujo completo funcionando, verificado con navegador real; desde 02/10 con resultados paginados y descarga CSV completa; falta historial, herramientas técnicas y dashboard de uso/costos | Posterior |
-| Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado | Posterior |
-| Módulo 5: Historial y gestión de consultas guardadas | No iniciado — infraestructura lista (Firestore habilitado), ya no bloqueado | Posterior |
+| Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado — **atrasado** (plan 05–07/10) | Posterior |
+| Módulo 5: Historial y gestión de consultas guardadas | No iniciado — infraestructura lista (Firestore habilitado); plan 08–09/10 | Posterior |
 | Integración de módulos y pruebas del sistema | Parcial: revisión de seguridad y pruebas multimotor hechas; falta integrar con frontend | Siguiente |
 | Presentación del prototipo funcional | No iniciado | Posterior |
 | **Cierre y entrega** | | |
@@ -159,9 +167,12 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 | Las métricas de generación real (precisión, tokens, robustez) todavía no se midieron — solo se probó que el pipeline funciona | Bloquea la defensa de la hipótesis, no solo el capítulo | Correr las 50 consultas generando con Gemini (§6, paso 2) |
 | Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo en la sección 3.6 | Empezar a convocar ahora |
 | El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas: la cifra es irreproducible | Sustituir por la medición real cuando exista |
-| Las bases de datos corren en contenedores locales | No serán alcanzables desde el backend desplegado | Decidir dónde vivirán para la evaluación |
+| ~~Las bases de datos corren en contenedores locales~~ | — | **Resuelto 01/10:** la tesis se presenta en local, no se despliega (`ACCESO_REMOTO.md`) |
 | Cambios documentales pendientes en los capítulos 1 a 4 | Modelo de organización, esquema cacheado, índices y versión de Node | Aplicar antes de la entrega final |
-| Las referencias de las 50 consultas eran inconsistentes con respecto a los pedidos cancelados (corregidas 02/10) | Los resultados 200/200 publicados se obtuvieron con las referencias anteriores | Volver a correr la verificación con las referencias corregidas y mencionarlo en 6.3.4 |
+| ~~Las referencias de las 50 consultas eran inconsistentes (corregidas 02/10)~~ | — | **Resuelto 08/10:** re-verificadas, 200/200 y 0 inconsistencias; mencionarlo en 6.3.4 |
 | El banco de pruebas tiene pocos datos (200 clientes, 300 pedidos): no permite medir eficiencia | Sin medición, el requisito de eficiencia no se puede demostrar | Banco de volumen alto en los 4 motores (pendiente) |
 | El SDK `@google-cloud/vertexai` está deprecado con eliminación anunciada para el 24/06/2026 (ya pasada); sigue funcionando al 02/10 | Si Google lo corta, la generación de SQL deja de funcionar, incluso a mitad de la corrida | Migrar a `@google/genai` antes de la corrida pagada |
+| Retiro de `gemini-2.5-pro` en Vertex AI: "no antes del 16/10/2026" según la página oficial (verificado 02/10); **al 08/10 la página oficial dice 20/10/2026**, sigue siendo provisoria | Coincide con la presentación (14/10) y la entrega (17/10); después del retiro la generación de SQL deja de funcionar | Correr piloto y evaluación antes del 16/10 y confirmar la fecha en la consola antes de cada corrida (ver `PREPARACION_EVALUACION_GEMINI.md` §8, punto 2c) |
+| Texto de 6.3.3 inexacto: dice que el validador deja pasar palabras reservadas dentro de literales y que bloquea el acceso a archivos; ninguna de las dos es cierta (08/10) | Un evaluador lo puede detectar en la defensa | Corregir validador y/o texto, versionar la batería (`SEGURIDAD.md` §9–11) |
+| Módulo 4 atrasado y Módulo 5 sin empezar, con presentación el 14/10 (08/10) | El prototipo se presenta incompleto | Priorizar la corrida con Gemini y un historial mínimo; Módulo 4 a alcance reducido si no da el tiempo |
 | Sin crédito de prueba en la cuenta de Google Cloud, cualquier uso de Vertex AI se factura de verdad | Bajo (fracciones de centavo por llamada), pero hay que avisar antes de cada corrida grande | Confirmar con David antes de corridas masivas (ej. las 50 consultas) |
