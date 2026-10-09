@@ -27,9 +27,9 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 6 | 14 vulnerabilidades moderadas transitivas (`npm audit`) | Baja | Documentado, no corregido (actualizado 02/10: 16, ver §6) |
 | 7 | Caída del backend completo ante un resultado demasiado grande (02/10) | **Alta** | Corregido |
 | 8 | Endpoint de descarga de CSV sin autenticación de Firebase (02/10) | Baja | Mitigado por diseño |
-| 9 | Palabras reservadas y `;` dentro de literales se bloquean; el texto de 6.3.3 dice lo contrario (08/10) | Baja | Abierto |
-| 10 | Funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) pasan el validador; las frenan los permisos del motor (08/10) | Baja | Abierto |
-| 11 | La batería de 17 casos no está versionada en el repo (08/10) | Baja | Abierto |
+| 9 | Palabras reservadas y `;` dentro de literales se bloqueaban; el texto de 6.3.3 decía lo contrario (08/10) | Baja | Corregido (08/10) |
+| 10 | Funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) pasaban el validador; las frenaban los permisos del motor (08/10) | Baja | Corregido (08/10) |
+| 11 | La batería de 17 casos no estaba versionada en el repo (08/10) | Baja | Corregido (08/10): `npm run test:seguridad` |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -324,7 +324,7 @@ y antes de usarse, quien la tenga puede descargar ese resultado una vez. Las pá
 
 ---
 
-## 9. Falsos positivos: palabras reservadas y `;` dentro de literales — BAJA (abierto, 08/10/2026)
+## 9. Falsos positivos: palabras reservadas y `;` dentro de literales — BAJA (corregido, 08/10/2026)
 
 **Archivo:** `nlqp/backend/src/services/querySafety.service.ts` (`KEYWORD_PATTERN` y
 el chequeo de `;` en `validateQuerySafety()`)
@@ -353,9 +353,28 @@ vulnerabilidad. Pero:
 (conservador: ante la duda, bloquea); o (b) aplicar la lista de palabras y el `;`
 solo fuera de literales, reutilizando el recorrido de
 `hasUnauthorizedStackedStatement()`. La (b) cambia `querySafety.service.ts` y exige
-la regresión completa. Decisión pendiente de David.
+la regresión completa. **David eligió la (b) el 08/10.**
 
-## 10. Funciones de lectura de archivos no bloqueadas por el validador — BAJA (abierto, 08/10/2026)
+### La corrección (08/10/2026)
+
+`maskStringLiterals()` reemplaza por espacios el contenido de los literales entre
+comillas simples, y `;`, comentarios, palabras y funciones prohibidas se buscan sobre
+ese texto. El riesgo de la técnica es que validador y motor no coincidan en dónde
+termina un literal: el validador vería como texto algo que el motor ejecuta. Por eso:
+
+- Se siguen las comillas dobles y los backticks (una `'` adentro no abre literal),
+  pero no se enmascaran. Sin esto, en MySQL
+  `SELECT "it's", LOAD_FILE('/etc/passwd'), "x'y"` escondía la función.
+- Si la consulta contiene `\` (escape en MySQL/MariaDB, no en los otros), `$`
+  (literales `$$…$$` de PostgreSQL) o `[` (identificador en SQL Server, subíndice en
+  PostgreSQL: `ARRAY[']']`), o un literal sin cerrar, **no se enmascara nada** y se
+  valida el texto completo, como antes.
+- Los comentarios no hace falta modelarlos: validador y motor coinciden hasta el
+  primer `--`, `/*` o `#`, que queda fuera de todo literal y se bloquea.
+
+La batería incluye un intento de evasión por cada una de esas construcciones.
+
+## 10. Funciones de lectura de archivos no bloqueadas por el validador — BAJA (corregido, 08/10/2026)
 
 **Archivo:** `nlqp/backend/src/services/querySafety.service.ts`
 
@@ -392,7 +411,19 @@ con las de arriba + `LOAD_FILE`, `SLEEP`/`pg_sleep`/`WAITFOR` (ya acotadas por e
 timeout, pero no tienen uso legítimo), y casos nuevos en la batería. Exige la
 regresión completa.
 
-## 11. La batería de seguridad no está versionada — BAJA (abierto, 08/10/2026)
+### La corrección (08/10/2026)
+
+`FORBIDDEN_FUNCTIONS` en `querySafety.service.ts`, buscadas como `nombre(`:
+archivos y large objects de PostgreSQL (`pg_read_file`, `pg_ls_*`, `lo_*`, …),
+funciones que **ejecutan SQL recibido como texto** (`query_to_xml*`,
+`cursor_to_xml*`, `ts_stat`, `ts_rewrite`, `dblink*` — imprescindibles desde §9,
+porque el SQL escondido en un literal ya no se inspecciona), administración y
+bloqueos (`pg_terminate_backend`, `pg_advisory*`, `set_config`, `nextval`, …),
+demoras (`pg_sleep*`, `SLEEP`, `BENCHMARK`), MySQL (`LOAD_FILE`, `GET_LOCK`, …) y
+lectura de archivos en SQL Server (`fn_xe_file_target_read_file`, `fn_get_audit_file`,
+`fn_trace_gettable`, `fn_dblog`). Palabras clave nuevas: `OPENDATASOURCE`, `WAITFOR`.
+
+## 11. La batería de seguridad no estaba versionada — BAJA (corregido, 08/10/2026)
 
 La batería de 17 casos que respalda el "17/17" de 6.3.3 y de este documento **no
 existe como archivo en el repo**; solo está descrita en texto. No se puede repetir
@@ -406,6 +437,13 @@ de control). Resultado: **19/22** — fallan los dos casos de §10 y el de `;` d
 de literal de §9. **Pendiente:** guardarla como script en el repo (junto con la
 corrida de las 50 consultas vía `validateQuerySafety()` + `runQuery()`) para que
 sea reproducible.
+
+### La corrección (08/10/2026)
+
+`nlqp/backend/scripts/regresion_seguridad.mjs`, con `npm run test:seguridad` (compila
+y corre todo; `-- --solo-bateria` no toca las bases). 57 casos: 44 que deben
+bloquearse y 13 legítimos. Resultado tras las correcciones de §9 y §10: **57/57, y
+las 50 consultas 200/200 con 0 inconsistencias entre motores.**
 
 ---
 
@@ -423,6 +461,13 @@ sea reproducible.
   `DB_MSSQL_TRUST_SERVER_CERTIFICATE=true` (valores de desarrollo local).
 - `nlqp/backend/.env.example` — mismas variables con los valores seguros por
   defecto (`false`).
+
+Revisión del 08/10/2026 (§9–11):
+
+- `nlqp/backend/src/services/querySafety.service.ts` — `maskStringLiterals()`,
+  `FORBIDDEN_FUNCTIONS`, palabras clave `OPENDATASOURCE` y `WAITFOR`.
+- `nlqp/backend/scripts/regresion_seguridad.mjs` (nuevo) + script
+  `test:seguridad` en `package.json`.
 
 Revisión del 02/10/2026 (§7 y §8):
 

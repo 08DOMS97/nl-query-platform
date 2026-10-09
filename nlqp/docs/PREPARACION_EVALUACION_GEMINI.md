@@ -252,9 +252,9 @@ Se confirma con David antes de cada corrida pagada.
 2d. ~~Volver a verificar las referencias corregidas el 02/10~~ — hecho 08/10/2026:
    200/200 ejecuciones, 0 inconsistencias entre motores (cada consulta pasada por
    `validateQuerySafety()` y ejecutada con `runQuery()`, usando `overrides` por motor).
-2e. **Antes de la corrida (08/10):** endurecer el Query Safety Engine
-   (`SEGURIDAD.md` §9–11) y versionar la batería, para que la corrida mida el
-   validador definitivo.
+2e. ~~Endurecer el Query Safety Engine y versionar la batería~~ — hecho 08/10/2026
+   (`SEGURIDAD.md` §9–11, `npm run test:seguridad`). La corrida mide el validador
+   definitivo.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con

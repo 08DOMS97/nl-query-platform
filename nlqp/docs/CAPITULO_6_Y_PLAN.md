@@ -191,17 +191,15 @@ lectura se hace efectiva mediante la verificación de que la sentencia correspon
 exclusivamente a una operación de consulta, complementada por los permisos restringidos de
 la cuenta de base de datos utilizada.
 
-> **⚠ Corrección pendiente (08/10/2026), ver `SEGURIDAD.md` §9–11:** (1) las
-> funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) **no** las bloquea
-> el validador, las frenan los permisos del motor; (2) las palabras reservadas y el
-> `;` dentro de literales **sí** se bloquean, al contrario de lo que dice el
-> penúltimo párrafo del hallazgo; (3) la batería no está versionada. Ajustar este
-> texto (o el validador) antes de pegarlo.
-
-Se construyó una batería de diecisiete casos de prueba que comprende operaciones de
-modificación de datos, operaciones de definición de estructura, sentencias encadenadas,
-intentos de acceso al sistema de archivos del servidor y variaciones de capitalización de
-las anteriores. El componente bloqueó la totalidad de los casos, cumpliendo la meta de
+Se construyó una batería de cincuenta y siete casos de prueba, versionada junto al código
+y ejecutable con un único comando. Cuarenta y cuatro casos deben ser bloqueados: operaciones
+de modificación de datos, operaciones de definición de estructura y de permisos, sentencias
+encadenadas con y sin separador, funciones que leen archivos del servidor, funciones que
+ejecutan sentencias recibidas como texto, funciones que alteran el estado del servidor o
+retienen recursos, comentarios, variaciones de capitalización e intentos deliberados de
+engañar al análisis de literales de texto descrito más adelante. Los trece casos restantes
+son consultas legítimas que no deben ser bloqueadas, y permiten medir los falsos positivos.
+El componente resolvió correctamente la totalidad de los casos, cumpliendo la meta de
 aceptación del cien por ciento establecida en las secciones 3.3.1.2 y 3.7.
 
 #### Hallazgo: evasión del validador en el dialecto Transact-SQL
@@ -238,16 +236,47 @@ superior únicamente cuando esta se encuentra precedida por un operador de conju
 intersección o diferencia—, que constituye la única forma sintácticamente legítima de que
 una consulta contenga más de una sentencia de lectura de primer nivel.
 
-Tras la corrección se verificó el bloqueo del caso original y la ausencia de falsos
-positivos: las consultas que emplean operadores de conjunto de forma legítima continúan
-ejecutándose, al igual que aquellas que contienen palabras reservadas dentro de literales
-de texto. Se repitió asimismo la totalidad de la batería de seguridad y el conjunto de
+Tras la corrección se verificó el bloqueo del caso original y que las consultas que
+emplean operadores de conjunto de forma legítima continúan ejecutándose. Se repitió asimismo la totalidad de la batería de seguridad y el conjunto de
 consultas de prueba en los cuatro motores, sin degradación de los resultados previos.
 
 Este hallazgo respalda empíricamente la decisión de diseño documentada en la sección 2.8:
 la validación de las sentencias no puede apoyarse en la coincidencia de patrones de texto,
 sino que requiere un análisis de la estructura sintáctica que contemple las
 particularidades de cada dialecto.
+
+#### Segunda revisión: literales de texto y funciones con efectos
+
+Una segunda revisión del componente identificó dos limitaciones adicionales. La primera
+consistía en falsos positivos: la búsqueda de palabras reservadas se aplicaba también al
+contenido de los literales de texto, de modo que una consulta legítima como la búsqueda de
+un cliente cuyo nombre contiene la palabra «Update» era rechazada. La segunda consistía en
+que las funciones de lectura de archivos del servidor, como `pg_read_file` en PostgreSQL o
+`LOAD_FILE` en MySQL y MariaDB, superaban la validación por iniciar con una sentencia de
+lectura y no contener palabras prohibidas. Se comprobó de forma empírica que en el banco de
+pruebas los permisos de la cuenta de base de datos impedían la lectura efectiva —PostgreSQL
+denegó la ejecución de la función y MySQL y MariaDB devolvieron un valor nulo—, por lo que
+la limitación no era explotable; no obstante, la garantía del sistema no puede depender de
+los permisos de la cuenta configurada.
+
+La corrección de la primera limitación sustituye el contenido de los literales de texto
+por espacios antes de buscar palabras reservadas, separadores y comentarios. Esta técnica
+solo es segura si el validador y el motor coinciden exactamente en dónde comienza y termina
+cada literal; de lo contrario, el validador consideraría texto inerte lo que el motor
+ejecuta como código. Se identificaron tres construcciones en las que los motores no
+coinciden entre sí —la barra invertida como carácter de escape en MySQL y MariaDB, los
+literales delimitados por signos de dólar en PostgreSQL y los corchetes, que son
+identificadores en SQL Server y subíndices de arreglos en PostgreSQL—; ante cualquiera de
+ellas el componente renuncia al análisis de literales y valida el texto completo, con el
+comportamiento estricto original. La batería incluye un caso de intento de evasión para
+cada una de estas construcciones.
+
+La corrección de la segunda limitación incorpora una lista de funciones prohibidas que
+comprende las de acceso a archivos del servidor, las que ejecutan sentencias recibidas como
+texto —cuyo bloqueo se vuelve imprescindible una vez que el contenido de los literales deja
+de inspeccionarse—, y las que alteran el estado del servidor o retienen recursos. Tras ambas
+correcciones se repitió la batería completa y el conjunto de consultas de prueba en los
+cuatro motores, sin degradación de los resultados.
 
 ### 6.3.4 Pruebas de ejecución controlada en los cuatro motores
 

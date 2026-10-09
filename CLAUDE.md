@@ -69,11 +69,9 @@ Plan con fechas: `Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx`.
 
 Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
 
-1. **Endurecer el Query Safety Engine** (gratis): bloquear funciones de archivo
-   (`SEGURIDAD.md` §10), decidir qué hacer con literales (§9), guardar la batería de
-   seguridad en el repo como script, regresión completa (batería + 50 × 4) y
-   ajustar el texto de 6.3.3.
-2. **Corrida con Gemini** (crítico, antes del 14/10): migrar a `@google/genai`,
+1. ~~**Endurecer el Query Safety Engine**~~ — hecho 08/10/2026 (`SEGURIDAD.md`
+   §9–11, texto de 6.3.3 actualizado).
+2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10): migrar a `@google/genai`,
    corregir S10/M13 (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
    corrida completa (~$2–3, **pedir confirmación antes**). Ver
    `PREPARACION_EVALUACION_GEMINI.md` §8.
@@ -103,11 +101,13 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Prompt preparado para la corrida (CHECKs, reglas de dominio, índices, reglas de
   rendimiento); `/generateSQL` devuelve `metrics`.
 
+- Query Safety Engine endurecido (08/10): ignora el contenido de los literales
+  (con modo estricto ante `\`, `$`, `[`), bloquea funciones de archivo y las que
+  ejecutan SQL como texto. Regresión: `npm run test:seguridad` → 57/57 + 200/200.
+
 **Abierto:**
-- Query Safety Engine: hallazgos §9 y §10 de `SEGURIDAD.md` (08/10). La batería de
-  17 casos no está en el repo.
-- Texto de tesis: 6.3.3 de `CAPITULO_6_Y_PLAN.md` afirma cosas que no son ciertas
-  (ver avisos dentro del archivo); Cap. 5 cita 42 tablas / 71 % (el banco tiene 8);
+- Texto de tesis: 6.3.4 de `CAPITULO_6_Y_PLAN.md` tiene un aviso pendiente (dice
+  que la integración con el modelo está "pendiente"); Cap. 5 cita 42 tablas / 71 % (el banco tiene 8);
   correcciones de figuras del Cap. 5 en 0 %; cambios pendientes en Cap. 1–4.
 - Módulo 4 (herramientas técnicas) y Módulo 5 (historial): sin empezar.
 - Dashboard de uso/costos en el frontend: sin empezar.
@@ -124,9 +124,9 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - **Nunca** ejecutar SQL contra las bases de datos sin pasar por
   `querySafety.service.ts` primero (ni siquiera "solo para probar" — la cuenta
   `testuser` tiene permisos amplios a propósito, ver instrucciones §2).
-- Cualquier cambio a `querySafety.service.ts` requiere volver a correr la batería de
-  17 casos de seguridad Y las 50 consultas de prueba en los 4 motores antes de darlo
-  por bueno — SQL Server tiene reglas de sintaxis distintas a los otros 3 (no exige
+- Cualquier cambio a `querySafety.service.ts` requiere `npm run test:seguridad` en
+  `nlqp/backend` (batería de 57 casos + 50 consultas en los 4 motores, Docker
+  levantado) en verde antes de darlo por bueno — SQL Server tiene reglas de sintaxis distintas a los otros 3 (no exige
   `;` entre sentencias) y ya causó un bypass real, ver `nlqp/docs/SEGURIDAD.md` §1.
 - **Nunca truncar resultados en silencio** ni pedirle al modelo `LIMIT`/`TOP` que el
   usuario no pidió: un resultado incompleto que parece completo es peor que un error.

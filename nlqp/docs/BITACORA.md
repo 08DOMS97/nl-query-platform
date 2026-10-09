@@ -6,6 +6,21 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-08 (2) — Query Safety Engine endurecido
+
+- `querySafety.service.ts`: el contenido de los literales entre comillas simples ya
+  no se inspecciona (corrige falsos positivos, SEGURIDAD §9), con modo estricto ante
+  `\`, `$`, `[` o literal sin cerrar, y seguimiento de comillas dobles/backticks
+  para que no se pueda desincronizar. Nueva lista de funciones prohibidas (archivos,
+  SQL como texto, estado, bloqueos, demoras, §10). Palabras clave `OPENDATASOURCE`,
+  `WAITFOR`. Opción (b) elegida por David.
+- Batería versionada: `nlqp/backend/scripts/regresion_seguridad.mjs`,
+  `npm run test:seguridad` (§11). **57/57** (44 bloqueos + 13 legítimas) y **50
+  consultas 200/200, 0 inconsistencias**.
+- Texto de tesis: 6.3.3 reescrito (batería de 57 casos, sin la afirmación falsa
+  sobre literales, subsección nueva "Segunda revisión").
+- Siguiente: corrida con Gemini, empezando por la migración a `@google/genai`.
+
 ## 2026-10-08 — Revisión completa del estado (sin costo de Vertex AI)
 
 - **Verificado:** backend y frontend compilan sin errores (`tsc --noEmit`). Banco

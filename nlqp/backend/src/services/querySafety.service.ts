@@ -44,9 +44,69 @@ const WRITE_OR_ADMIN_KEYWORDS = [
   'OPENQUERY',
   'OUTFILE',
   'DUMPFILE',
+  'OPENDATASOURCE',
+  'WAITFOR',
+];
+
+/**
+ * Funciones que, aun dentro de un SELECT, leen archivos del servidor, ejecutan SQL
+ * recibido como texto, modifican estado o bloquean recursos. Ninguna tiene uso
+ * legítimo en una consulta de negocio. Hoy los permisos de `testuser` ya frenan la
+ * lectura de archivos (ver SEGURIDAD.md §10), pero el validador no puede depender
+ * de los permisos de la cuenta.
+ *
+ * Las que ejecutan SQL recibido como texto (`query_to_xml`, `ts_stat`, `dblink`, …)
+ * son críticas desde que las palabras clave se buscan fuera de los literales: el
+ * SQL escondido en el literal no se ve.
+ */
+const FORBIDDEN_FUNCTIONS = [
+  // PostgreSQL — archivos del servidor y large objects
+  'pg_read_file',
+  'pg_read_binary_file',
+  'pg_stat_file',
+  'pg_ls_\\w+',
+  'pg_file_\\w+',
+  'lo_\\w+',
+  // PostgreSQL — ejecutan SQL recibido como texto
+  'query_to_xml\\w*',
+  'cursor_to_xml\\w*',
+  'ts_stat',
+  'ts_rewrite',
+  'dblink\\w*',
+  // PostgreSQL — administración, estado, bloqueos
+  'pg_terminate_backend',
+  'pg_cancel_backend',
+  'pg_reload_conf',
+  'pg_rotate_logfile',
+  'pg_switch_wal',
+  'pg_create_restore_point',
+  'pg_logical_emit_message',
+  'pg_advisory\\w*',
+  'pg_try_advisory\\w*',
+  'pg_notify',
+  'set_config',
+  'pg_sleep\\w*',
+  'nextval',
+  'setval',
+  // MySQL / MariaDB
+  'load_file',
+  'sleep',
+  'benchmark',
+  'get_lock',
+  'release_lock',
+  'release_all_locks',
+  'master_pos_wait',
+  'source_pos_wait',
+  // SQL Server — lectura de archivos del servidor
+  'fn_xe_file_target_read_file',
+  'fn_get_audit_file',
+  'fn_trace_gettable',
+  'fn_dblog',
+  'fn_dump_dblog',
 ];
 
 const KEYWORD_PATTERN = new RegExp(`\\b(${WRITE_OR_ADMIN_KEYWORDS.join('|')})\\b`, 'i');
+const FORBIDDEN_FUNCTION_PATTERN = new RegExp(`\\b(${FORBIDDEN_FUNCTIONS.join('|')})\\s*\\(`, 'i');
 const STORED_PROC_PATTERN = /\b(sp_|xp_)\w*/i;
 const COMMENT_PATTERN = /(--|\/\*|\*\/|#)/;
 const LEADING_ALLOWED_PATTERN = /^\s*\(*\s*(SELECT|WITH)\b/i;
@@ -55,6 +115,59 @@ const SET_COMBINATOR_BEFORE = /(UNION\s+ALL|UNION|INTERSECT|EXCEPT|MINUS)\s*$/i;
 function stripTrailingSemicolon(sql: string): string {
   const trimmed = sql.trim();
   return trimmed.endsWith(';') ? trimmed.slice(0, -1).trim() : trimmed;
+}
+
+/**
+ * Reemplaza por espacios el contenido de los literales entre comillas simples, para
+ * que `WHERE name = 'Update Corp'` o `'a;b'` no se bloqueen por palabras o
+ * caracteres que, dentro de un literal, son solo texto (SEGURIDAD.md §9).
+ *
+ * Solo es seguro si el validador y el motor coinciden exactamente en dónde empieza
+ * y termina cada literal: si no, el validador "ve" como texto algo que el motor
+ * ejecuta como código (p. ej. `"it's", load_file('x'), "x'y"` en MySQL esconde la
+ * función si no se siguen las comillas dobles). Por eso:
+ *   - Las comillas dobles y los backticks se siguen (una `'` adentro no abre
+ *     literal) pero NO se enmascaran: se validan completos. Los 4 motores coinciden
+ *     en dónde terminan (`""` como escape); fuera de MySQL, un backtick es error de
+ *     sintaxis, así que no hay desacuerdo explotable.
+ *   - Se devuelve `null` (validar el texto completo, modo estricto) ante los casos
+ *     en que los motores NO coinciden:
+ *       `\` — MySQL/MariaDB lo tratan como escape (`'a\'b'` es UN literal);
+ *             PostgreSQL/SQL Server no.
+ *       `$` — PostgreSQL admite literales `$$...$$` / `$tag$...$tag$`, dentro de
+ *             los cuales una `'` no abre nada.
+ *       `[` — identificador en SQL Server (`[it's]`), subíndice de arreglo en
+ *             PostgreSQL (`arr[']']` contiene un literal).
+ * Los comentarios no hace falta modelarlos: validador y motor coinciden hasta el
+ * primer `--`, `/*` o `#`, que queda fuera de todo literal y lo bloquea
+ * `COMMENT_PATTERN` sobre el texto enmascarado.
+ */
+function maskStringLiterals(body: string): string | null {
+  if (/[\\$[]/.test(body)) return null;
+
+  let out = '';
+  let quote: "'" | '"' | '`' | null = null;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (quote === null) {
+      if (ch === "'" || ch === '"' || ch === '`') quote = ch;
+      out += ch;
+      continue;
+    }
+    if (ch === quote) {
+      if (body[i + 1] === quote) { // comilla duplicada = escapada, sigue adentro
+        out += quote === "'" ? '  ' : ch + ch;
+        i++;
+        continue;
+      }
+      quote = null;
+      out += ch;
+      continue;
+    }
+    out += quote === "'" ? ' ' : ch;
+  }
+  // Literal sin cerrar: el motor lo rechazará, pero ante la duda, modo estricto.
+  return quote === null ? out : null;
 }
 
 /**
@@ -134,13 +247,16 @@ export function validateQuerySafety(sql: string): QuerySafetyResult {
   }
 
   const body = stripTrailingSemicolon(sql);
+  // Texto sobre el que se buscan ";", comentarios, palabras y funciones prohibidas:
+  // sin el contenido de los literales cuando es seguro, el texto completo si no.
+  const code = maskStringLiterals(body) ?? body;
 
   // Sentencias apiladas: un ";" en medio de la consulta indica más de una sentencia.
-  if (body.includes(';')) {
+  if (code.includes(';')) {
     return { safe: false, reason: 'Solo se permite una única sentencia SQL (sin ";" intermedios).' };
   }
 
-  if (COMMENT_PATTERN.test(body)) {
+  if (COMMENT_PATTERN.test(code)) {
     return { safe: false, reason: 'No se permiten comentarios SQL en la consulta.' };
   }
 
@@ -157,12 +273,17 @@ export function validateQuerySafety(sql: string): QuerySafetyResult {
     };
   }
 
-  const keywordMatch = body.match(KEYWORD_PATTERN);
+  const keywordMatch = code.match(KEYWORD_PATTERN);
   if (keywordMatch) {
     return { safe: false, reason: `Palabra clave no permitida detectada: "${keywordMatch[0]}".` };
   }
 
-  const spMatch = body.match(STORED_PROC_PATTERN);
+  const functionMatch = code.match(FORBIDDEN_FUNCTION_PATTERN);
+  if (functionMatch) {
+    return { safe: false, reason: `Función no permitida detectada: "${functionMatch[1]}".` };
+  }
+
+  const spMatch = code.match(STORED_PROC_PATTERN);
   if (spMatch) {
     return { safe: false, reason: `Llamada a procedimiento/función del sistema no permitida: "${spMatch[0]}".` };
   }
