@@ -268,11 +268,32 @@ Se confirma con David antes de cada corrida pagada.
    tablas. Causa: `pruneSchema()` agrega las tablas vecinas por FK a un salto
    (`expandOneHop`), y `orders` está conectada con casi todo el esquema. Impacto:
    la métrica de **reducción de tokens** va a salir baja en muchas consultas.
-   Decisión pendiente de David antes de la corrida: (a) medirla tal cual y
-   documentarlo, o (b) expandir solo cuando la pregunta nombra 2+ tablas o pide
-   datos de una tabla relacionada (cambia la poda: volver a medir y revisar que no
-   se pierdan tablas necesarias en las 50 consultas, gratis con `countTokens`).
-   Recordar además que el Cap. 5 cita un 71 % sobre 42 tablas, irreproducible.
+   David eligió la (b): ajustar la poda. **Hecho 09/10/2026** (`schemaPruning.service.ts`):
+   - Núcleo = tablas nombradas (sustantivo principal del nombre: `order_items` →
+     "item") + tablas con una columna distintiva nombrada (término presente en 1–2
+     tablas). Conexión solo por el camino más corto de FKs entre las del núcleo.
+     Fail-open (esquema completo) si nada coincide.
+   - Bugs corregidos de paso: "clientes" no coincidía nunca (se singularizaba a
+     "client" antes de buscar el sinónimo) y "categories" quedaba en "categori".
+     Con la poda vieja, C07 y C09 **perdían `customers`**: solo funcionaba porque
+     enviaba casi todo.
+   - Sinónimos de negocio: venta/gasto/ingreso/compra → `orders` (la regla de
+     dominio exige `orders` para excluir cancelados); vendido/comprado/unidades →
+     además `order_items`.
+   - **Verificado contra las 50 consultas** (tablas que usa la referencia vs.
+     tablas enviadas): 0/50 con tablas faltantes; tablas enviadas promedio 5,56 →
+     **2,18** (necesarias 1,76; esquema 8).
+   - **Reducción de tokens medida con `countTokens` (gratis), Postgres, 50
+     consultas:** prompt completo 1238 → podado 701 tokens promedio, **43,4 %**
+     (simples 51,3 %, intermedias 43,2 %, complejas 35,8 %). ~490 tokens del prompt
+     son fijos (instrucciones, reglas, pregunta); sobre la parte de esquema sola la
+     reducción es ~72 % (≈745 → ≈208). Reportar ambas cifras y aclarar cuál es cuál.
+   - **Limitación a declarar en la tesis:** el diccionario de sinónimos se ajustó
+     mirando estas 50 preguntas, así que sobre ellas la poda tiene ventaja. La
+     métrica de robustez con paráfrasis es justamente la prueba de que generaliza;
+     si se omiten las paráfrasis, decirlo explícitamente.
+   - El Cap. 5 cita un 71 % sobre 42 tablas: irreproducible, reemplazar por estas
+     cifras.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con

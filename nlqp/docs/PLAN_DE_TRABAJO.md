@@ -166,13 +166,13 @@ coordinar a los 35 participantes de la encuesta (ver §6).
 |---|---|---|
 | Las métricas de generación real (precisión, tokens, robustez) todavía no se midieron — solo se probó que el pipeline funciona | Bloquea la defensa de la hipótesis, no solo el capítulo | Correr las 50 consultas generando con Gemini (§6, paso 2) |
 | Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo en la sección 3.6 | Empezar a convocar ahora |
-| El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas: la cifra es irreproducible | Sustituir por la medición real cuando exista |
+| El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas: la cifra es irreproducible | Sustituir por la medición real: 43,4 % del prompt / ~72 % del esquema (09/10) |
 | ~~Las bases de datos corren en contenedores locales~~ | — | **Resuelto 01/10:** la tesis se presenta en local, no se despliega (`ACCESO_REMOTO.md`) |
 | Cambios documentales pendientes en los capítulos 1 a 4 | Modelo de organización, esquema cacheado, índices y versión de Node | Aplicar antes de la entrega final |
 | ~~Las referencias de las 50 consultas eran inconsistentes (corregidas 02/10)~~ | — | **Resuelto 08/10:** re-verificadas, 200/200 y 0 inconsistencias; mencionarlo en 6.3.4 |
 | El banco de pruebas tiene pocos datos (200 clientes, 300 pedidos): no permite medir eficiencia | Sin medición, el requisito de eficiencia no se puede demostrar | Banco de volumen alto en los 4 motores (pendiente) |
 | ~~El SDK `@google-cloud/vertexai` está deprecado~~ | — | **Resuelto 09/10:** migrado a `@google/genai` 2.24.0, verificado con una llamada real |
-| La poda de esquema casi no reduce tablas en este banco (expande FKs a un salto; `orders` conecta todo) (09/10) | La métrica de reducción de tokens sale baja | Decidir antes de la corrida: medir tal cual o ajustar la poda (`PREPARACION_EVALUACION_GEMINI.md` §8, 2f) |
+| ~~La poda de esquema casi no reducía tablas~~ | — | **Resuelto 09/10:** poda rediseñada, 43,4 % de reducción del prompt (~72 % del esquema), 0/50 consultas pierden tablas (`PREPARACION_EVALUACION_GEMINI.md` §8, 2f) |
 | Retiro de `gemini-2.5-pro` en Vertex AI: "no antes del 16/10/2026" según la página oficial (verificado 02/10); **al 08/10 la página oficial dice 20/10/2026**, sigue siendo provisoria | Coincide con la presentación (14/10) y la entrega (17/10); después del retiro la generación de SQL deja de funcionar | Correr piloto y evaluación antes del 16/10 y confirmar la fecha en la consola antes de cada corrida (ver `PREPARACION_EVALUACION_GEMINI.md` §8, punto 2c) |
 | ~~Texto de 6.3.3 inexacto (literales y acceso a archivos)~~ | — | **Resuelto 08/10:** validador corregido, batería versionada (57/57), texto de 6.3.3 reescrito (`SEGURIDAD.md` §9–11) |
 | Módulo 4 atrasado y Módulo 5 sin empezar, con presentación el 14/10 (08/10) | El prototipo se presenta incompleto | Priorizar la corrida con Gemini y un historial mínimo; Módulo 4 a alcance reducido si no da el tiempo |

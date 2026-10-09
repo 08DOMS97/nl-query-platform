@@ -6,6 +6,19 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-09 (2) — Poda de esquema rediseñada
+
+- `schemaPruning.service.ts`: núcleo = tablas nombradas + tablas con columna
+  distintiva (término en 1–2 tablas); conexión por camino más corto de FKs en vez
+  de expandir un salto alrededor de todo. Opción (b) elegida por David.
+- Bugs corregidos: "clientes" nunca coincidía (singularizado a "client") y
+  "categories" quedaba en "categori". La poda vieja perdía `customers` en C07 y C09.
+- Verificado gratis: 0/50 consultas con tablas faltantes; 5,56 → 2,18 tablas
+  promedio; `countTokens` en las 50: 1238 → 701 tokens, **43,4 %** de reducción del
+  prompt (~72 % sobre la parte de esquema).
+- Limitación: sinónimos ajustados con las 50 preguntas; generalización a probar
+  con paráfrasis.
+
 ## 2026-10-09 — Migración a `@google/genai`
 
 - `vertexAI.service.ts` migrado de `@google-cloud/vertexai` (deprecado) a

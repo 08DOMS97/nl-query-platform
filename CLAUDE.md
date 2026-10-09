@@ -73,7 +73,7 @@ Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
    §9–11, texto de 6.3.3 actualizado).
 2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10):
    ~~migrar a `@google/genai`~~ (hecho 09/10, verificado con llamada real);
-   **decidir la poda** (`PREPARACION_EVALUACION_GEMINI.md` §8 punto 2f), corregir S10/M13 (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
+   ~~ajustar la poda~~ (hecho 09/10, §8 punto 2f); **corregir S10/M13** (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
    corrida completa (~$2–3, **pedir confirmación antes**). Ver
    `PREPARACION_EVALUACION_GEMINI.md` §8.
 3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
@@ -102,6 +102,10 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Prompt preparado para la corrida (CHECKs, reglas de dominio, índices, reglas de
   rendimiento); `/generateSQL` devuelve `metrics`.
 
+- Poda de esquema rediseñada (09/10): 0/50 consultas pierden tablas, 2,18 tablas
+  promedio (antes 5,56), reducción de tokens del prompt 43,4 % (~72 % sobre el
+  esquema solo), medida con `countTokens`. Sinónimos ajustados con las 50
+  preguntas: la generalización se prueba con paráfrasis.
 - SDK migrado a `@google/genai` 2.24.0 (09/10). Llamada real verificada: S10 en
   Postgres → SQL eficiente y correcto, $0.01188, 998 tokens de razonamiento, 14,5 s.
 - Query Safety Engine endurecido (08/10): ignora el contenido de los literales
@@ -114,8 +118,6 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
   correcciones de figuras del Cap. 5 en 0 %; cambios pendientes en Cap. 1–4.
 - Módulo 4 (herramientas técnicas) y Módulo 5 (historial): sin empezar.
 - Dashboard de uso/costos en el frontend: sin empezar.
-- Poda de esquema: en este banco casi no poda (expande FKs a un salto y `orders`
-  conecta todo) — afecta la métrica de reducción de tokens, decisión pendiente (09/10).
 - Riesgos: retiro de `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
   factura (hasta ~$0.011), avisar antes.
 - Coordinar los 35 participantes de la encuesta (no depende de código).
