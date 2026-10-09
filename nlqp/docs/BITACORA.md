@@ -6,6 +6,14 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-09 (3) — Referencias S10 y M13 eficientes
+
+- S10 y M13 (`consultas_prueba_50.json`) filtran por rango de fechas en vez de
+  `EXTRACT`/`YEAR` sobre `order_date` (que impedía usar el índice). Resultados
+  idénticos al SQL anterior en los 4 motores. Barrido de antipatrones en las 50:
+  nada más que corregir. Regresión 57/57 y 200/200.
+- Siguiente: runner nuevo de la corrida con Gemini.
+
 ## 2026-10-09 (2) — Poda de esquema rediseñada
 
 - `schemaPruning.service.ts`: núcleo = tablas nombradas + tablas con columna

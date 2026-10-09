@@ -73,8 +73,8 @@ Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
    §9–11, texto de 6.3.3 actualizado).
 2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10):
    ~~migrar a `@google/genai`~~ (hecho 09/10, verificado con llamada real);
-   ~~ajustar la poda~~ (hecho 09/10, §8 punto 2f); **corregir S10/M13** (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
-   corrida completa (~$2–3, **pedir confirmación antes**). Ver
+   ~~ajustar la poda~~ (hecho 09/10, §8 punto 2f); ~~corregir S10/M13~~ (hecho
+   09/10, §8 punto 4); **runner nuevo** (§8 punto 6), piloto y corrida completa (~$2–3, **pedir confirmación antes**). Ver
    `PREPARACION_EVALUACION_GEMINI.md` §8.
 3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
 4. Si no da el tiempo: Módulo 4 (herramientas técnicas, atrasado desde 07/10),
@@ -88,8 +88,8 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Módulos 1–3, 5 y 6 del backend (conexiones, esquema, poda con sinónimos ES→EN,
   Gemini vía Vertex AI en `proyectog-340d3`, Query Safety Engine, ejecución) en los
   4 motores.
-- 50 consultas de referencia (con las 5 corregidas el 02/10): **200/200, 0
-  inconsistencias** (re-verificado 08/10). Es SQL de referencia, **no** generado
+- 50 consultas de referencia (con las 5 corregidas el 02/10 y S10/M13 pasadas a
+  rango de fechas el 09/10): **200/200, 0 inconsistencias** (re-verificado 09/10). Es SQL de referencia, **no** generado
   por Gemini. `run_consultas_prueba.mjs` ya no sirve (no manda token ni entiende la
   respuesta paginada); el runner nuevo es parte del paso 2.
 - Firebase Auth + Firestore: todas las llamadas exigen ID token real

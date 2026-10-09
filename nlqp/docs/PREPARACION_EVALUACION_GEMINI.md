@@ -296,9 +296,18 @@ Se confirma con David antes de cada corrida pagada.
      cifras.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
-4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con
-   `EXTRACT(YEAR FROM order_date) = 2025`, que impide usar el índice
-   `ix_orders_date`; lo eficiente es un rango de fechas.
+4. ~~Auditoría de eficiencia del SQL de referencia~~ — **hecho 09/10/2026.** S10 y
+   M13 filtraban con `EXTRACT(YEAR FROM order_date) = 2025` / `YEAR(order_date) =
+   2025`, que impide usar el índice `ix_orders_date`; ahora usan
+   `order_date >= '2025-01-01' AND order_date < '2026-01-01'` (S10 ya no necesita
+   override para SQL Server). Resultados **idénticos** al SQL anterior en los 4
+   motores (S10 = 104; M13 mes a mes igual). Barrido del resto buscando `SELECT *`,
+   `NOT IN (SELECT…)`, `DISTINCT`, subconsultas en el `SELECT` y funciones sobre
+   columnas en el `WHERE`: lo que aparece es legítimo (`DISTINCT` de S14 es la
+   pregunta; `COUNT(DISTINCT…)` en C07/C09/C13 es la semántica; las funciones de
+   fecha de M12/M13/M20 están en `SELECT`/`GROUP BY`, no en el filtro). Regresión:
+   57/57 y 200/200. La auditoría con `EXPLAIN` sobre volumen alto queda para el
+   banco grande (punto 3).
 5. Paráfrasis (50), revisadas por David antes de guardarlas. (08/10: si no se
    revisan antes del piloto, quedan como trabajo futuro; el banco de volumen alto
    (punto 3) puede hacerse después de la corrida, porque `EXPLAIN` sobre el SQL ya
