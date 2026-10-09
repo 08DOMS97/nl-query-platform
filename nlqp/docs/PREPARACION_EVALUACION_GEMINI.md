@@ -221,7 +221,15 @@ Se confirma con David antes de cada corrida pagada.
 
 1. ~~Streaming, paginación y CSV~~ — hecho (`RENDIMIENTO_E_INTEGRIDAD.md`).
 2. ~~Índices en el esquema + reglas de rendimiento en el prompt~~ — hecho (§4).
-2b. **Riesgo nuevo:** el SDK `@google-cloud/vertexai` está deprecado y su aviso
+2b. ~~Migrar a `@google/genai`~~ — **hecho 09/10/2026** (`@google/genai` 2.24.0
+   fijado, `@google-cloud/vertexai` desinstalado). Verificado con `countTokens`
+   (gratis) y con una llamada real (S10, Postgres): SQL correcto y eficiente
+   (`order_date >= '2025-01-01' AND order_date < '2026-01-01'`, mismo resultado que
+   la referencia, 104), Query Safety Engine lo aprueba, 1208 tokens de entrada / 39
+   de salida / **998 de razonamiento** (casi todo el presupuesto de 1024), costo
+   **$0.01188**, latencia 14,5 s. Proyección: 200 llamadas (50 × 4) ≈ $2,40; 400 con
+   paráfrasis ≈ $4,75.
+   Texto original del riesgo: el SDK `@google-cloud/vertexai` está deprecado y su aviso
    indica eliminación el 24/06/2026 (ya pasada). Sigue respondiendo al 02/10/2026,
    pero puede dejar de hacerlo en cualquier momento, incluso a mitad de la corrida.
    Reemplazo oficial: `@google/genai` (modo Vertex AI), que además tipa de forma
@@ -255,6 +263,16 @@ Se confirma con David antes de cada corrida pagada.
 2e. ~~Endurecer el Query Safety Engine y versionar la batería~~ — hecho 08/10/2026
    (`SEGURIDAD.md` §9–11, `npm run test:seguridad`). La corrida mide el validador
    definitivo.
+2f. **Hallazgo 09/10/2026 — la poda casi no poda en este banco.** Para S10 ("¿Cuántos
+   pedidos se hicieron en 2025?"), que solo necesita `orders`, se enviaron 7 de 8
+   tablas. Causa: `pruneSchema()` agrega las tablas vecinas por FK a un salto
+   (`expandOneHop`), y `orders` está conectada con casi todo el esquema. Impacto:
+   la métrica de **reducción de tokens** va a salir baja en muchas consultas.
+   Decisión pendiente de David antes de la corrida: (a) medirla tal cual y
+   documentarlo, o (b) expandir solo cuando la pregunta nombra 2+ tablas o pide
+   datos de una tabla relacionada (cambia la poda: volver a medir y revisar que no
+   se pierdan tablas necesarias en las 50 consultas, gratis con `countTokens`).
+   Recordar además que el Cap. 5 cita un 71 % sobre 42 tablas, irreproducible.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. Auditoría de eficiencia del SQL de referencia. Ya detectado: S10 y M13 filtran con

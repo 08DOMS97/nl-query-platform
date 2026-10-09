@@ -6,6 +6,20 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-09 — Migración a `@google/genai`
+
+- `vertexAI.service.ts` migrado de `@google-cloud/vertexai` (deprecado) a
+  `@google/genai` en modo Vertex AI, versión fijada **2.24.0** (publicada 22/09; la
+  2.28.0 tenía un día). Misma configuración: temperatura 0, razonamiento 1024,
+  salida 4096, error explícito ante `MAX_TOKENS`. SDK viejo desinstalado.
+- Verificado gratis con `countTokens` (493 tokens) y con **una llamada real
+  autorizada por David**: S10 en Postgres → `SELECT COUNT(*) FROM orders WHERE
+  order_date >= '2025-01-01' AND order_date < '2026-01-01'` (usa rango, como pide la
+  regla de rendimiento), aprobada por el Query Safety Engine, 104 = referencia.
+  Tokens 1208 / 39 / 998 de razonamiento; **$0.01188**; 14,5 s.
+- Hallazgo: la poda envió 7 de 8 tablas para una pregunta de una sola tabla
+  (expansión por FK a un salto). Decisión pendiente (PREPARACION §8, 2f).
+
 ## 2026-10-08 (2) — Query Safety Engine endurecido
 
 - `querySafety.service.ts`: el contenido de los literales entre comillas simples ya

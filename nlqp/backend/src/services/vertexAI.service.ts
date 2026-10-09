@@ -1,9 +1,4 @@
-import {
-  FinishReason,
-  VertexAI,
-  type GenerationConfig,
-  type UsageMetadata,
-} from '@google-cloud/vertexai';
+import { FinishReason, GoogleGenAI, type GenerateContentConfig } from '@google/genai';
 import type { DbEngine, SchemaInfo } from '../types/index.js';
 import { DOMAIN_RULES } from './domainRules.service.js';
 
@@ -117,16 +112,15 @@ const THINKING_BUDGET_TOKENS = 1024;
 const MAX_OUTPUT_TOKENS = 4096;
 
 /**
- * `@google-cloud/vertexai` 1.12 no tipa `thinkingConfig` ni `thoughtsTokenCount`,
- * pero reenvía `generationConfig` tal cual a la API REST y devuelve
- * `usageMetadata` tal como llega — solo hace falta extender los tipos.
+ * Cliente de Vertex AI con el SDK `@google/genai` (modo Vertex AI). Reemplaza a
+ * `@google-cloud/vertexai`, deprecado con eliminación anunciada para el
+ * 24/06/2026 (migrado el 08/10/2026). Autenticación: Application Default
+ * Credentials, igual que antes (`gcloud auth application-default login`).
+ * `@google/genai` tipa de forma nativa `thinkingConfig` y `thoughtsTokenCount`.
  */
-type GenerationConfigWithThinking = GenerationConfig & {
-  thinkingConfig?: { thinkingBudget: number };
-};
-type UsageMetadataWithThinking = UsageMetadata & { thoughtsTokenCount?: number };
+let client: GoogleGenAI | null = null;
 
-function getModel(generationConfig?: GenerationConfigWithThinking) {
+function getClient(): { ai: GoogleGenAI; model: string } {
   const projectId = process.env.GCP_PROJECT_ID;
   const location = process.env.GCP_LOCATION ?? 'us-central1';
   const model = process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-pro';
@@ -138,8 +132,8 @@ function getModel(generationConfig?: GenerationConfigWithThinking) {
     );
   }
 
-  const vertexAI = new VertexAI({ project: projectId, location });
-  return vertexAI.getGenerativeModel({ model, generationConfig });
+  client ??= new GoogleGenAI({ vertexai: true, project: projectId, location });
+  return { ai: client, model };
 }
 
 /**
@@ -153,10 +147,9 @@ export async function countPromptTokens(
   naturalLanguageQuery: string,
 ): Promise<number> {
   const prompt = buildPrompt(engine, schema, naturalLanguageQuery);
-  const result = await getModel().countTokens({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-  });
-  return result.totalTokens;
+  const { ai, model } = getClient();
+  const result = await ai.models.countTokens({ model, contents: prompt });
+  return result.totalTokens ?? 0;
 }
 
 export interface GenerateSqlResult {
@@ -181,17 +174,19 @@ export async function generateSql(
   schema: SchemaInfo,
   naturalLanguageQuery: string,
 ): Promise<GenerateSqlResult> {
-  const generationConfig: GenerationConfigWithThinking = {
+  const config: GenerateContentConfig = {
     temperature: 0,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     thinkingConfig: { thinkingBudget: THINKING_BUDGET_TOKENS },
   };
-  const generativeModel = getModel(generationConfig);
+  const { ai, model } = getClient();
 
   const prompt = buildPrompt(engine, schema, naturalLanguageQuery);
-  const result = await generativeModel.generateContent(prompt);
-  const candidate = result.response.candidates?.[0];
-  const text = candidate?.content?.parts?.[0]?.text;
+  const response = await ai.models.generateContent({ model, contents: prompt, config });
+  const candidate = response.candidates?.[0];
+  // `response.text` concatena las partes de texto de la respuesta, sin el
+  // razonamiento interno (no se pide `includeThoughts`).
+  const text = response.text;
 
   // Un SQL cortado por el tope de salida no debe llegar al Query Safety Engine
   // como si fuera una respuesta completa: se reporta como error explícito.
@@ -204,7 +199,7 @@ export async function generateSql(
     throw new Error('Vertex AI no devolvió texto en la respuesta.');
   }
 
-  const usage = result.response.usageMetadata as UsageMetadataWithThinking | undefined;
+  const usage = response.usageMetadata;
 
   return {
     sql: stripMarkdownFences(text),

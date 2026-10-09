@@ -65,21 +65,22 @@ decirlo.
 
 Plan con fechas: `Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx`.
 
-## Próximo paso (actualizado 2026-10-08)
+## Próximo paso (actualizado 2026-10-09)
 
 Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
 
 1. ~~**Endurecer el Query Safety Engine**~~ — hecho 08/10/2026 (`SEGURIDAD.md`
    §9–11, texto de 6.3.3 actualizado).
-2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10): migrar a `@google/genai`,
-   corregir S10/M13 (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
+2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10):
+   ~~migrar a `@google/genai`~~ (hecho 09/10, verificado con llamada real);
+   **decidir la poda** (`PREPARACION_EVALUACION_GEMINI.md` §8 punto 2f), corregir S10/M13 (rango de fechas en vez de `EXTRACT`), runner nuevo, piloto y
    corrida completa (~$2–3, **pedir confirmación antes**). Ver
    `PREPARACION_EVALUACION_GEMINI.md` §8.
 3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
 4. Si no da el tiempo: Módulo 4 (herramientas técnicas, atrasado desde 07/10),
    banco de volumen alto y paráfrasis → alcance reducido / trabajo futuro.
 
-## Estado (actualizado 2026-10-08)
+## Estado (actualizado 2026-10-09)
 
 Historial fechado completo en `nlqp/docs/BITACORA.md`.
 
@@ -101,6 +102,8 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Prompt preparado para la corrida (CHECKs, reglas de dominio, índices, reglas de
   rendimiento); `/generateSQL` devuelve `metrics`.
 
+- SDK migrado a `@google/genai` 2.24.0 (09/10). Llamada real verificada: S10 en
+  Postgres → SQL eficiente y correcto, $0.01188, 998 tokens de razonamiento, 14,5 s.
 - Query Safety Engine endurecido (08/10): ignora el contenido de los literales
   (con modo estricto ante `\`, `$`, `[`), bloquea funciones de archivo y las que
   ejecutan SQL como texto. Regresión: `npm run test:seguridad` → 57/57 + 200/200.
@@ -111,8 +114,9 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
   correcciones de figuras del Cap. 5 en 0 %; cambios pendientes en Cap. 1–4.
 - Módulo 4 (herramientas técnicas) y Módulo 5 (historial): sin empezar.
 - Dashboard de uso/costos en el frontend: sin empezar.
-- Riesgos: SDK `@google-cloud/vertexai` deprecado (sigue funcionando); retiro de
-  `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
+- Poda de esquema: en este banco casi no poda (expande FKs a un salto y `orders`
+  conecta todo) — afecta la métrica de reducción de tokens, decisión pendiente (09/10).
+- Riesgos: retiro de `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
   factura (hasta ~$0.011), avisar antes.
 - Coordinar los 35 participantes de la encuesta (no depende de código).
 - Despliegue: no hace falta, se presenta **en local** (decisión 01/10). Acceso
