@@ -1,5 +1,10 @@
 # Instrucciones iniciales para Claude Code — NL-Query-Platform (NLQP)
 
+> **Histórico (arranque del proyecto, septiembre 2026).** No refleja el estado actual:
+> el tablero vigente es `CLAUDE.md`. Sigue siendo útil para: §2 credenciales del banco
+> local, §3 el dataset y las diferencias de dialecto. Los pendientes de §8 están todos
+> resueltos (GCP, Firebase y GitHub desde el 21/09), salvo confirmar `../db/`.
+
 ## 0. Contexto que Claude Code debe leer primero
 
 Este es el proyecto de tesis de David Monterroso (UMG): **NL-Query-Platform**, una

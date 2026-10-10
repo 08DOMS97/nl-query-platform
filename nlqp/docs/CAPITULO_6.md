@@ -1,20 +1,12 @@
-# Capítulo 6 — Desarrollo de la aplicación
+# Capítulo 6 — Desarrollo de la aplicación (borrador para el documento principal)
 
-Texto para agregar, según la estructura de tu plan de trabajo, más el plan actualizado.
+Texto redactado para pegar en el documento de tesis. **Solo contiene texto de tesis:**
+qué falta corregir o agregar (en este capítulo y en los demás) está en
+`RESUMEN_PARA_DOC_TEORICO.md`, que es la lista de trabajo. Las secciones marcadas
+*[Sección pendiente…]* todavía no tienen texto.
 
-**Qué se puede escribir hoy:** Módulo 1 completo, Módulo 2 completo, y del Módulo 3 las
-partes de poda de esquema, Query Safety Engine y ejecución controlada. Más la sección de
-integración y pruebas del sistema, parcial.
-
-**Qué no:** la integración con Vertex AI, las pruebas de generación, el frontend, el
-Módulo 4 y el Módulo 5. Al final de cada sección bloqueada te dejo indicado qué falta.
-
-**Numeración:** el documento llega a la Tabla 13 y a la Figura 8. Las tablas nuevas
-arrancan en la 14. Actualizá el índice al terminar.
-
----
-
-# PARTE 1 — Texto para pegar
+**Numeración:** al 19/09 el documento llegaba a la Tabla 13 y a la Figura 8; las tablas
+de este capítulo arrancan en la 14. Verificar contra el documento principal.
 
 ---
 
@@ -292,18 +284,6 @@ lenguaje, cuya integración se encuentra pendiente según se indica en la secci�
 prueba verifica, por tanto, la capa de validación y ejecución y la capa de abstracción de
 dialectos, y no la precisión del proceso de conversión de lenguaje natural a SQL.
 
-> **Nota (08/10/2026):** el 02/10 se corrigieron 5 referencias (M03, M07, M12, M13,
-> C11). Re-verificado el 08/10 con las referencias corregidas: 200/200 y 50/50
-> consistentes; la tabla sigue siendo válida. Mencionar la corrección en el texto.
-> **Actualización 10/10/2026:** "consistente" significaba *mismo número de filas*.
-> Comparando el contenido, 6 referencias diferían entre motores (empates en top N,
-> M20 con otra fórmula de días y un bug de zona horaria del sistema, ya corregido).
-> Tras corregirlas, las 50 dan contenido idéntico en los 4 motores. El texto debe
-> decir "mismo resultado (filas y valores)" y mencionar esta segunda corrección
-> (`PREPARACION_EVALUACION_GEMINI.md` §8, 2g).
-> Además, este párrafo dice que la integración con el modelo está "pendiente": ya
-> no lo está (verificada el 21/09), actualizarlo.
-
 **Tabla 14.** Ejecución controlada del conjunto de prueba en los cuatro motores. Fuente: Elaboración propia.
 
 | Nivel de complejidad | Consultas | Ejecuciones | Ejecuciones exitosas |
@@ -431,93 +411,3 @@ completa.
 
 *[Sección pendiente. Requiere el frontend y la integración completa.]*
 
----
-
-# PARTE 2 — Plan de trabajo actualizado
-
-> **Desactualizado (histórico, 19/09/2026).** El plan vigente está en
-> `PLAN_DE_TRABAJO.md` y el estado diario en `BITACORA.md`.
-
-Estado al 19 de septiembre de 2026, sobre la estructura de tu plan.
-
-## Capítulo 6 — Desarrollo de la aplicación
-
-| Actividad | Estado | Puede escribirse |
-|---|---|---|
-| Módulo 1: Gestión segura de conexiones | **Completo y verificado** | Sí — sección 6.1 |
-| Módulo 2: Extracción e interpretación de esquema | **Completo y verificado** | Sí — sección 6.2 |
-| · Inspección: PostgreSQL y MySQL | Completo | Sí — 6.2.1 |
-| · Inspección: MariaDB y SQL Server; normalización | Completo | Sí — 6.2.2 |
-| Módulo 3: Generación NL2SQL y Query Safety Engine | **Parcial** | Parcial |
-| · Diseño de prompt y estrategia de schema pruning | Poda completa; prompt sin verificar | Sí — 6.3.1 |
-| · Integración con Vertex AI Gemini Pro | **Bloqueado** — falta proyecto GCP | No |
-| · Implementación del Query Safety Engine | **Completo y verificado** | Sí — 6.3.3 |
-| · Pruebas de generación SQL en los cuatro motores | **Bloqueado** — depende de la generación | Parcial — 6.3.4 cubre la ejecución |
-| Frontend Next.js y autenticación de interfaz | **Bloqueado** — falta proyecto Firebase | No |
-| Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado | No |
-| Módulo 5: Historial y gestión de consultas guardadas | **Bloqueado** — falta Firestore | No |
-| Integración de módulos y pruebas del sistema | **Parcial** | Sí — sección 6.7 |
-| Presentación del prototipo funcional | No iniciado | No |
-
-**Cierre y entrega:** sin iniciar, depende de lo anterior.
-
-## Lectura del avance
-
-De trece actividades del Capítulo 6, **cinco están terminadas y verificadas**, dos van
-parciales y seis no pueden empezar. Podés escribir aproximadamente el 45 % del capítulo hoy
-mismo, y es la parte más difícil: los dos módulos de infraestructura contra cuatro motores
-reales y el componente de seguridad con un hallazgo crítico documentado.
-
-Lo que falta no está frenado por dificultad técnica. Está frenado por dos cuentas.
-
-## El camino crítico
-
-```
-Proyecto GCP con Vertex AI habilitado
-        ↓
-6.3.2 Integración con Vertex AI  →  6.3.4 Pruebas de generación
-        ↓
-Métricas de precisión, tokens, robustez y consistencia
-```
-
-```
-Proyecto Firebase (Auth + Firestore)
-        ↓
-6.4 Frontend  →  6.5 Módulo 4  →  6.6 Módulo 5
-        ↓
-6.8 Prototipo funcional  →  Encuesta con 35 usuarios
-```
-
-Vertex AI desbloquea dos secciones y todas las métricas de la hipótesis. Firebase desbloquea
-cuatro secciones y la verificación de la variable dependiente. **Firebase bloquea más
-capítulo; Vertex AI bloquea más tesis.**
-
-## Orden recomendado
-
-1. **Crear el proyecto de Google Cloud y habilitar Vertex AI.** El código del servicio ya
-   está escrito. Con solo poner el identificador de proyecto en la configuración se
-   desbloquea la sección 6.3.2.
-
-2. **Ejecutar el conjunto de cincuenta consultas generando el SQL**, en lugar de usar el de
-   referencia. De esa única corrida salen la sección 6.3.4 completa y cuatro métricas del
-   capítulo de resultados.
-
-3. **Crear el proyecto de Firebase.** Habilita Authentication y Firestore, y con ellos las
-   secciones 6.4, 6.5 y 6.6.
-
-4. **Construir frontend, herramientas técnicas e historial.** Es la mayor carga de trabajo
-   restante, pero sin bloqueos externos una vez creado el proyecto.
-
-5. **Coordinar los 35 participantes de la encuesta.** Es lo único que no se resuelve con
-   código y necesita anticipación: son 35 personas durante dos semanas.
-
-## Riesgos abiertos
-
-| Riesgo | Impacto |
-|---|---|
-| Sin proyecto GCP no hay métrica central de la hipótesis | Bloquea la defensa, no solo el capítulo |
-| Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo en la sección 3.6 |
-| El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas; la cifra es irreproducible y debe corregirse |
-| Las bases corren en contenedores locales | No serán alcanzables desde el backend desplegado; decidir dónde vivirán para la evaluación |
-| No hay commits en el repositorio | Riesgo de pérdida; ya ocurrió con los documentos de la auditoría inicial |
-| Quedan pendientes los cambios documentales de los capítulos 1 a 4 | Organización, esquema cacheado, índices y versión de Node |

@@ -56,6 +56,19 @@ npm run dev
 Deja esa terminal abierta — mientras esté corriendo, el mensaje dirá algo como
 `NLQP backend escuchando en http://localhost:8080`.
 
+**c) Un token de inicio de sesión (obligatorio, agregado 10/10/2026):** todas las
+peticiones (salvo el health check) exigen un ID token de Firebase; sin él responden
+`401`. En otra terminal:
+```powershell
+cd "C:\Users\david\Proyectos\nl-query-platform\nlqp\backend"
+npm run test:token
+```
+Copia el texto largo que imprime y pégalo en Postman: **Environments → NLQP Local →
+variable `idToken` → Current value**, y guarda. La colección ya lo manda en cada
+petición (`Authorization: Bearer {{idToken}}`). **Dura 1 hora**: si empiezan a salir
+`401`, repite este paso. Si importaste la colección antes del 10/10, vuelve a
+importar los dos archivos.
+
 ---
 
 ## 4. Probar cada endpoint
@@ -133,11 +146,10 @@ de inyección SQL). También debe dar **403**.
 
 ### 5. Generate SQL (NL2SQL)
 `POST /generateSQL` con `{"engine": "postgres", "naturalLanguageQuery": "..."}`.
-**Esta todavía no va a funcionar** — responde `500` con un mensaje explicando que
-falta `GCP_PROJECT_ID` (necesitas el proyecto de Google Cloud con Vertex AI
-habilitado, que está pendiente). En cuanto tengas ese proyecto, este endpoint
-convierte la pregunta en SQL automáticamente y ahí sí tiene sentido encadenarlo con
-el endpoint 3 (Execute Query).
+Llama a Gemini (Vertex AI, proyecto `proyectog-340d3`) y devuelve `sql`, `safety`
+y `metrics` (tokens, costo, latencia, tablas enviadas). **Cada envío cuesta ~$0.012**
+y tarda ~15 s. El SQL devuelto se ejecuta copiándolo en el endpoint 3 (Execute
+Query).
 
 ---
 
@@ -147,8 +159,8 @@ el endpoint 3 (Execute Query).
   - `200` = todo bien.
   - `400` = pediste algo mal formado (falta un campo, motor inválido).
   - `403` = el Query Safety Engine bloqueó tu SQL (funcionando como debe).
-  - `500` = error del servidor (revisa el mensaje `error` del JSON; si es
-    `generateSQL`, casi seguro es porque falta configurar Vertex AI).
+  - `401` = falta el token o venció (paso 3c).
+  - `500` = error del servidor (revisa el mensaje `error` del JSON).
 - **Pestaña "Body"** de la respuesta: el JSON devuelto. Postman lo formatea e
   indenta automáticamente ("Pretty").
 - **Pestaña "Headers"**: no la necesitas para esto, es información técnica del HTTP.
@@ -161,7 +173,8 @@ el endpoint 3 (Execute Query).
 |---|---|---|
 | "Could not send request" / "ECONNREFUSED" | El backend no está corriendo | `npm run dev` en `nlqp/backend` (paso 3b) |
 | `testConnection` da `ok: false` en algún motor | Docker no está arriba o el contenedor aún no terminó de iniciar | `docker compose up -d` en `Bases de datos/`, esperar ~10s |
-| `generateSQL` da 500 "GCP_PROJECT_ID no está configurado" | Esperado — falta el proyecto de Google Cloud | Pendiente de que se configure `GCP_PROJECT_ID` en `nlqp/backend/.env` |
+| Cualquier petición da `401` | Falta el token o pasó más de 1 hora | `npm run test:token` y pegarlo en la variable `idToken` (paso 3c) |
+| `generateSQL` da 500 | Credenciales de Google Cloud vencidas o modelo no disponible | Revisar el mensaje `error`; si son las credenciales, `gcloud auth application-default login` |
 | `executeQuery` da 504 | La consulta superó los 60 s y el motor la canceló | Acotarla (rango de fechas, filtros); no es un error del sistema |
 | `executeQuery` da 413 | El resultado completo supera 1 GB | Acotar la consulta o agregar filtros |
 | `getResultPage` da 404 | El resultado venció (30 min) o el backend se reinició | Volver a ejecutar la consulta |

@@ -97,7 +97,7 @@ streaming nuevo contra la lectura directa, ver `RENDIMIENTO_E_INTEGRIDAD.md`).
 **Pendiente:** volver a confirmar con el runner que siguen siendo consistentes
 entre los 4 motores, y auditarlas por eficiencia (§7).
 
-Nota para el Capítulo 6: los resultados de `resultados_consultas_prueba.md`
+Nota para el Capítulo 6: los resultados de `historico/resultados_consultas_prueba.md`
 (200/200, 50/50 consistentes) se obtuvieron con las referencias **anteriores** a
 esta corrección.
 
@@ -369,7 +369,9 @@ Se confirma con David antes de cada corrida pagada.
      preguntas con el mismo resultado en los 4 motores; resumen y filtro de origen
      probados.
 7. Piloto pagado y corrida completa, con confirmación de costo. Comandos (con el
-   backend corriendo, `npm run dev`):
+   backend levantado con `npm run build` y **`npm start`**, no `npm run dev`: en
+   Windows `node --watch` se reinicia sin motivo y puede cortar una llamada ya
+   cobrada):
    `npm run eval:gemini -- --modo piloto --parafrasis --confirmar` (40 llamadas,
    ~$0.50, tope automático $0.60) y luego
    `npm run eval:gemini -- --modo completa --parafrasis --confirmar`.

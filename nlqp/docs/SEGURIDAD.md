@@ -342,7 +342,7 @@ texto completo de la consulta, **incluidos los literales de texto**. Solo
 Falla en el sentido seguro (bloquea, no deja pasar), así que no es una
 vulnerabilidad. Pero:
 
-- **El texto de tesis es inexacto:** 6.3.3 en `CAPITULO_6_Y_PLAN.md` afirma que "las
+- **El texto de tesis es inexacto:** 6.3.3 en `CAPITULO_6_Y_PLAN.md` (hoy `CAPITULO_6.md`) afirmaba que "las
   consultas que contienen palabras reservadas dentro de literales de texto continúan
   ejecutándose". No es así.
 - **Impacto en la corrida con Gemini:** ninguno hoy. Ningún valor de los `CHECK` del

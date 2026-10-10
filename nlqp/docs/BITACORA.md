@@ -6,6 +6,26 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-10 (2) — Orden de la documentación
+
+- Pedido de David: que cada sesión arranque sabiendo de qué va el proyecto, cómo está
+  y qué sigue, sin desviarse, y que lo que afecta a la tesis quede en un documento
+  aparte para saber qué modificar en el documento principal.
+- `CLAUDE.md` reescrito como **tablero**: qué es, calendario, estado por área,
+  próximo paso (lo terminado se borra y queda acá), protocolo de sesión (inicio,
+  durante —no desviarse, proponer antes de algo grande, confirmar gastos— y cierre
+  en 4 pasos), mapa de documentos, reglas.
+- Nuevo `RESUMEN_PARA_DOC_TEORICO.md`: lista de trabajo para el Word por capítulo y
+  sección, con casillas `[ ]`/`[x]`/`[?]` y contador. Arranca con 25 pendientes y 4
+  por verificar, juntando lo que estaba disperso.
+- `CAPITULO_6_Y_PLAN.md` → `CAPITULO_6.md` (solo texto de tesis); la Parte 2 (plan
+  del 19/09), los resultados del 21/09 y el runner viejo → `docs/historico/`.
+- `PLAN_DE_TRABAJO.md` reescrito: solo plan hasta el 17/10 y riesgos (sin estado).
+- `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` marcado como histórico.
+- Postman: la colección no mandaba el token (todo daba 401 desde el 21/09); ahora
+  manda `Bearer {{idToken}}` y el manual explica `npm run test:token`.
+- `frontend/README.md` en español (era el de plantilla de Next.js).
+
 ## 2026-10-10 — Runner de la evaluación con Gemini (sin costo de Vertex AI)
 
 - David eligió: runner por **HTTP como el frontend** (opción a) y **con

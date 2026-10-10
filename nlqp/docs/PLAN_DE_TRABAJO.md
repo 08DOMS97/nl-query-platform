@@ -1,179 +1,41 @@
-# Plan de trabajo actualizado — NLQP
+# Plan de trabajo — NLQP (reescrito 2026-10-10)
 
-Estado al 21 de septiembre de 2026 (misma fecha, actualizado dos veces en el
-día). Cambios del día: los dos bloqueos de cuentas de nube se resolvieron, el
-Módulo 3 (NL2SQL + Query Safety Engine) quedó completo y verificado con una
-llamada real a Vertex AI, el repositorio ya tiene commits y está en GitHub, se
-agregó una actividad nueva no contemplada en el plan original (el módulo de
-uso y costos), y arrancó una primera versión del Frontend Next.js — login,
-registro y la pantalla principal del flujo (motor → pregunta en lenguaje
-natural → SQL generado → ejecutar → resultados), verificada con un navegador
-real.
+Solo **plan y riesgos**. El estado actual y el próximo paso están en `CLAUDE.md` (raíz);
+el historial, en `BITACORA.md`. Este archivo se toca al replanificar o cuando cambia un
+riesgo. Plan original con fechas: `Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx`.
+Versión anterior (21/09–09/10) en el historial de git.
 
-**Actualización 8 de octubre de 2026:** revisión completa sin costo de Vertex AI
-(detalle en `BITACORA.md`). Las 50 referencias corregidas dan 200/200 y 0
-inconsistencias. Tres hallazgos nuevos en el Query Safety Engine (`SEGURIDAD.md`
-§9–11) que vuelven inexacto parte del texto de 6.3.3. Contra el Excel del plan:
-Módulo 4 atrasado (plan 05–07/10, sin empezar), Módulo 5 previsto 08–09/10,
-correcciones de figuras del Cap. 5 en 0 %. Presentación 14/10, entrega 17/10.
-Retiro de `gemini-2.5-pro` en Vertex AI: ahora 20/10 como fecha más temprana.
+## Plan hasta la entrega
 
-**Actualización 2 de octubre de 2026:** preparación de la corrida de las 50
-consultas generando con Gemini (`PREPARACION_EVALUACION_GEMINI.md`) y nueva capa
-de rendimiento e integridad de resultados (`RENDIMIENTO_E_INTEGRIDAD.md`): timeout
-de 60 s del lado del servidor en los 4 motores, ejecución única con resultado
-completo paginado y descargable como CSV (sin truncar filas). Se agregó como
-requisito que las consultas generadas sean eficientes en entornos con muchos
-datos, y se corrigieron 5 consultas de referencia que eran inconsistentes entre sí.
+| Fechas | Actividad | Qué incluye | Si no da el tiempo |
+|---|---|---|---|
+| 10–11/10 | Evaluación con Gemini | Piloto (~$0.50) y corrida completa con paráfrasis (~$4.25 más); revisión manual de los casos dudosos | **No se recorta**: es la métrica central de la hipótesis |
+| 11–12/10 | M5 historial (mínimo) | Guardar pregunta + SQL en Firestore, listarlos y reutilizarlos desde el frontend | Documentar como alcance reducido |
+| 12–13/10 | Integración y prueba del prototipo | Flujo completo desde la UI con Gemini real, ensayo de la presentación | — |
+| 12–13/10 | M4 herramientas técnicas | Solo si sobra tiempo | Alcance reducido / trabajo futuro |
+| **14/10** | **Presentación del prototipo** | En local | — |
+| 15–16/10 | Documento | Aplicar `RESUMEN_PARA_DOC_TEORICO.md` (Cap. 1–6), conclusiones y limitaciones, figuras del Cap. 5 | — |
+| **17/10** | **Entrega PG2** | | |
 
-Alcance de la entrega en curso: **Capítulo 6 hasta la sección 6.2 inclusive**
-(sin cambios — ver §3, es una decisión de alcance ya tomada, no de avance
-técnico).
+Fuera de plan, solo si sobra tiempo: dashboard de uso y costos en el frontend, banco de
+volumen alto con `EXPLAIN` (puede hacerse después de la corrida, sin volver a pagar
+Gemini).
 
----
-
-## 1. Estado general
-
-| | |
-|---|---|
-| Actividades del Capítulo 6 (plan original) | 13 |
-| Terminadas y verificadas | 8 |
-| Parciales | 3 (suma el Frontend, ahora v1 en curso) |
-| Bloqueadas por cuentas de nube | 0 (antes 4) |
-| No iniciadas | 2 |
-| Actividad nueva fuera del plan original | 1 (módulo de uso y costos — backend terminado; el frontend v1 es avance de una actividad ya planeada, no una actividad nueva) |
-| **Incluidas en esta entrega** | **3** (Módulo 1 y las dos de Módulo 2, sin cambios) |
-
-El avance técnico sigue por delante del alcance de esta entrega. Se documenta
-hasta 6.2 por decisión de alcance, no por falta de material.
-
----
-
-## 2. Estructura del plan con estado real
-
-| Actividad | Estado real | Entrega |
-|---|---|---|
-| **Capítulo 6 — Desarrollo de la aplicación** | | |
-| Módulo 1: Gestión segura de conexiones | Completo y verificado en los 4 motores | **Esta entrega** |
-| Módulo 2: Extracción e interpretación de esquema | Completo y verificado | **Esta entrega** |
-| · Inspección de esquema: PostgreSQL y MySQL | Completo | **Esta entrega** |
-| · Inspección de esquema: MariaDB y SQL Server; normalización | Completo | **Esta entrega** |
-| Módulo 3: Generación NL2SQL y Query Safety Engine | **Completo** | Siguiente |
-| · Diseño de prompt y estrategia de schema pruning | Completo y verificado; ampliado 02/10 con valores de los `CHECK`, reglas de dominio, índices (`IDX`) y reglas de rendimiento | Siguiente |
-| · Integración con Vertex AI Gemini Pro | **Completo y verificado** — proyecto `proyectog-340d3`, llamada real confirmada | Siguiente |
-| · Implementación del Query Safety Engine | Completo y verificado; endurecido 08/10, batería versionada 57/57 | Siguiente |
-| · Pruebas de generación SQL en los cuatro motores | **Parcial** — 200/200 ejecuciones verificadas con SQL de referencia; falta repetir la corrida generando con Gemini para las métricas reales. Preparación en curso (02/10), ver `PREPARACION_EVALUACION_GEMINI.md` | Siguiente |
-| Frontend Next.js y autenticación de interfaz | **Parcial (v1)** — login/registro y pantalla principal del flujo completo funcionando, verificado con navegador real; desde 02/10 con resultados paginados y descarga CSV completa; falta historial, herramientas técnicas y dashboard de uso/costos | Posterior |
-| Módulo 4: Herramientas de apoyo para usuarios técnicos | No iniciado — **atrasado** (plan 05–07/10) | Posterior |
-| Módulo 5: Historial y gestión de consultas guardadas | No iniciado — infraestructura lista (Firestore habilitado); plan 08–09/10 | Posterior |
-| Integración de módulos y pruebas del sistema | Parcial: revisión de seguridad y pruebas multimotor hechas; falta integrar con frontend | Siguiente |
-| Presentación del prototipo funcional | No iniciado | Posterior |
-| **Cierre y entrega** | | |
-| Conclusiones y revisión final del documento | No iniciado | Final |
-| Entrega PG2 | — | Final |
-| **Fuera del plan original** | | |
-| Módulo de uso y costos (registro de tokens/costo de Vertex AI y uso general en Firestore, endpoint de estadísticas) | **Completo y verificado (backend)** — dashboard visual pendiente del frontend | A definir dónde encaja en la estructura formal de tesis |
-| Rendimiento e integridad de resultados (timeout en el motor, ejecución única con snapshot, paginación, CSV completo) — 02/10 | **Completo y verificado** en los 4 motores y en el navegador | A definir; candidato natural junto a 6.3 (validación y ejecución) |
-
----
-
-## 3. Qué entra en esta entrega
-
-Tres actividades, todas terminadas y verificadas contra los cuatro motores reales:
-
-**Módulo 1 — Gestión segura de conexiones.** Administrador de conexiones con controladores
-por motor, separación entre metadatos y credenciales mediante Secret Manager, prueba de
-conectividad con diagnóstico diferenciado de fallos. Verificado en PostgreSQL, MySQL,
-MariaDB y SQL Server con cuentas de solo lectura. Incluye una corrección de seguridad
-aplicada durante la revisión.
-
-**Módulo 2 — Extracción e interpretación de esquema.** Capa de abstracción multimotor con
-una implementación de introspección por motor y una representación normalizada común.
-Verificado: ocho tablas y ocho relaciones de clave foránea correctamente identificadas en
-los cuatro motores, con representación equivalente.
-
-El texto redactado para ambas secciones está en `nlqp/docs/CAPITULO_6_Y_PLAN.md`, listo
-para pegar.
-
----
-
-## 4. Material terminado que queda fuera de esta entrega
-
-Conviene tenerlo presente para la planificación, porque no requiere trabajo adicional
-—solo redacción— cuando decidas incorporarlo:
-
-| Contenido | Estado | Comentario |
-|---|---|---|
-| Query Safety Engine (6.3.3) | Verificado, 17/17 | Incluye el hallazgo del bypass en Transact-SQL, explotado y corregido |
-| Poda de esquema (6.3.1) | Verificado | Incluye el diccionario español–inglés como hallazgo |
-| Ejecución controlada (6.3.4) | Verificado, 200/200 | Con la aclaración de que el SQL es de referencia |
-| Revisión de seguridad (6.7) | Completa | 6 hallazgos: 3 corregidos, 3 documentados |
-| **Integración con Vertex AI Gemini Pro** | **Verificado con llamada real** | Nuevo desde 19/09 — texto aún no redactado en `CAPITULO_6_Y_PLAN.md` |
-| **Módulo de uso y costos** | **Completo (backend)** | Actividad nueva, fuera del alcance original — ver `nlqp/docs/USO_Y_COSTOS.md`; falta decidir su numeración formal en la tesis y redactar el texto |
-| **Frontend v1 (login + flujo principal)** | **Funcionando, verificado con navegador real** | Primera parte del Frontend Next.js — texto aún no redactado; falta decidir si se documenta ya o cuando el frontend esté más completo (historial, herramientas técnicas, dashboard) |
-
-El Query Safety Engine sigue siendo el componente más defendible y verificado. La
-integración con Vertex AI ahora también está verificada end-to-end — es la pieza que
-falta redactar con mayor peso para la siguiente entrega, porque valida la hipótesis
-central de la tesis.
-
----
-
-## 5. Bloqueos
-
-**Ninguno actualmente.** Los dos bloqueos de cuentas de nube que frenaban seis
-actividades (proyecto de Google Cloud con Vertex AI, proyecto de Firebase con
-Authentication y Firestore) se resolvieron el 21/09/2026 — proyecto unificado
-`proyectog-340d3`. Lo único pendiente que no se resuelve con código es
-coordinar a los 35 participantes de la encuesta (ver §6).
-
----
-
-## 6. Secuencia recomendada para el siguiente tramo
-
-1. ~~Crear el proyecto de Google Cloud y habilitar Vertex AI.~~ **Hecho (21/09).**
-
-2. **Ejecutar el conjunto de cincuenta consultas generando el SQL** en lugar de usar el de
-   referencia. Es el paso pendiente más importante ahora mismo: cierra la sección de
-   pruebas de generación y produce las métricas de precisión, reducción de tokens,
-   robustez lingüística y consistencia que sostienen la hipótesis de la tesis, y
-   desde el 02/10 también de eficiencia. **Preparación en curso**: lista de pasos en
-   `PREPARACION_EVALUACION_GEMINI.md` §8. Costo corregido: ~$1–5 en total (400
-   llamadas con las paráfrasis; la estimación anterior no contaba el razonamiento
-   de Gemini) — confirmar antes de correrla.
-
-3. ~~Crear el proyecto de Firebase.~~ **Hecho (21/09).** Authentication y Firestore
-   habilitados.
-
-4. **Construir el frontend.** ~~No iniciado~~ **v1 en curso (21/09):** login,
-   registro y la pantalla principal del flujo (motor → pregunta → SQL
-   generado → ejecutar → resultados) ya funcionan, verificado con navegador
-   real. Falta: historial de consultas, herramientas técnicas (Módulo 4 del
-   plan) y el dashboard visual del módulo de uso y costos — sigue siendo la
-   mayor carga de trabajo restante, pero ya con una base funcionando.
-
-5. **Integración final y prototipo funcional.**
-
-6. **Coordinar los 35 participantes de la encuesta.** Sigue siendo lo único que no se
-   resuelve con código y requiere anticipación: son 35 personas durante dos semanas.
-   Conviene empezar a convocarlos en paralelo al desarrollo, no al final.
-
----
-
-## 7. Riesgos abiertos
+## Riesgos abiertos
 
 | Riesgo | Impacto | Acción |
 |---|---|---|
-| Las métricas de generación real (precisión, tokens, robustez) todavía no se midieron — solo se probó que el pipeline funciona | Bloquea la defensa de la hipótesis, no solo el capítulo | Correr las 50 consultas generando con Gemini (§6, paso 2) |
-| Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo en la sección 3.6 | Empezar a convocar ahora |
-| El Capítulo 5 menciona 42 tablas y una reducción del 71 % | El banco tiene 8 tablas: la cifra es irreproducible | Sustituir por la medición real: 43,4 % del prompt / ~72 % del esquema (09/10) |
-| ~~Las bases de datos corren en contenedores locales~~ | — | **Resuelto 01/10:** la tesis se presenta en local, no se despliega (`ACCESO_REMOTO.md`) |
-| Cambios documentales pendientes en los capítulos 1 a 4 | Modelo de organización, esquema cacheado, índices y versión de Node | Aplicar antes de la entrega final |
-| ~~Las referencias de las 50 consultas eran inconsistentes (corregidas 02/10)~~ | — | **Resuelto 08/10:** re-verificadas, 200/200 y 0 inconsistencias; mencionarlo en 6.3.4 |
-| El banco de pruebas tiene pocos datos (200 clientes, 300 pedidos): no permite medir eficiencia | Sin medición, el requisito de eficiencia no se puede demostrar | Banco de volumen alto en los 4 motores (pendiente) |
-| ~~El SDK `@google-cloud/vertexai` está deprecado~~ | — | **Resuelto 09/10:** migrado a `@google/genai` 2.24.0, verificado con una llamada real |
-| ~~La poda de esquema casi no reducía tablas~~ | — | **Resuelto 09/10:** poda rediseñada, 43,4 % de reducción del prompt (~72 % del esquema), 0/50 consultas pierden tablas (`PREPARACION_EVALUACION_GEMINI.md` §8, 2f) |
-| Retiro de `gemini-2.5-pro` en Vertex AI: "no antes del 16/10/2026" según la página oficial (verificado 02/10); **al 08/10 la página oficial dice 20/10/2026**, sigue siendo provisoria | Coincide con la presentación (14/10) y la entrega (17/10); después del retiro la generación de SQL deja de funcionar | Correr piloto y evaluación antes del 16/10 y confirmar la fecha en la consola antes de cada corrida (ver `PREPARACION_EVALUACION_GEMINI.md` §8, punto 2c) |
-| ~~Texto de 6.3.3 inexacto (literales y acceso a archivos)~~ | — | **Resuelto 08/10:** validador corregido, batería versionada (57/57), texto de 6.3.3 reescrito (`SEGURIDAD.md` §9–11) |
-| Módulo 4 atrasado y Módulo 5 sin empezar, con presentación el 14/10 (08/10) | El prototipo se presenta incompleto | Priorizar la corrida con Gemini y un historial mínimo; Módulo 4 a alcance reducido si no da el tiempo |
-| Sin crédito de prueba en la cuenta de Google Cloud, cualquier uso de Vertex AI se factura de verdad | Bajo (fracciones de centavo por llamada), pero hay que avisar antes de cada corrida grande | Confirmar con David antes de corridas masivas (ej. las 50 consultas) |
+| Retiro de `gemini-2.5-pro` en Vertex AI (no antes del 20/10/2026, provisorio) | Después del retiro la generación deja de funcionar, incluida la demo | Correr la evaluación antes del 14/10; confirmar la fecha en la consola antes de cada corrida (`PREPARACION_EVALUACION_GEMINI.md` §8, 2c) |
+| M4 y M5 atrasados con presentación el 14/10 | El prototipo se presenta incompleto | Evaluación primero, M5 mínimo después, M4 solo si sobra tiempo |
+| Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo (sección 3.6) | Convocar ya; no depende de código |
+| Mucho texto de tesis por aplicar (Cap. 1–6) en 2 días (15–16/10) | Entrega con texto desactualizado | Ir aplicando `RESUMEN_PARA_DOC_TEORICO.md` durante la semana, no todo al final |
+| La latencia de generación (~14,5 s en una consulta simple) está al borde del umbral de 15 s de la sección 3.3.1.3 | La hipótesis de tiempo de respuesta puede no cumplirse | Medirla en la corrida completa y discutirla en resultados |
+| El banco de pruebas es chico (200 clientes, 300 pedidos) | La eficiencia con mucho volumen no queda demostrada | Banco grande con `EXPLAIN` si sobra tiempo; si no, limitación declarada |
+| Vertex AI sin crédito de prueba | Cada llamada se factura (~$0.012) | Confirmar con David antes de cada corrida |
+
+## Riesgos cerrados (resumen; detalle en `BITACORA.md`)
+
+SDK deprecado → migrado (09/10). Poda que casi no podaba → rediseñada (09/10).
+Referencias inconsistentes → corregidas (02/10 y 10/10). Texto de 6.3.3 inexacto →
+validador corregido y texto reescrito (08/10). Bases solo en local → se presenta en
+local (01/10). Bloqueos de cuentas de nube → resueltos (21/09).

@@ -1,9 +1,10 @@
 {
   "info": {
     "name": "NLQP - NL Query Platform",
-    "description": "Colección de pruebas para el backend de NLQP (tesis de David Monterroso, UMG). Usa la variable {{baseUrl}} (definida en el Environment adjunto) para apuntar al backend local.",
+    "description": "Colección de pruebas para el backend de NLQP (tesis de David Monterroso, UMG). Usa la variable {{baseUrl}} (definida en el Environment adjunto) para apuntar al backend local. Todas las peticiones mandan Authorization: Bearer {{idToken}} (variable del Environment: se obtiene con npm run test:token en nlqp/backend y dura 1 hora).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{idToken}}", "type": "string" }] },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" }
   ],
@@ -128,7 +129,7 @@
       }
     },
     {
-      "name": "5. Generate SQL (NL2SQL) - requiere GCP_PROJECT_ID configurado",
+      "name": "5. Generate SQL (NL2SQL) - llama a Gemini, cuesta ~$0.012",
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
