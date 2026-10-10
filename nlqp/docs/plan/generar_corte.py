@@ -44,6 +44,26 @@ def serial(iso):
     return (datetime.date.fromisoformat(iso) - datetime.date(1899, 12, 30)).days
 
 
+def ordenar(tareas):
+    """Orden de filas: jerárquico, y dentro de cada grupo por fecha de inicio y de fin
+    (pedido de David, 10/10: una fila no puede ir antes que otra con fecha anterior).
+    Con el mismo inicio va primero la tarea sin subtareas, para que las subtareas de un
+    grupo no queden antes de una tarea hermana que empieza antes. No cambia fechas."""
+    pos = {t['no']: i for i, t in enumerate(tareas)}
+    hijos = {}
+    for t in tareas:
+        hijos.setdefault(t['padre'], []).append(t)
+    out = []
+    def visitar(t):
+        out.append(t)
+        for h in sorted(hijos.get(t['no'], []), key=lambda h: (h['inicio'], bool(hijos.get(h['no'])), h['fin'], h['no'])):
+            visitar(h)
+    for r in hijos[None]:
+        visitar(r)
+    assert len(out) == len(tareas)
+    return out
+
+
 def calcular(tareas, corte):
     por_no = {t['no']: t for t in tareas}
     hijos = {t['no']: [] for t in tareas}
@@ -240,7 +260,7 @@ def main():
     corte = datetime.date.fromisoformat(args.corte)
 
     plan = json.loads(PLAN.read_text(encoding='utf-8'))
-    tareas = plan['tareas']
+    tareas = ordenar(plan['tareas'])
     hijos, raiz = calcular(tareas, corte)
 
     z = zipfile.ZipFile(PLANTILLA)

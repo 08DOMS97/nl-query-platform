@@ -20,7 +20,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **17/10/2026** | **Entrega PG2** |
 | ~20/10/2026 | Retiro más temprano de `gemini-2.5-pro` (provisorio, verificado 08/10) |
 
-## Estado por área (actualizado 2026-10-10)
+## Estado por área (actualizado 2026-10-10, con M5)
 
 | Área | Estado |
 |---|---|
@@ -30,26 +30,30 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
 | Frontend v1 | ✅ Login, flujo pregunta → SQL → resultados paginados + CSV. Falta probar "Generar SQL" con Gemini real desde la UI y el dashboard de costos |
 | M4 herramientas técnicas | ❌ Sin empezar (atrasado desde 07/10) |
-| M5 historial | ❌ Sin empezar (atrasado desde 09/10) |
-| Texto de tesis | 🟡 25 pendientes + 4 por verificar → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
+| Texto de tesis | 🟡 19 pendientes + 1 por verificar + 54 aplicados (+2 por M5: 6.6 nueva y alcance de 6.4). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 10/10) | Plan 96 % · real 90 % · **−6,4 puntos: atrasados** (M4, M5, figuras del Cap. 5). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 10/10, actualizado) | Plan 96 % · real 91 % · **−4,6 puntos: atrasados** (M4 sin empezar; pruebas de generación 70 %; frontend 85 %). **No incluye M5 al 90 %**: falta regenerar el corte. Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
 ## Próximo paso (actualizado 2026-10-10)
 
-1. **Piloto con paráfrasis** ← **SIGUIENTE**. 40 llamadas, ~$0.50, tope automático
-   $0.60. **Pedir confirmación a David antes.** Requiere Docker y el backend con
-   `npm run build` + **`npm start`** (no `dev`: `node --watch` se reinicia solo en
-   Windows y puede cortar una llamada ya cobrada). Comando:
+David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
+
+1. **M4: decidir versión mínima o alcance reducido** ← **SIGUIENTE**. Proponer en 3–5
+   líneas. M4 y el banco de volumen alto, si no dan los tiempos → alcance reducido /
+   trabajo futuro (se documenta, no se improvisa).
+2. Regenerar el corte del 10/10 (`generar_corte.py 2026-10-10`) con el Excel del corte
+   cerrado: falló por estar abierto y no recoge M5 al 90 %.
+3. **Piloto con paráfrasis**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
+   automático $0.60. **Pedir confirmación a David antes.** Requiere Docker y el
+   backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
+   reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
    `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-2. **Corrida completa con paráfrasis** (~$4.25 más; lo del piloto no se repite).
-   **Confirmación aparte.** Después: revisar a mano "Para revisión manual" de
-   `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras en el resumen para la
-   tesis (6.3.5).
-3. **M5 historial, versión mínima.**
-4. Si no da el tiempo: M4 y el banco de volumen alto → alcance reducido / trabajo
-   futuro (se documenta, no se improvisa).
+4. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
+   del piloto no se repite). **Confirmación aparte.** Después: revisar a mano "Para
+   revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras
+   en el resumen para la tesis (6.3.5) el 16/10.
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 

@@ -32,3 +32,34 @@ export interface ExecuteQueryResponse {
   pageSize: number;
   totalPages: number;
 }
+
+/** Una ejecución del historial automático (`GET /history`, M5). */
+export interface HistoryEntry {
+  id: string;
+  question: string | null;
+  engine: DbEngine;
+  sql: string;
+  success: boolean;
+  totalRows: number | null;
+  errorReason: string | null;
+  /** ISO 8601. */
+  executedAt: string;
+}
+
+/** Una consulta que el usuario guardó con un nombre (`/savedQueries`, M5). */
+export interface SavedQuery {
+  id: string;
+  name: string;
+  question: string | null;
+  engine: DbEngine;
+  sql: string;
+  /** ISO 8601. */
+  savedAt: string;
+}
+
+/** Consulta que se reusa desde el historial o las guardadas: vuelve al formulario. */
+export interface ReusedQuery {
+  engine: DbEngine;
+  question: string | null;
+  sql: string;
+}

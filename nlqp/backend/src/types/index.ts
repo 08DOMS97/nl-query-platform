@@ -104,6 +104,32 @@ export interface GenerateSqlResponse {
 export interface ExecuteQueryRequest {
   engine: DbEngine;
   sql: string;
+  /** Pregunta en español que originó el SQL; opcional, solo para el historial (M5). */
+  question?: string;
+}
+
+/** Una ejecución del historial automático (`GET /history`, M5). */
+export interface HistoryEntry {
+  id: string;
+  question: string | null;
+  engine: DbEngine;
+  sql: string;
+  success: boolean;
+  totalRows: number | null;
+  errorReason: string | null;
+  /** ISO 8601. */
+  executedAt: string;
+}
+
+/** Una consulta que el usuario guardó con un nombre (`/savedQueries`, M5). */
+export interface SavedQuery {
+  id: string;
+  name: string;
+  question: string | null;
+  engine: DbEngine;
+  sql: string;
+  /** ISO 8601. */
+  savedAt: string;
 }
 
 /** Una página del resultado de una consulta (`/executeQuery` devuelve la primera). */

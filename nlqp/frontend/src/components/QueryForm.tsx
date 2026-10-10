@@ -3,13 +3,41 @@
 import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { apiFetch } from '@/lib/api';
-import { DB_ENGINES, type DbEngine, type ExecuteQueryResponse, type GenerateSqlResponse } from '@/lib/types';
+import {
+  DB_ENGINES,
+  type DbEngine,
+  type ExecuteQueryResponse,
+  type GenerateSqlResponse,
+  type QuerySafetyResult,
+  type ReusedQuery,
+} from '@/lib/types';
 import { QueryResult } from './QueryResult';
+import { SaveQueryButton } from './SaveQueryButton';
 
-export function QueryForm({ user }: { user: User }) {
-  const [engine, setEngine] = useState<DbEngine>('postgres');
-  const [question, setQuestion] = useState('');
-  const [generated, setGenerated] = useState<GenerateSqlResponse | null>(null);
+/**
+ * SQL listo para ejecutar: generado por Gemini (trae el veredicto del Query Safety
+ * Engine) o reusado del historial / las guardadas (sin veredicto: el backend lo
+ * vuelve a validar al ejecutarlo, como a todo).
+ */
+type PendingQuery = ReusedQuery & { safety: QuerySafetyResult | null };
+
+export function QueryForm({
+  user,
+  reused,
+  onExecuted,
+}: {
+  user: User;
+  /**
+   * Consulta elegida en el historial o en las guardadas (M5). Solo se lee al montar:
+   * la página remonta el formulario (con `key`) cada vez que se reusa una.
+   */
+  reused: ReusedQuery | null;
+  /** Avisa que se ejecutó algo, para refrescar el historial. */
+  onExecuted: () => void;
+}) {
+  const [engine, setEngine] = useState<DbEngine>(reused?.engine ?? 'postgres');
+  const [question, setQuestion] = useState(reused?.question ?? '');
+  const [generated, setGenerated] = useState<PendingQuery | null>(reused ? { ...reused, safety: null } : null);
   const [result, setResult] = useState<ExecuteQueryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -25,7 +53,7 @@ export function QueryForm({ user }: { user: User }) {
         method: 'POST',
         body: { engine, naturalLanguageQuery: question },
       });
-      setGenerated(data);
+      setGenerated({ engine: data.engine, sql: data.sql, question: question.trim(), safety: data.safety });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -40,13 +68,14 @@ export function QueryForm({ user }: { user: User }) {
     try {
       const data = await apiFetch<ExecuteQueryResponse>('/executeQuery', user, {
         method: 'POST',
-        body: { engine: generated.engine, sql: generated.sql },
+        body: { engine: generated.engine, sql: generated.sql, question: generated.question ?? undefined },
       });
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setExecuting(false);
+      onExecuted();
     }
   }
 
@@ -97,20 +126,29 @@ export function QueryForm({ user }: { user: User }) {
       {generated && (
         <div className="space-y-2 rounded border p-3">
           <pre className="overflow-x-auto rounded bg-gray-100 p-2 text-sm">{generated.sql}</pre>
-          {generated.safety.safe ? (
+          {generated.safety === null ? (
+            <p className="text-sm text-gray-600">
+              Consulta reusada ({generated.engine}): el Query Safety Engine la vuelve a validar al ejecutarla.
+            </p>
+          ) : generated.safety.safe ? (
             <p className="text-sm text-green-700">Query Safety Engine: aprobado.</p>
           ) : (
             <p className="text-sm text-red-600">
               Query Safety Engine bloqueó esta consulta{generated.safety.reason ? `: ${generated.safety.reason}` : '.'}
             </p>
           )}
-          <button
-            onClick={handleExecute}
-            disabled={!generated.safety.safe || executing}
-            className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
-          >
-            {executing ? 'Ejecutando…' : 'Ejecutar'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleExecute}
+              disabled={generated.safety?.safe === false || executing}
+              className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
+            >
+              {executing ? 'Ejecutando…' : 'Ejecutar'}
+            </button>
+            {generated.safety?.safe !== false && (
+              <SaveQueryButton key={generated.sql} query={generated} user={user} onSaved={onExecuted} />
+            )}
+          </div>
         </div>
       )}
 

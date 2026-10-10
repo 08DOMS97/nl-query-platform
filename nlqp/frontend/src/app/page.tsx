@@ -1,15 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { QueryForm } from '@/components/QueryForm';
+import { HistoryPanel } from '@/components/HistoryPanel';
+import type { ReusedQuery } from '@/lib/types';
 
 export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [reused, setReused] = useState<ReusedQuery | null>(null);
+  const [reuseCount, setReuseCount] = useState(0);
+  const [historyKey, setHistoryKey] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,7 +41,17 @@ export default function HomePage() {
           </button>
         </div>
       </div>
-      <QueryForm user={user} />
+      <QueryForm key={reuseCount} user={user} reused={reused} onExecuted={() => setHistoryKey((k) => k + 1)} />
+      <HistoryPanel
+        user={user}
+        refreshKey={historyKey}
+        onReuse={(q) => {
+          // Remonta el formulario con la consulta elegida (aunque sea la misma de antes).
+          setReused({ engine: q.engine, question: q.question, sql: q.sql });
+          setReuseCount((n) => n + 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </main>
   );
 }

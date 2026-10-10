@@ -6,6 +6,170 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-10 (10) — M5 historial y consultas guardadas (versión mínima)
+
+- **David decidió:** lo que cuesta dinero va al final, con fecha límite: piloto a más
+  tardar el 14/10 (recomendado el 13/10), corrida completa a más tardar el 15/10, cifras
+  en la tesis el 16/10. M5 pasa a ser el siguiente.
+- **David decidió:** historial y consultas guardadas son cosas distintas: el historial
+  es automático, guardar es siempre manual.
+- Backend: `queryHistory.service.ts` + `functions/queryHistory.ts`. Firestore por
+  usuario: `users/{uid}/history` (lo escribe `/executeQuery` con éxito o error; no lo
+  bloqueado ni lo marcado `X-NLQP-Origin: evaluacion`) y `users/{uid}/saved`.
+  Endpoints: `GET /history` (últimas 50), `GET|POST|DELETE /savedQueries`
+  (`DELETE ?id=`). `/executeQuery` acepta `question` opcional. Al guardar se valida el
+  SQL con el Query Safety Engine; al ejecutar se vuelve a validar como siempre.
+- Frontend: `HistoryPanel` (pestañas Historial / Guardadas; Reusar, Guardar, Borrar) y
+  `SaveQueryButton` (nombre en línea). Reusar remonta el formulario con la consulta, sin
+  llamar a Gemini.
+- **Verificado:** API 32/32 (4 motores, errores, bloqueadas y evaluación fuera del
+  historial, validaciones 400/403/404/405, 401 sin token); interfaz 10/10 con Chromium
+  automatizado (la prueba abortaba si se pedía `/generateSQL`); `npm run test:seguridad`
+  57/57 + 200/200; frontend `tsc`, `lint` y `build` sin errores. Gasto en Gemini: $0.
+  Quedan unas 8 entradas de prueba en el historial del usuario de prueba.
+- Tesis: borrador de **6.6 Módulo 5** en `CAPITULO_6.md` (Tabla 19, Figura 10 pendiente)
+  y corrección del alcance de 6.4; 2 entradas nuevas en el resumen (19 pendientes).
+- Plan: tarea 33 (M5) con real 90 %. El corte del 10/10 **no se regeneró**: el Excel
+  del corte estaba abierto. Hay que cerrarlo y correr `generar_corte.py 2026-10-10`.
+- Sigue: piloto con paráfrasis (≈ $0.50, con confirmación), recomendado el 13/10.
+
+## 2026-10-10 (9) — Plan: filas en orden de fecha
+
+- David: en el plan una fila no puede ir antes que otra con fecha anterior. Las filas
+  nuevas se habían puesto junto a su tarea relacionada (p. ej. la 44, del 09/10, quedaba
+  antes de la 28, del 24/09).
+- `generar_corte.py` ordena las filas dentro de cada grupo por fecha de inicio (con el
+  mismo inicio, primero la tarea sin subtareas; después fecha de fin y número). No
+  cambia fechas ni números de tarea.
+- Las tareas 42, 43 y 44 (08–09/10) pasan de "Módulo 3" a ser tareas directas del Cap. 6:
+  dentro de Módulo 3 quedaban antes de Frontend (21/09) y del Módulo 4 (05/10). Ahora
+  todo el plan va en orden de inicio de arriba abajo.
+- Corte 10/10 regenerado: proyecto sin cambios (plan 96 %, real 91 %, −4,6); Módulo 3
+  pasa a 96 % de real porque ya no incluye esas tres. Sin commit.
+
+## 2026-10-10 (8) — Word, segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4
+
+- Pedido de David: referencias a secciones con vínculo, nada pendiente en el Word y
+  aplicar los cambios del proyecto que faltaban (mencionó que Vertex AI ya no se usa).
+- **Verificado en el código:** Vertex AI **sí** se sigue usando (`vertexAI.service.ts`:
+  `new GoogleGenAI({ vertexai: true, project, location })`, Gemini 2.5 Pro). Lo que ya no
+  se usa es el SDK `@google-cloud/vertexai` (migrado a `@google/genai` el 09/10). El Word
+  se corrigió en ese sentido (2.5 y 6.3.2); si David cambia de proveedor, hay que
+  rehacer 6.3.2, 2.5, RF-06, actores y costos.
+- Word (`PG2-2026 capítulo 6 revisado 10-10-2026.docx`, mismo nombre): quitados los
+  marcadores de 6.3.6, 6.5 y 6.6; integración renumerada a 6.5 (6.5.1–6.5.3); 6.3.2
+  actualizada (SDK, prompt de seis partes con valores de CHECK, marcas de índice, reglas
+  de dominio y de rendimiento, razonamiento 1024 / salida 4096 con error ante corte,
+  llamada real del 09/10: $0.01188, 14,5 s); 6.3.4 con la comparación por contenido y
+  las dos revisiones de las referencias (cancelados; empates, días, `LIMIT`, zona
+  horaria); 6.3.1 con el dato de paráfrasis (2 de 50) en vez de remitir a 6.3.6; 2.9
+  describe la poda real; RNF-13 remite a 6.3.2.
+- 44 referencias nuevas como hipervínculo al título (como las del original) y las
+  existentes reapuntadas; índices general, de tablas y de figuras regenerados con
+  páginas del render (Word los vuelve a actualizar al abrir). Validado; ningún párrafo
+  pasa de 12 líneas; capítulos en página impar (Cap. 6: 21 páginas).
+- `CAPITULO_6.md` y `RESUMEN_PARA_DOC_TEORICO.md` sincronizados (17 pendientes, 1 por
+  verificar, 54 aplicados). Sin commit, por pedido de David.
+
+## 2026-10-10 (7) — Plan de trabajo: corte 10/10 actualizado
+
+- Corte 10/10 regenerado con `generar_corte.py` (sin cambiar fechas del plan base):
+  tarea 39 (correcciones de figuras, rótulos y numeración del Cap. 5) pasa a 100 %;
+  tarea 37 (conclusiones y revisión final del documento) a 30 %, antes de su fecha, por
+  la revisión del documento hecha hoy. Proyecto: plan 96 %, real 91 %, **−4,6 puntos**
+  (antes −6,4). Lo que sigue pesando: M4 y M5 sin empezar, pruebas de generación 70 %,
+  frontend 85 %.
+- Excel en `Claude outputs/Plan_de_Trabajo_PG2 10-10-2026.xlsx` (sobrescribe el del
+  mismo corte). Sin commit, por pedido de David.
+
+## 2026-10-10 (6) — Word revisado con control de cambios
+
+- David pasó el .docx actual (`PG2-2026 capítulo 6.3.5 agregado 02-10-2026`) y pidió
+  aplicar todo con el formato exacto del documento y sus reglas (interlineado 1.5,
+  espaciado 2 pt, títulos de nivel 3+ con sangría, capítulos en página impar, máximo 12
+  líneas por párrafo, mínimo 12 páginas por capítulo, APA 7). Claude entregó `PG2-2026
+  capítulo 6 revisado 10-10-2026.docx` con **control de cambios** (autor "Claude"): 267
+  inserciones, 172 eliminaciones, 31 cambios de formato y 3 comentarios. Validado con el
+  esquema de Word (sin errores) y revisado en PDF.
+- Aplicadas todas las entradas de `RESUMEN_PARA_DOC_TEORICO.md` que no dependen de la
+  corrida ni están en espera. 6.3.2 y 6.3.4 solo recibieron la referencia 6.5 → 6.7.1 y
+  el reordenamiento, sin tocar su contenido.
+- Hallazgos de formato al revisar el .docx: las leyendas del Cap. 6 tenían el número
+  escrito a mano y la numeración automática apagada (por eso salían mal en los índices);
+  6.3.5 no tenía estilo de título; la tabla de hallazgos era flotante; RF-05, RNF-02 y
+  RNF-11 tenían asteriscos de markdown sueltos. Corregido.
+- Estructura final del Cap. 6 en el Word: 6.3.3.1 y 6.3.3.2 (títulos de nivel 4), 6.3.6
+  (marcador), 6.5 y 6.6 (marcadores), 6.7 con 6.7.1 Registro de uso y costos, 6.7.2
+  Revisión de seguridad y 6.7.3 Tiempos de ejecución. `CAPITULO_6.md` actualizado con
+  esa numeración. Tablas del Cap. 6: 14 a 18.
+- Páginas por capítulo (render con LibreOffice, puede variar ±1 en Word): Cap. 1: 20,
+  Cap. 2: 28, Cap. 3: 20, Cap. 4: 14, Cap. 5: 12, Cap. 6: 20. Todos empiezan en página
+  impar. Cap. 4 y 5 cumplen el mínimo pero no el ideal de 15.
+- Quedan 3 comentarios en el Word para David (equipo de 3.8, referencia sugerida de
+  Spider 2.0, recálculo de 1.6.3) y marcadores amarillos en 6.3.6, 6.5 y 6.6. Sin
+  commit, por pedido de David.
+- Corrección del mismo día: David no quiere el control de cambios (tachados y colores)
+  ni comentarios; no es parte del formato. Se reemplazó por una **versión limpia** con
+  los cambios ya incorporados, sin comentarios y sin resaltado (mismo nombre de
+  archivo). Validada y revisada en PDF; el texto del cuerpo coincide con la versión
+  aceptada. Referencia APA 7 sugerida para Spider 2.0 (no aplicada): Lei, F., Chen, J.,
+  Ye, Y., Cao, R., Shin, D., Su, H., Suo, Z., Gao, H., Hu, W., Yin, P., Zhong, V.,
+  Xiong, C., Sun, R., Liu, Q., Wang, S., & Yu, T. (2025). Spider 2.0: Evaluating
+  language models on real-world enterprise text-to-SQL workflows. En International
+  Conference on Learning Representations (ICLR 2025).
+  https://proceedings.iclr.cc/paper_files/paper/2025/file/46c10f6c8ea5aa6f267bcdabcb123f97-Paper-Conference.pdf
+
+## 2026-10-10 (5) — Decisiones sobre el texto de tesis
+
+- David pidió que Claude tomara las decisiones pendientes del texto de tesis. Quedaron
+  registradas como **Decisión (10/10)** en `RESUMEN_PARA_DOC_TEORICO.md`, con el motivo.
+  Las principales: eliminar la "Tabla 10." vacía del Cap. 3 (las referencias de 4.3.5 ya
+  contaban sin ella; las tablas del Cap. 6 pasan a 14–18); Spider 2.0 con los datos de
+  la versión publicada (arXiv v2: >1,000 columnas, o1-preview 21.3 % frente a 91.2 % en
+  Spider 1.0); agregar RF-14 de autenticación y dejar RF-12; agregar el motor de base de
+  datos como actor secundario en 4.2; no redibujar las Figuras 2 y 5 y aclarar el texto
+  (caché como mejora futura, Figura 5 ilustrativa); eliminar el párrafo del segundo
+  escenario de 5.1.3; no cambiar el umbral de 15 s; recalcular 1.6.3 una sola vez con el
+  costo promedio de la corrida completa (si el 13/10 no hay corrida, con $0.012); 3.8
+  con los datos de la Tabla 8 (David confirma el equipo); perfiles de usuario como
+  limitación; reordenar 6.7 ya.
+- `CAPITULO_6.md`: 6.3.1 reescrita (poda nueva, hallazgo de "clientes", 72 % / 43,4 %);
+  hallazgos 9 a 11 agregados a la tabla de seguridad con sus párrafos; tablas
+  renumeradas a 14–18. 6.3.3 verificada sin cambios.
+- El contenido nuevo del prompt se movió de 6.3.1 a 6.3.2 (en espera), para no describir
+  el prompt en dos lugares. La entrada "descripción de la poda en el Cap. 5" se cerró:
+  verificado que el Cap. 5 no la describe.
+- Contador: 53 pendientes, 0 por verificar, 10 aplicados. Sin commit, por pedido de
+  David.
+
+## 2026-10-10 (4) — Texto de tesis sincronizado con el Word
+
+- Lo redactado en el chat de Cowork (25/09 y 02/10) no estaba en el repo. Se verificó
+  qué tiene el Word contra el PDF que pasó David (128 páginas): están 6.3.1, 6.3.2, 6.4
+  (con la captura como Figura 9), "Registro de uso y costos" como 6.5 e "Integración"
+  como 6.6, versión del 25/09; 6.3.5 pegada el 02/10; tablas del texto renumeradas a
+  17–19.
+- Lo que el Word **no** tiene o tiene mal: el segundo párrafo de la introducción sigue
+  sin reemplazar; 6.3.3 tiene solo tres párrafos de la versión de 17 casos (falta el
+  hallazgo de Transact-SQL); **6.3.5 quedó pegada en medio de 6.3.4**, así que la tabla
+  de ejecución controlada es la 16 y la de verificación la 15; 6.3.5 todavía dice "60
+  segundos" y le falta el párrafo de limitación; 6.4 no tiene las correcciones del 25/09
+  ni las del 02/10; los índices están desactualizados y los títulos de tablas salen en
+  el índice general.
+- `CAPITULO_6.md` reescrito con la estructura acordada: 6.3.5 control de tiempo, 6.3.6
+  evaluación con Gemini, 6.5 M4, 6.6 M5, 6.7 integración con "Registro de uso y costos"
+  como primera subsección. Tablas 15 a 19. 6.1, 6.2 y 6.3.3 copiadas sin cambios
+  (verificado con diff); 6.4 sin rótulos en cursiva, como en el Word.
+- `RESUMEN_PARA_DOC_TEORICO.md`: rehecho contra el PDF. Agregadas las observaciones de
+  la revisión del documento del 25/09 (caps. 1 a 5), todas confirmadas como pendientes
+  en el PDF salvo 4.4 y "modelo de organización" (`[?]`); la entrada de requisitos no
+  funcionales ya no menciona el valor del tope de tiempo (decisión de David, 02/10);
+  6.3.2 y 6.3.4 quedan **en espera** por pedido de David (03/10). Contador: 52
+  pendientes, 2 por verificar, 9 aplicados.
+- Dato nuevo para 1.6.3: el costo medido (~$0.012 por consulta) es ~40 % mayor que el
+  que supone la Tabla 4 (~$0.0087); con el escenario de 35 usuarios serían ~$125 al mes.
+- Sin commit, por pedido de David.
+
 ## 2026-10-10 (3) — Plan de trabajo con cortes por fecha
 
 - David: el plan base **no se cambia** (aunque las fechas no coincidan, es lo que
