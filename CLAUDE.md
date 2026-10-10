@@ -76,9 +76,12 @@ Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
    ~~ajustar la poda~~ (hecho 09/10, §8 punto 2f); ~~corregir S10/M13~~ (hecho
    09/10, §8 punto 4); ~~runner nuevo~~ (hecho 10/10, §8 punto 6, probado gratis
    400/400); ~~paráfrasis revisadas~~ (aprobadas por David 10/10). **Ahora:
-   piloto** (~$0.25) → **corrida completa con
-   paráfrasis** (~$4.75). **Pedir confirmación antes de cada una.** Comandos en
-   `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
+   piloto con paráfrasis** (40 llamadas, ~$0.50) → **corrida completa con
+   paráfrasis** (~$4.25 más; el piloto no se repite). **Pedir confirmación antes de
+   cada una.** Requiere Docker y el backend corriendo. Comandos en
+   `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7. Después: revisar a mano los casos
+   de "Para revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y llevar
+   las cifras al Cap. 6.
 3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
 4. Si no da el tiempo: Módulo 4 (herramientas técnicas, atrasado desde 07/10),
    banco de volumen alto → alcance reducido / trabajo futuro.
@@ -130,7 +133,9 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Dashboard de uso/costos en el frontend: sin empezar.
 - Paráfrasis (`parafrasis_50.json`): aprobadas por David el 10/10, sin cambios.
 - Riesgos: retiro de `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
-  factura (~$0.012), avisar antes.
+  factura (~$0.012), avisar antes. **Gastado en Gemini al 10/10: ≈ $0.022** (3
+  llamadas sueltas: 21/09, 01/10, 09/10). Las 200/200 ejecuciones de referencia no
+  usan Gemini y no cuestan nada.
 - Coordinar los 35 participantes de la encuesta (no depende de código).
 - Despliegue: no hace falta, se presenta **en local** (decisión 01/10). Acceso
   remoto analizado en `ACCESO_REMOTO.md`, no implementado.

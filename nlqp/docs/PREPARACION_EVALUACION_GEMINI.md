@@ -370,5 +370,6 @@ Se confirma con David antes de cada corrida pagada.
      probados.
 7. Piloto pagado y corrida completa, con confirmación de costo. Comandos (con el
    backend corriendo, `npm run dev`):
-   `npm run eval:gemini -- --modo piloto --confirmar` y luego
+   `npm run eval:gemini -- --modo piloto --parafrasis --confirmar` (40 llamadas,
+   ~$0.50, tope automático $0.60) y luego
    `npm run eval:gemini -- --modo completa --parafrasis --confirmar`.
