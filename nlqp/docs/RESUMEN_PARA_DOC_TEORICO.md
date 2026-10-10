@@ -24,15 +24,15 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-10, con el Módulo 5)
+## Contador (actualizado 2026-10-10, con los Módulos 4 y 5)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 20 |
 | 5 | 1 | 0 | 4 |
-| 6 | 5 | 0 | 30 |
+| 6 | 8 | 0 | 30 |
 | Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **19** | **1** | **54** |
+| **Total** | **22** | **1** | **54** |
 
 ---|---|---|---|
 | Preliminares y 1–4 | 7 | 1 | 15 |
@@ -344,22 +344,37 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
 - [x] (25/09) Sección pegada en el Word, con la captura de la pantalla principal como
   Figura 9.
 
-### Módulos 4 y 5 (6.5 y 6.6 cuando se escriban)
+### Módulos 4 y 5 (6.5 y 6.6)
+- [ ] (10/10) **Agregar 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos**
+  (sección nueva, después de 6.4) con el texto de `CAPITULO_6.md`: roles técnico y no
+  técnico como custom claim que solo asigna el backend, control en el backend (403);
+  Tabla 16 (edición del SQL, conexiones y pool, esquema, uso y costos); SQL editado
+  validado al ejecutar; endpoint del pool; verificación 23/23 (API, ambos roles) +
+  12/12 (interfaz) + regresión 57/57 y 200/200; limitación del SQL no firmado. Lleva la
+  Figura 10 (captura de Conexiones; está en `Claude outputs/capturas 10-10-2026/`).
 - [ ] (10/10) **Agregar 6.6 Módulo 5 — Historial y gestión de consultas guardadas**
-  (sección nueva, antes de la integración) con el texto de `CAPITULO_6.md`: historial
+  (sección nueva, después de 6.5) con el texto de `CAPITULO_6.md`: historial
   automático y consultas guardadas por decisión del usuario, en colecciones separadas
-  de Firestore por usuario; Tabla 19 (datos de cada registro); reusar sin llamar al
+  de Firestore por usuario; Tabla 17 (datos de cada registro); reutilizar sin llamar al
   modelo y con nueva validación del Query Safety Engine; verificación 32/32 (API, 4
-  motores) + 10/10 (interfaz) + regresión 57/57 y 200/200; lo que queda fuera. Lleva
-  la Figura 10 (captura del panel, pendiente de tomar). **Numeración:** si M4 queda
-  como alcance reducido y no se escribe, M5 pasa a 6.5 y la integración a 6.6.
-- [ ] (10/10) **Corregir el alcance de 6.4**: "Todavía no incluye las herramientas para
-  usuarios técnicos, el historial de consultas ni el panel de uso y costos" → quitar el
-  historial y remitir a 6.6 (texto en `CAPITULO_6.md`).
-- [ ] (10/10) Módulo 4: redactar según lo que se construya; si no da el tiempo,
-  documentar como alcance reducido.
+  motores) + 10/10 (interfaz) + regresión 57/57 y 200/200; lo que queda fuera. Lleva la
+  Figura 11 (captura de Historial; en la misma carpeta).
+- [ ] (10/10) **Reemplazar 6.4** por el texto de `CAPITULO_6.md`: pantallas por módulo
+  con barra lateral y menú según el rol, criterio visual (blanco, neutros cálidos,
+  acento naranja claro, IBM Plex), SQL plegado para el no técnico y editable para el
+  técnico (cubre RF-09), la consulta se conserva al cambiar de pantalla, y el párrafo
+  de alcance sin "todavía no incluye…". **Reemplazar la Figura 9** por la captura de
+  la pantalla Consultar nueva (en la misma carpeta).
 
 ### 6.5 — Integración y pruebas del sistema (6.7 cuando entren M4 y M5)
+- [ ] (10/10) **Renumerar la integración a 6.7** (6.7.1 uso y costos, 6.7.2 seguridad,
+  6.7.3 tiempos) al entrar 6.5 (M4) y 6.6 (M5); las referencias son hipervínculos, solo
+  cambia el número escrito. Las tablas 16–18 pasan a 18–20 (numeración automática).
+- [ ] (10/10) **6.7.1**: reemplazar el párrafo "Dos limitaciones: el panel visual… no
+  define un rol de administrador" por el de `CAPITULO_6.md` (las estadísticas están en
+  la pantalla Uso y costos, solo rol técnico).
+- [ ] (10/10) **6.7.2**: agregar a la tabla de hallazgos la fila "Funciones técnicas
+  accesibles a cualquier usuario autenticado | Media | Corregido" (`SEGURIDAD.md` §12).
 - [x] (10/10) **Renumerar a 6.5** al quitar los marcadores de 6.5 y 6.6: 6.5 Integración,
   6.5.1 Registro de uso y costos, 6.5.2 Revisión de seguridad, 6.5.3 Tiempos de ejecución;
   referencias de 6.3.2, 6.3.5 y 6.4 actualizadas. **Aplicado el 10/10** (segunda versión del Word, sin marcadores y con referencias enlazadas).
@@ -396,10 +411,12 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
 - [ ] (25/09) **Reescribir las Conclusiones actuales**: afirman resultados que todavía
   no se midieron (mejora de precisión por la poda, Q712 al mes, ROI de 39,2 %).
   Reescribirlas con los datos de la evaluación y el costo medido.
-- [ ] (25/09) **Limitación — perfiles de usuario**: 4.2 y 5.1.1 diferencian el acceso
-  por perfil, pero el frontend no distingue perfiles (cualquier usuario autenticado ve
-  el SQL y las estadísticas de uso). **Decisión:** declararlo como limitación y no
-  implementarlo; M4 y M5 van primero y el tiempo no alcanza.
+- [ ] (10/10) **Limitación — SQL no firmado** (reemplaza la de perfiles del 25/09, que
+  ya no aplica: los roles se implementaron el 10/10, sección 6.5). Un usuario no
+  técnico no puede editar el SQL en la interfaz, pero con su token puede enviar una
+  sentencia propia a `executeQuery`; el Query Safety Engine la sigue validando (no
+  puede modificar datos). Cerrarlo: firmar en el backend el SQL generado
+  (`SEGURIDAD.md` §12).
 - [ ] (09/10) **Limitación**: el diccionario de sinónimos de la poda se ajustó con las
   mismas 50 preguntas de la evaluación. Medido con las paráfrasis (antes de la corrida):
   en 2 de 50 la poda pierde tablas (M17, C08). Se decidió **no** ajustarlo para no

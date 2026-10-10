@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { testConnectionHandler } from './functions/testConnection.js';
+import { poolStatusHandler, testConnectionHandler } from './functions/testConnection.js';
 import { getSchemaHandler } from './functions/getSchema.js';
 import { generateSQLHandler } from './functions/generateSQL.js';
 import { executeQueryHandler } from './functions/executeQuery.js';
@@ -11,7 +11,7 @@ import {
   exportResultCsvHandler,
   getResultPageHandler,
 } from './functions/resultPages.js';
-import { verifyFirebaseAuth } from './middleware/auth.middleware.js';
+import { requireTechnicalRole, verifyFirebaseAuth } from './middleware/auth.middleware.js';
 
 /**
  * Servidor local de desarrollo: monta todas las funciones en un único proceso Express
@@ -26,11 +26,13 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => res.status(200).json({ ok: true }));
 
-app.get('/testConnection', verifyFirebaseAuth, testConnectionHandler);
-app.get('/getSchema', verifyFirebaseAuth, getSchemaHandler);
+// Módulo 4 (rol técnico): conexiones y pool, esquema, uso y costos.
+app.get('/testConnection', verifyFirebaseAuth, requireTechnicalRole, testConnectionHandler);
+app.get('/poolStatus', verifyFirebaseAuth, requireTechnicalRole, poolStatusHandler);
+app.get('/getSchema', verifyFirebaseAuth, requireTechnicalRole, getSchemaHandler);
 app.post('/generateSQL', verifyFirebaseAuth, generateSQLHandler);
 app.post('/executeQuery', verifyFirebaseAuth, executeQueryHandler);
-app.get('/getUsageStats', verifyFirebaseAuth, getUsageStatsHandler);
+app.get('/getUsageStats', verifyFirebaseAuth, requireTechnicalRole, getUsageStatsHandler);
 app.get('/history', verifyFirebaseAuth, getHistoryHandler);
 app.all('/savedQueries', verifyFirebaseAuth, savedQueriesHandler);
 app.get('/getResultPage', verifyFirebaseAuth, getResultPageHandler);

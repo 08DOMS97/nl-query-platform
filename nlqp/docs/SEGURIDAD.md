@@ -30,6 +30,7 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 9 | Palabras reservadas y `;` dentro de literales se bloqueaban; el texto de 6.3.3 decía lo contrario (08/10) | Baja | Corregido (08/10) |
 | 10 | Funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) pasaban el validador; las frenaban los permisos del motor (08/10) | Baja | Corregido (08/10) |
 | 11 | La batería de 17 casos no estaba versionada en el repo (08/10) | Baja | Corregido (08/10): `npm run test:seguridad` |
+| 12 | Sin control por rol: todo usuario autenticado veía conexiones, esquema y costos (10/10) | Media | Corregido (10/10); queda un riesgo aceptado, ver §12 |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -446,6 +447,44 @@ bloquearse y 13 legítimos. Resultado tras las correcciones de §9 y §10: **57/
 las 50 consultas 200/200 con 0 inconsistencias entre motores.** (Desde el 10/10 la
 comparación entre motores es por contenido, no solo por número de filas; ver
 `PREPARACION_EVALUACION_GEMINI.md` §8, 2g.)
+
+## 12. Sin control de acceso por rol — MEDIA (corregido, 10/10/2026)
+
+### El problema
+
+La sección 4.2 define dos actores, usuario técnico y no técnico, pero el backend solo
+verificaba que hubiera sesión. Cualquier cuenta creada desde `/signup` podía llamar a
+`/testConnection`, `/getSchema` y `/getUsageStats`, y así ver la estructura completa de
+las bases (tablas, columnas, valores permitidos, índices) y el gasto en Vertex AI.
+
+### La corrección (10/10/2026)
+
+- El rol es un custom claim de Firebase (`role: 'tecnico'`). Solo lo escribe el Admin
+  SDK (`npm run set:role -- <correo> <tecnico|no_tecnico>`); el usuario no puede
+  cambiárselo. Sin claim, el usuario es no técnico: las cuentas nuevas empiezan con el
+  menor permiso.
+- `auth.middleware.ts`: `verifyFirebaseAuth` lee el claim; `requireTechnicalRole`
+  responde 403 si no es técnico. Se aplica en el backend a `/testConnection`,
+  `/poolStatus` (nuevo), `/getSchema` y `/getUsageStats`. El frontend solo oculta las
+  pantallas; la autorización es la del backend.
+- Con el bypass de desarrollo (sin Firebase) el rol es no técnico (falla cerrado).
+
+### Verificación
+
+23/23 con un token de cada rol: las 4 rutas técnicas dan 403 al no técnico, 200 al
+técnico y 401 sin token; historial, guardadas y ejecución funcionan con ambos roles y
+el historial de uno no se ve desde el otro. En la interfaz, 12/12 (menú y rutas
+técnicas restringidas al rol usuario; SQL editado con `DELETE` lo rechaza el backend).
+`npm run test:seguridad` sin cambios: 57/57 y 200/200.
+
+### Riesgo aceptado
+
+La interfaz no deja editar el SQL al rol no técnico, pero con su token puede enviar
+cualquier sentencia directo a `/executeQuery`. Sigue pasando por el Query Safety
+Engine (solo lectura, una sentencia), así que no puede modificar datos; sí puede leer
+tablas que el modelo no le habría consultado. Cerrarlo exige firmar en el backend el
+SQL generado por `/generateSQL` y aceptar solo SQL firmado de un no técnico. Queda
+documentado como limitación.
 
 ---
 

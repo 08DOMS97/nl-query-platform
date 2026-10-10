@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Sistema visual de NLQP.
+ * Fondo blanco, neutros cálidos y un solo acento naranja suave: el acento marca
+ * dónde está el usuario (navegación) y cuál es la acción principal, nada más.
+ * Sin sombras de profundidad, sin degradados; la jerarquía la dan el borde, el
+ * peso tipográfico y el espacio.
+ */
+@theme {
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Neutros cálidos */
+  --color-canvas: #ffffff;
+  --color-surface: #faf8f5;
+  --color-sunken: #f4f1ec;
+  --color-line: #e8e3dc;
+  --color-line-strong: #d5cec4;
+  --color-ink: #1f1d1a;
+  --color-ink-2: #57524b;
+  --color-ink-3: #8a8379;
+
+  /* Acento naranja claro */
+  --color-accent-50: #fff7f0;
+  --color-accent-100: #fdebdc;
+  --color-accent-200: #f7d3b4;
+  --color-accent-500: #e3843f;
+  --color-accent-700: #9c4d17;
+  --color-accent-800: #7a3b10;
+
+  /* Estados */
+  --color-ok: #2f6f4a;
+  --color-ok-bg: #edf6f0;
+  --color-bad: #a8321f;
+  --color-bad-bg: #fcefec;
+  --color-warn: #8a5a00;
+  --color-warn-bg: #fdf5e3;
+
+  --radius-sm: 3px;
+  --radius: 4px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: "kern";
+}
+
+/* Cifras alineadas en tablas y métricas */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 1px;
+}
+
+::selection {
+  background: var(--color-accent-100);
 }

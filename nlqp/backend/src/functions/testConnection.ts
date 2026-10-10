@@ -1,6 +1,6 @@
 import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
-import { testAllConnections, testConnection } from '../services/connectionManager.service.js';
+import { getPoolStatus, testAllConnections, testConnection } from '../services/connectionManager.service.js';
 import { DB_ENGINES, type DbEngine } from '../types/index.js';
 
 function isDbEngine(value: unknown): value is DbEngine {
@@ -27,4 +27,13 @@ export const testConnectionHandler = async (req: Request, res: Response): Promis
   res.status(allOk ? 200 : 502).json({ results });
 };
 
+/**
+ * GET /poolStatus -> { pools: PoolStatus[] }: conexiones abiertas, libres, en uso y en
+ * espera de cada motor. Solo lectura; no abre conexiones. Solo rol técnico.
+ */
+export const poolStatusHandler = (_req: Request, res: Response): void => {
+  res.status(200).json({ pools: getPoolStatus() });
+};
+
 functions.http('testConnection', testConnectionHandler);
+functions.http('poolStatus', poolStatusHandler);

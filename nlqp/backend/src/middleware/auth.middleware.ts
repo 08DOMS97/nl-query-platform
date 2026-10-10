@@ -1,5 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
 import { getFirebaseAdmin } from '../services/firebaseAdmin.service.js';
+import type { UserRole } from '../types/index.js';
+
+export type AuthedRequest = Request & { uid?: string; role?: UserRole };
+
+/** Solo un claim `role: 'tecnico'` explícito da el rol técnico; cualquier otra cosa, no técnico. */
+export function roleFromClaims(claims: Record<string, unknown>): UserRole {
+  return claims.role === 'tecnico' ? 'tecnico' : 'no_tecnico';
+}
 
 /**
  * Verifica el JWT de Firebase Auth enviado como `Authorization: Bearer <idToken>`.
@@ -28,6 +36,7 @@ export async function verifyFirebaseAuth(
       '[auth.middleware] FIREBASE_PROJECT_ID no configurado y NLQP_ALLOW_DEV_AUTH_BYPASS=true — ' +
         'verificación de JWT omitida (solo desarrollo local, NUNCA debe estar así en producción).',
     );
+    (req as AuthedRequest).role = 'no_tecnico';
     next();
     return;
   }
@@ -42,9 +51,23 @@ export async function verifyFirebaseAuth(
 
   try {
     const decoded = await getFirebaseAdmin().auth().verifyIdToken(idToken);
-    (req as Request & { uid?: string }).uid = decoded.uid;
+    (req as AuthedRequest).uid = decoded.uid;
+    (req as AuthedRequest).role = roleFromClaims(decoded);
     next();
   } catch (err) {
     res.status(401).json({ error: 'Token inválido o expirado.', detail: err instanceof Error ? err.message : String(err) });
   }
+}
+
+/**
+ * Restringe una ruta al rol técnico (Módulo 4: conexiones y pool, esquema, uso y
+ * costos). Va después de `verifyFirebaseAuth`. Se aplica en el backend: ocultar la
+ * pantalla en el frontend no alcanza.
+ */
+export function requireTechnicalRole(req: Request, res: Response, next: NextFunction): void {
+  if ((req as AuthedRequest).role !== 'tecnico') {
+    res.status(403).json({ error: 'Esta función es solo para el rol técnico.' });
+    return;
+  }
+  next();
 }

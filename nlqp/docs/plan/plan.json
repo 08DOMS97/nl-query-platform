@@ -343,8 +343,8 @@
       "padre": 21,
       "inicio": "2026-09-21",
       "fin": "2026-10-02",
-      "real": 0.85,
-      "comentario": "v1: login, registro, flujo motor-pregunta-SQL-ejecutar, paginación y descarga CSV verificadas en navegador. Falta: probar \"Generar SQL\" con Gemini desde la interfaz, distinguir perfiles técnico/no técnico y dashboard de uso y costos."
+      "real": 0.95,
+      "comentario": "10/10: rediseño completo (pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex) y perfiles técnico/no técnico. Verificado en navegador 12/12. Falta: probar \"Generar SQL\" con Gemini desde la interfaz."
     },
     {
       "no": 41,
@@ -367,8 +367,8 @@
       "padre": 21,
       "inicio": "2026-10-05",
       "fin": "2026-10-07",
-      "real": 0.0,
-      "comentario": "Sin empezar (plan 05–07/10). Se hará solo si hay tiempo después de la evaluación y el historial; si no, alcance reducido."
+      "real": 0.9,
+      "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado 23/23 API + 12/12 UI. Falta pasarlo al Word con su captura."
     },
     {
       "no": 33,

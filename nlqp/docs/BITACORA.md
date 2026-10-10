@@ -6,6 +6,40 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-10 (11) — M4 por roles y rediseño del frontend
+
+- Commit `7d81e97` (M5 y documentación pendiente), sin push.
+- **David decidió:** el frontend se hace "de verdad": diseño profesional, blanco con
+  naranja claro, sin aspecto de hecho por IA, una pantalla por módulo. **M4 es lo que
+  puede hacer el rol técnico**, y el pool de conexiones solo lo ve ese rol. Uso y costos
+  también, solo para el técnico.
+- Backend: rol como custom claim de Firebase (`role: 'tecnico'`; sin claim = no
+  técnico). `requireTechnicalRole` (403) en `/testConnection`, `/getSchema`,
+  `/getUsageStats` y `/poolStatus` (nuevo: abiertas, libres, en uso y en espera por
+  motor, sin abrir conexiones). `npm run set:role -- <correo> <tecnico|no_tecnico>`.
+  Usuarios de prueba: `nlqp-test@example.com` técnico, `nlqp-usuario@example.com`
+  (`NlqpUsuario_2026!`) no técnico.
+- Frontend: route group `(app)` con barra lateral según el rol; pantallas Consultar,
+  Historial, Conexiones, Esquema y Uso y costos. Paleta blanca con neutros cálidos y
+  acento naranja claro; IBM Plex Sans y Mono servidas por `next/font`. Técnico: SQL
+  editable (marcado "Editada"; si el backend la rechaza queda "Bloqueada" con el
+  motivo) y consumo de la generación. No técnico: SQL plegado, solo lectura. La
+  consulta en curso se conserva al cambiar de pantalla. Login y registro con errores de
+  Firebase traducidos.
+- **Verificado:** roles 23/23 (API, ambos roles, 401/403/200, aislamiento del
+  historial, pool coherente); M5 sigue 32/32; interfaz 12/12 (edición, bloqueo de
+  `DELETE` editado, guardar/reutilizar/eliminar, rutas técnicas restringidas al no
+  técnico) y capturas de las 8 pantallas sin errores de consola; `test:seguridad`
+  57/57 + 200/200; `tsc`, `lint`, `build` limpios. Gasto en Gemini: $0 (las pruebas
+  abortaban si se pedía `/generateSQL`).
+- Riesgo aceptado, documentado en `SEGURIDAD.md` §12: un no técnico puede mandar SQL
+  propio a `/executeQuery` con su token (lo sigue validando el Query Safety Engine).
+- Tesis: `CAPITULO_6.md` con 6.4 reescrita, 6.5 Módulo 4 nueva, integración renumerada
+  a 6.7 (tablas 14–20, figuras 9–11). Resumen: 22 pendientes. Capturas para las
+  figuras en `Claude outputs/capturas 10-10-2026/` (tienen datos de prueba; conviene
+  retomarlas con preguntas reales después del piloto).
+- Plan: M4 90 %, frontend 95 %. El corte del 10/10 sigue sin regenerar (Excel abierto).
+
 ## 2026-10-10 (10) — M5 historial y consultas guardadas (versión mínima)
 
 - **David decidió:** lo que cuesta dinero va al final, con fecha límite: piloto a más

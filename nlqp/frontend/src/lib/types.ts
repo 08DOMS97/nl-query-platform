@@ -4,15 +4,38 @@ export type DbEngine = 'postgres' | 'mysql' | 'mariadb' | 'mssql';
 
 export const DB_ENGINES: DbEngine[] = ['postgres', 'mysql', 'mariadb', 'mssql'];
 
+/** Nombre de cada motor tal como se muestra en la interfaz. */
+export const ENGINE_LABELS: Record<DbEngine, string> = {
+  postgres: 'PostgreSQL',
+  mysql: 'MySQL',
+  mariadb: 'MariaDB',
+  mssql: 'SQL Server',
+};
+
+/** Rol del usuario (custom claim de Firebase que asigna el backend). */
+export type UserRole = 'tecnico' | 'no_tecnico';
+
 export interface QuerySafetyResult {
   safe: boolean;
   reason?: string;
+}
+
+export interface GenerateSqlMetrics {
+  tokensInput: number;
+  tokensOutput: number;
+  tokensThinking: number;
+  tokensTotal: number;
+  costUsd: number;
+  latencyMs: number;
+  tablesSent: number;
+  tablesTotal: number;
 }
 
 export interface GenerateSqlResponse {
   sql: string;
   engine: DbEngine;
   safety: QuerySafetyResult;
+  metrics: GenerateSqlMetrics;
 }
 
 /**
@@ -62,4 +85,66 @@ export interface ReusedQuery {
   engine: DbEngine;
   question: string | null;
   sql: string;
+}
+
+/* --- Módulo 4 (rol técnico) --- */
+
+export interface TestConnectionResult {
+  engine: DbEngine;
+  ok: boolean;
+  latencyMs?: number;
+  error?: string;
+}
+
+export interface PoolStatus {
+  engine: DbEngine;
+  initialized: boolean;
+  max: number;
+  total: number;
+  idle: number;
+  inUse: number;
+  waiting: number;
+}
+
+export interface ColumnInfo {
+  name: string;
+  dataType: string;
+  nullable: boolean;
+  isPrimaryKey: boolean;
+  isForeignKey: boolean;
+  referencesTable?: string;
+  referencesColumn?: string;
+  defaultValue?: string | null;
+  allowedValues?: string[];
+  indexed?: boolean;
+}
+
+export interface IndexInfo {
+  name: string;
+  columns: string[];
+  unique: boolean;
+}
+
+export interface TableInfo {
+  name: string;
+  columns: ColumnInfo[];
+  indexes?: IndexInfo[];
+}
+
+export interface SchemaInfo {
+  engine: DbEngine;
+  database: string;
+  tables: TableInfo[];
+}
+
+export type UsageOrigin = 'usuario' | 'evaluacion' | 'todos';
+
+export interface UsageStats {
+  periodDays: number;
+  origin: UsageOrigin;
+  totalCalls: number;
+  totalCostUsd: number;
+  callsByType: { generateSQL: number; executeQuery: number };
+  callsByEngine: Record<DbEngine, number>;
+  errorCount: number;
 }

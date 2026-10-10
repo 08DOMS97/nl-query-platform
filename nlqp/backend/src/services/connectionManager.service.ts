@@ -3,7 +3,7 @@ import Cursor from 'pg-cursor';
 import mysql from 'mysql2/promise';
 import type { Connection as MysqlCoreConnection } from 'mysql2';
 import mssql from 'mssql';
-import type { DbEngine, EngineConnectionConfig, TestConnectionResult } from '../types/index.js';
+import type { DbEngine, EngineConnectionConfig, PoolStatus, TestConnectionResult } from '../types/index.js';
 import { DB_ENGINES } from '../types/index.js';
 
 const { Pool: PgPool } = pg;
@@ -76,10 +76,13 @@ function isTimeoutError(err: unknown): boolean {
 }
 
 // Pools cacheados por motor — se crean una sola vez y se reutilizan (lazy singleton).
+const POOL_MAX = 5;
 let pgPool: pg.Pool | undefined;
 let mysqlPool: mysql.Pool | undefined;
 let mariadbPool: mysql.Pool | undefined;
 let mssqlPoolPromise: Promise<mssql.ConnectionPool> | undefined;
+/** El pool de SQL Server ya conectado (solo para `getPoolStatus`, que no espera). */
+let mssqlPoolReady: mssql.ConnectionPool | undefined;
 
 function getPgPool(): pg.Pool {
   if (!pgPool) {
@@ -90,7 +93,7 @@ function getPgPool(): pg.Pool {
       database: cfg.database,
       user: cfg.user,
       password: cfg.password,
-      max: 5,
+      max: POOL_MAX,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
       statement_timeout: QUERY_TIMEOUT_MS,
@@ -108,7 +111,7 @@ function getMysqlPool(): mysql.Pool {
       database: cfg.database,
       user: cfg.user,
       password: cfg.password,
-      connectionLimit: 5,
+      connectionLimit: POOL_MAX,
       connectTimeout: 5_000,
       // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
       // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
@@ -134,7 +137,7 @@ function getMariadbPool(): mysql.Pool {
       database: cfg.database,
       user: cfg.user,
       password: cfg.password,
-      connectionLimit: 5,
+      connectionLimit: POOL_MAX,
       connectTimeout: 5_000,
       // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
       // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
@@ -159,7 +162,7 @@ async function getMssqlPool(): Promise<mssql.ConnectionPool> {
       database: cfg.database,
       user: cfg.user,
       password: cfg.password,
-      pool: { max: 5, idleTimeoutMillis: 30_000 },
+      pool: { max: POOL_MAX, idleTimeoutMillis: 30_000 },
       // trustServerCertificate=true desactiva la validación del certificado TLS (acepta
       // cualquier certificado, incluido uno falsificado — riesgo de MITM). Necesario en
       // local porque el contenedor de pruebas usa un certificado autofirmado (ver README
@@ -173,6 +176,10 @@ async function getMssqlPool(): Promise<mssql.ConnectionPool> {
       connectionTimeout: 5_000,
       requestTimeout: QUERY_TIMEOUT_MS,
     }).connect();
+    mssqlPoolPromise.then(
+      (p) => (mssqlPoolReady = p),
+      () => undefined,
+    );
   }
   return mssqlPoolPromise;
 }
@@ -435,4 +442,52 @@ export async function closeAllPools(): Promise<void> {
   mysqlPool = undefined;
   mariadbPool = undefined;
   mssqlPoolPromise = undefined;
+  mssqlPoolReady = undefined;
+}
+
+/**
+ * Estado de los pools de conexión (pantalla de Conexiones, solo rol técnico). No
+ * crea pools: un motor que todavía no se usó aparece como no iniciado.
+ */
+export function getPoolStatus(): PoolStatus[] {
+  /** mysql2 no expone contadores públicos: se leen las colas internas del pool. */
+  const mysqlFamily = (pool: mysql.Pool | undefined) => {
+    if (!pool) return null;
+    const core = pool.pool as unknown as {
+      _allConnections: { length: number };
+      _freeConnections: { length: number };
+      _connectionQueue: { length: number };
+    };
+    const total = core._allConnections.length;
+    const idle = core._freeConnections.length;
+    return { total, idle, inUse: total - idle, waiting: core._connectionQueue.length };
+  };
+
+  const counts: Record<DbEngine, Omit<PoolStatus, 'engine' | 'initialized' | 'max'> | null> = {
+    postgres: pgPool
+      ? {
+          total: pgPool.totalCount,
+          idle: pgPool.idleCount,
+          inUse: pgPool.totalCount - pgPool.idleCount,
+          waiting: pgPool.waitingCount,
+        }
+      : null,
+    mysql: mysqlFamily(mysqlPool),
+    mariadb: mysqlFamily(mariadbPool),
+    mssql: mssqlPoolReady
+      ? {
+          total: mssqlPoolReady.size,
+          idle: mssqlPoolReady.available,
+          inUse: mssqlPoolReady.borrowed,
+          waiting: mssqlPoolReady.pending,
+        }
+      : null,
+  };
+
+  return DB_ENGINES.map((engine) => {
+    const c = counts[engine];
+    return c
+      ? { engine, initialized: true, max: POOL_MAX, ...c }
+      : { engine, initialized: false, max: POOL_MAX, total: 0, idle: 0, inUse: 0, waiting: 0 };
+  });
 }

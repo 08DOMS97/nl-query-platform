@@ -1,82 +1,32 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { AuthForm } from '@/components/AuthForm';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
-    <main className="flex-1 flex items-center justify-center p-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold">Iniciar sesión — NLQP</h1>
-
-        <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium">
-            Correo
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-          />
-        </div>
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-3 py-2 text-white disabled:opacity-50"
-        >
-          {loading ? 'Ingresando…' : 'Ingresar'}
-        </button>
-
-        <p className="text-sm text-gray-600">
-          ¿No tenés cuenta?{' '}
-          <Link href="/signup" className="underline">
-            Registrate
+    <AuthForm
+      title="Iniciar sesión"
+      description="Ingrese con su cuenta para consultar las bases de datos."
+      submitLabel="Ingresar"
+      submittingLabel="Ingresando…"
+      onSubmit={async (email, password) => {
+        await signInWithEmailAndPassword(auth, email, password);
+        router.push('/');
+      }}
+      footer={
+        <>
+          ¿No tiene cuenta?{' '}
+          <Link href="/signup" className="text-accent-700 underline underline-offset-2">
+            Crear una cuenta
           </Link>
-        </p>
-      </form>
-    </main>
+        </>
+      }
+    />
   );
 }

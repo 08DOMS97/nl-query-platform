@@ -13,14 +13,12 @@ chat de Cowork (25/09 y 02/10).
 
 **Numeración:** al quitar la "Tabla 10." vacía del Cap. 3 (10/10), antes de este
 capítulo el Word llega a la Tabla 13 y a la Figura 8. Tablas del capítulo: 14 (6.3.4),
-15 (6.3.5), 16 (6.5.1), 17 (6.5.2), 18 (6.5.3) y 19 (6.6, Módulo 5); Figuras 9 (6.4) y
-10 (6.6). Si el Módulo 5 entra en el Word antes que 6.5, las leyendas se renumeran
-solas. En el Word las leyendas
-se numeran solas (estilos "Tabla 1" e "I_Figuras"): no se escribe el número a mano.
-**Secciones (10/10):** sin marcadores, la integración es la **6.5** (6.5.1 uso y costos,
-6.5.2 seguridad, 6.5.3 tiempos). Cuando se escriban los Módulos 4 y 5 entran como 6.5 y
-6.6 y la integración vuelve a 6.7; en el Word las referencias son hipervínculos a los
-títulos, así que solo cambia el número escrito.
+15 (6.3.5), 16 (6.5, Módulo 4), 17 (6.6, Módulo 5), 18 (6.7.1), 19 (6.7.2) y 20 (6.7.3);
+Figuras 9 (6.4), 10 (6.5) y 11 (6.6). En el Word las leyendas se numeran solas (estilos
+"Tabla 1" e "I_Figuras"): no se escribe el número a mano.
+**Secciones (10/10, con M4 y M5):** 6.5 Módulo 4, 6.6 Módulo 5 y 6.7 Integración
+(6.7.1 uso y costos, 6.7.2 seguridad, 6.7.3 tiempos). En el Word las referencias son
+hipervínculos a los títulos, así que solo cambia el número escrito.
 
 ---
 
@@ -251,7 +249,7 @@ Aun así, el modelo puede envolver la respuesta en bloques de código pese a la
 instrucción, por lo que el servicio retira esas marcas antes de devolver la sentencia.
 Si la respuesta llega vacía, se reporta un error en lugar de continuar. De cada
 respuesta se conservan los tokens de entrada, salida y razonamiento que informa Vertex
-AI, que alimentan el registro de uso y costos (sección 6.5.1).
+AI, que alimentan el registro de uso y costos (sección 6.7.1).
 
 El servicio solo genera, no autoriza. El endpoint `generateSQL` extrae el esquema, lo
 poda, invoca al modelo y devuelve la sentencia junto con un resultado informativo de
@@ -477,7 +475,7 @@ el tamaño de los lotes y la escritura de la copia. Cualquier otra página se le
 Estas pruebas encontraron también un error grave: cuando un resultado superaba el tamaño
 máximo, el descarte de la copia dejaba escrituras pendientes que terminaban el proceso
 del backend. Una sola consulta grande dejaba el servicio caído para todos los usuarios.
-Se corrigió y se registra en la revisión de seguridad (sección 6.5.2).
+Se corrigió y se registra en la revisión de seguridad (sección 6.7.2).
 
 Como limitación, el almacén de copias reside en el disco del proceso del backend. En un
 despliegue con varias instancias de Cloud Functions tendría que trasladarse a
@@ -489,11 +487,22 @@ resultados vigentes.
 ## 6.4 Frontend Next.js y autenticación de interfaz
 
 El frontend se construyó con Next.js (App Router) y TypeScript, con Tailwind para los
-estilos y el SDK de Firebase para la autenticación. Tiene tres destinos: `/login`,
-`/signup` y la pantalla principal `/`, que solo es accesible con sesión iniciada.
+estilos y el SDK de Firebase para la autenticación. Fuera de la sesión hay dos
+pantallas, `/login` y `/signup`. Dentro, una barra lateral fija organiza el sistema por
+módulo, de modo que cada función tiene su propia pantalla en lugar de concentrarse en
+una sola: Consultar (`/`) e Historial (`/historial`) para todo usuario, y Conexiones,
+Esquema y Uso y costos solo para el rol técnico (sección 6.5).
+
+La interfaz se diseñó como una herramienta de trabajo: fondo blanco, neutros cálidos y
+un único color de acento, naranja claro, reservado para la ubicación actual en la
+navegación y la acción principal de cada pantalla. La tipografía es IBM Plex Sans, con
+IBM Plex Mono para el SQL, los nombres de tablas y columnas y las cifras, que se alinean
+en columnas. Las fuentes se sirven desde la propia aplicación, sin pedidos a servicios
+externos.
 
 Un proveedor de contexto escucha el estado de sesión de Firebase Authentication (correo
-y contraseña) y lo expone a toda la aplicación. Si no hay sesión, la pantalla principal
+y contraseña) y lo expone a toda la aplicación, junto con el rol del usuario, que se lee
+del token de identidad. Si no hay sesión, la pantalla principal
 redirige a `/login`. Cada llamada al backend obtiene el token de identidad vigente del
 usuario y lo envía en el encabezado `Authorization`, de modo que el backend lo verifique
 en cada solicitud, como se describió en la sección 2.7. Las credenciales de las bases de
@@ -508,15 +517,18 @@ resultado con el rango y el total de filas (por ejemplo, «Filas 1–1,000 de 20
 botones para avanzar y retroceder entre páginas y la opción «Descargar CSV completo»; si
 la consulta no devolvió filas, se muestra un aviso.
 
-Mostrar el SQL antes de ejecutarlo cubre en parte el requerimiento RF-09: la sentencia
-se presenta solo para lectura y a cualquier usuario autenticado, ya que esta versión no
-distingue perfiles; la vista dedicada al usuario técnico corresponde al Módulo 4. El
-bloqueo del botón es solo una ayuda de interfaz: la autorización real la aplica el
-backend en `executeQuery`, que vuelve a validar la sentencia.
+La sentencia se muestra según el rol. Al usuario no técnico se le presenta plegada y
+solo para lectura, porque lo que necesita es el resultado; el usuario técnico la ve
+abierta y puede editarla antes de ejecutarla, junto con el consumo de la generación
+(sección 6.5), lo que cubre el requerimiento RF-09. El bloqueo del botón es solo una
+ayuda de interfaz: la autorización real la aplica el backend en `executeQuery`, que
+vuelve a validar la sentencia. La consulta en curso se conserva al cambiar de pantalla,
+de modo que consultar el esquema o el historial no borra la pregunta, el SQL ni el
+resultado.
 
 Se manejan estados de carga de sesión, generación y ejecución. Los errores del backend
 se muestran al usuario tal como los devuelve la API; en esta versión ese mensaje puede
-incluir texto del controlador de base de datos (hallazgo 5, sección 6.5.2), por lo que
+incluir texto del controlador de base de datos (hallazgo 5, sección 6.7.2), por lo que
 RNF-04 se cumple solo de forma parcial.
 
 Con un navegador automatizado se comprobó que sin sesión se redirige a `/login`, que el
@@ -527,13 +539,67 @@ generación por una sentencia fija para no generar llamadas a Vertex AI. La gene
 con el modelo desde la interfaz queda pendiente de verificar; el endpoint
 correspondiente ya se probó por separado.
 
-Todavía no incluye las herramientas para usuarios técnicos ni el panel de uso y costos
-(el historial y las consultas guardadas se describen en la sección 6.6), ni distingue la interfaz por perfil como establece la sección
-4.2. La selección de motor corresponde a los cuatro motores del banco de pruebas
-preconfigurados en el backend; esta versión no incluye la administración de conexiones
-desde la interfaz.
+El historial y las consultas guardadas se describen en la sección 6.6. La selección de
+motor corresponde a los cuatro motores del banco de pruebas preconfigurados en el
+backend; esta versión no incluye la administración de conexiones desde la interfaz:
+la pantalla de Conexiones muestra su estado, pero no permite agregarlas ni editarlas.
 
-*[Figura 9. Pantalla principal de NLQP. Fuente: Elaboración propia. — captura ya incluida en el Word.]*
+*[Figura 9. Pantalla Consultar de NLQP. Fuente: Elaboración propia. — reemplazar la captura del Word por la de la interfaz nueva.]*
+
+---
+
+## 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos
+
+El sistema distingue los dos actores de la sección 4.2. El usuario no técnico pregunta,
+obtiene resultados y gestiona su historial; el usuario técnico tiene, además,
+herramientas para revisar lo que hace el sistema por dentro. El Módulo 4 reúne esas
+herramientas.
+
+El rol se guarda como un atributo del usuario en Firebase Authentication (custom claim)
+que solo el backend puede escribir, mediante una herramienta de administración; el
+usuario no puede asignárselo. Las cuentas creadas desde el registro empiezan como no
+técnicas, el permiso menor. El control se aplica en el backend: un middleware verifica
+el rol en cada solicitud a una función técnica y responde 403 si no corresponde. El
+frontend solo oculta esas pantallas; ocultarlas no bastaría, porque las funciones
+seguirían disponibles para quien llame a la API directamente.
+
+**Tabla 16.** Herramientas del rol técnico. Fuente: Elaboración propia.
+
+| Herramienta | Qué muestra | Para qué sirve |
+|---|---|---|
+| Edición del SQL | La sentencia generada, editable antes de ejecutarla, con tokens, costo, tiempo y tablas enviadas al modelo | Corregir o ajustar una sentencia y ver cuánto costó generarla |
+| Conexiones | Estado de cada motor con su latencia y la ocupación del pool de conexiones (en uso, libres, en espera, máximo) | Diagnosticar fallas de conexión y saturación del pool |
+| Esquema | Tablas, columnas, tipos, nulos, claves primarias y foráneas, valores permitidos e índices de cada motor | Ver el esquema tal como lo recibe el modelo y entender sus respuestas |
+| Uso y costos | Llamadas, costo total y por generación, errores y llamadas por motor, por período y origen | Seguir el consumo de Vertex AI (sección 6.7.1) |
+
+Una sentencia editada no se considera aprobada por haber sido generada antes: la
+interfaz la marca como editada y el backend la valida con el Query Safety Engine al
+ejecutarla, como a cualquier otra. Si la rechaza, la sentencia queda marcada como
+bloqueada con el motivo y no se puede ejecutar hasta que se corrija.
+
+El estado del pool se obtiene de un endpoint nuevo de solo lectura, que informa las
+conexiones abiertas, libres, en uso y en espera de cada motor sin abrir conexiones
+nuevas; un motor que todavía no se usó aparece como no iniciado.
+
+*[Figura 10. Pantalla de Conexiones del rol técnico. Fuente: Elaboración propia. — captura pendiente.]*
+
+### Verificación
+
+Con un usuario de cada rol, contra el backend, 23 de 23 comprobaciones fueron
+correctas: las cuatro funciones técnicas responden 403 al usuario no técnico, 200 al
+técnico y 401 sin sesión; el historial, las consultas guardadas y la ejecución
+funcionan con ambos roles, y el historial de uno no es visible para el otro. En la
+interfaz, con un navegador automatizado, 12 de 12: el usuario no técnico no ve el menú
+técnico y no accede a esas pantallas escribiendo la dirección; el técnico edita y
+ejecuta una sentencia, y una sentencia editada con `DELETE` es rechazada por el
+backend. La regresión de seguridad siguió en 57 de 57 casos y 200 de 200 ejecuciones.
+
+Queda una limitación: la interfaz no permite editar el SQL al usuario no técnico, pero
+con su token podría enviar una sentencia propia directamente a `executeQuery`. El Query
+Safety Engine la sigue validando, así que no puede modificar datos, pero sí consultar
+tablas por su cuenta. Cerrarlo requiere que el backend firme el SQL que genera y acepte
+de un usuario no técnico solo sentencias firmadas; queda como trabajo futuro (sección
+6.7.2).
 
 ---
 
@@ -551,7 +617,7 @@ del usuario lo obtiene el backend del token de Firebase Authentication verificad
 de un dato enviado por el cliente, de modo que un usuario no puede leer ni modificar el
 historial de otro.
 
-**Tabla 19.** Datos del historial y de las consultas guardadas. Fuente: Elaboración propia.
+**Tabla 17.** Datos del historial y de las consultas guardadas. Fuente: Elaboración propia.
 
 | Registro | Cuándo se crea | Qué guarda |
 |---|---|---|
@@ -560,7 +626,7 @@ historial de otro.
 
 No entran al historial las sentencias que el Query Safety Engine bloquea, porque nunca
 llegan a ejecutarse, ni las ejecuciones de la evaluación con Gemini, que se identifican
-por separado igual que en el registro de uso y costos (sección 6.5.1). El historial
+por separado igual que en el registro de uso y costos (sección 6.7.1). El historial
 muestra las 50 ejecuciones más recientes.
 
 Desde el historial o desde las consultas guardadas, el usuario puede **reusar** una
@@ -570,7 +636,7 @@ en Vertex AI. Una sentencia guardada no se considera confiable por haber sido gu
 el Query Safety Engine la valida al guardarla y de nuevo cada vez que se ejecuta, porque
 `executeQuery` sigue siendo el único punto de ejecución contra las bases de datos.
 
-*[Figura 10. Historial y consultas guardadas en la pantalla principal. Fuente: Elaboración propia. — captura pendiente.]*
+*[Figura 11. Pantalla de Historial. Fuente: Elaboración propia. — captura pendiente.]*
 
 ### Verificación
 
@@ -591,12 +657,12 @@ borrar entradas del historial.
 
 ---
 
-## 6.5 Integración de módulos y pruebas del sistema
+## 6.7 Integración de módulos y pruebas del sistema
 
 Esta sección documenta la verificación del sistema como conjunto, una vez integrados los
 módulos construidos.
 
-### 6.5.1 Registro de uso y costos
+### 6.7.1 Registro de uso y costos
 
 Este componente no forma parte de los cinco módulos del alcance. Se agregó como
 instrumento de medición porque sin él no hay forma de responder con datos cuánto consume
@@ -608,7 +674,7 @@ Por cada llamada a `generateSQL` y `executeQuery`, el backend guarda un document
 colección `usageEvents` de Cloud Firestore. `testConnection` y `getSchema` no generan
 eventos, porque son llamadas de diagnóstico y no uso del sistema.
 
-**Tabla 16.** Campos del evento de uso. Fuente: Elaboración propia.
+**Tabla 18.** Campos del evento de uso. Fuente: Elaboración propia.
 
 | Campo | Cuándo se registra |
 |---|---|
@@ -636,20 +702,19 @@ El endpoint `getUsageStats` devuelve, para los últimos N días, el total de lla
 costo acumulado, el desglose por tipo y motor y el número de errores. Se verificó en
 vivo, incluida una llamada real a Vertex AI.
 
-Dos limitaciones: el panel visual en tiempo real depende del frontend y aún no existe, y
-cualquier usuario autenticado puede consultar las estadísticas, porque el sistema no
-define un rol de administrador (sección 4.2). Este registro es telemetría de operación y
+Las estadísticas se consultan en la pantalla Uso y costos, reservada al rol técnico
+(sección 6.5). Este registro es telemetría de operación y
 es independiente del historial de consultas guardadas (RF-11 a RF-13), aunque ambos usan
 Firestore en colecciones separadas.
 
-### 6.5.2 Revisión de seguridad del backend
+### 6.7.2 Revisión de seguridad del backend
 
 Se hizo una revisión manual de los módulos implementados, buscando desviaciones de la
 restricción de solo lectura y de las prácticas de manejo de credenciales y autenticación
 de la sección 2.8. Cada hallazgo se comprobó contra el entorno real antes de reportarlo,
 en lugar de deducirlo solo de leer el código.
 
-**Tabla 17.** Hallazgos de la revisión de seguridad del backend. Fuente: Elaboración propia.
+**Tabla 19.** Hallazgos de la revisión de seguridad del backend. Fuente: Elaboración propia.
 
 | Hallazgo | Severidad | Estado |
 |---|---|---|
@@ -664,6 +729,7 @@ en lugar de deducirlo solo de leer el código.
 | Falsos positivos por palabras reservadas dentro de textos | Baja | Corregido |
 | Funciones de lectura de archivos del servidor no bloqueadas por el validador | Baja | Corregido |
 | Batería de pruebas de seguridad no versionada | Baja | Corregido |
+| Funciones técnicas accesibles a cualquier usuario autenticado | Media | Corregido |
 
 El primer hallazgo se describe en la sección 6.3.3, el tercero en la sección 6.1 y el de
 la caída del backend en la sección 6.3.5. El segundo merece mención. La verificación del token se
@@ -685,13 +751,13 @@ primeros se describen en la segunda revisión del Query Safety Engine (sección 
 la batería de pruebas de seguridad, que antes no estaba guardada junto al código, quedó
 versionada y se ejecuta con un solo comando.
 
-### 6.5.3 Tiempos de ejecución sobre el motor
+### 6.7.3 Tiempos de ejecución sobre el motor
 
 Durante la verificación se midió el tiempo de ejecución de cada consulta en cada motor.
 Corresponden solo a la ejecución, no al tiempo total de respuesta de la sección 3.3.1.3,
 que incluye además el esquema, la poda y la generación con el modelo.
 
-**Tabla 18.** Latencia de ejecución por motor, en milisegundos. Fuente: Elaboración propia.
+**Tabla 20.** Latencia de ejecución por motor, en milisegundos. Fuente: Elaboración propia.
 
 | Motor | Ejecuciones | Mínimo | Mediana | Media | Percentil 95 | Máximo |
 |---|---|---|---|---|---|---|

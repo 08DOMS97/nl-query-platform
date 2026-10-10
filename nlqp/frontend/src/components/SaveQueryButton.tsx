@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { apiFetch } from '@/lib/api';
 import type { ReusedQuery, SavedQuery } from '@/lib/types';
+import { Button } from './ui';
 
 /**
  * Guarda una consulta con un nombre (M5). Guardar es siempre una acción del
@@ -13,10 +14,12 @@ export function SaveQueryButton({
   query,
   user,
   onSaved,
+  size = 'md',
 }: {
   query: ReusedQuery;
   user: User;
-  onSaved: () => void;
+  onSaved?: () => void;
+  size?: 'sm' | 'md';
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(query.question ?? '');
@@ -34,7 +37,7 @@ export function SaveQueryButton({
       });
       setOpen(false);
       setSaved(true);
-      onSaved();
+      onSaved?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -45,35 +48,39 @@ export function SaveQueryButton({
   if (!open) {
     return (
       <span className="inline-flex items-center gap-2">
-        <button onClick={() => { setOpen(true); setSaved(false); }} className="rounded border px-2 py-1 text-sm">
+        <Button size={size} onClick={() => { setOpen(true); setSaved(false); }}>
           Guardar
-        </button>
-        {saved && <span className="text-sm text-green-700">Guardada.</span>}
+        </Button>
+        {saved && <span className="text-[12px] text-ok">Guardada</span>}
       </span>
     );
   }
 
   return (
-    <span className="inline-flex flex-wrap items-center gap-2">
+    <form
+      className="inline-flex flex-wrap items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (name.trim() && !saving) handleSave();
+      }}
+    >
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         maxLength={100}
         placeholder="Nombre de la consulta"
-        className="rounded border px-2 py-1 text-sm"
+        aria-label="Nombre de la consulta"
+        className={`${size === 'sm' ? 'h-7' : 'h-8'} w-64 rounded border border-line-strong bg-canvas px-2.5 text-[13px] focus:border-accent-500 focus:outline-none`}
         autoFocus
       />
-      <button
-        onClick={handleSave}
-        disabled={saving || !name.trim()}
-        className="rounded bg-black px-2 py-1 text-sm text-white disabled:opacity-50"
-      >
-        {saving ? 'Guardando…' : 'Confirmar'}
-      </button>
-      <button onClick={() => setOpen(false)} className="text-sm underline">
+      <Button type="submit" size={size} variant="primary" disabled={saving || !name.trim()}>
+        {saving ? 'Guardando…' : 'Guardar'}
+      </Button>
+      <Button size={size} variant="ghost" onClick={() => setOpen(false)}>
         Cancelar
-      </button>
-      {error && <span className="text-sm text-red-600">{error}</span>}
-    </span>
+      </Button>
+      {error && <span className="text-[12px] text-bad">{error}</span>}
+    </form>
   );
 }

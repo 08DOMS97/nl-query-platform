@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { apiFetch, BACKEND_URL } from '@/lib/api';
 import type { ExecuteQueryResponse } from '@/lib/types';
+import { Button, EmptyState, Notice, Panel, formatNumber } from './ui';
 
 /**
  * Muestra el resultado por páginas sin perder filas: cada página se lee del
@@ -52,72 +53,91 @@ export function QueryResult({ initial, user }: { initial: ExecuteQueryResponse; 
   }
 
   if (current.totalRows === 0) {
-    return <p className="text-sm text-gray-600">La consulta no devolvió filas.</p>;
+    return (
+      <Panel title="Resultado">
+        <EmptyState title="La consulta no devolvió filas." />
+      </Panel>
+    );
   }
 
   const firstRow = (current.page - 1) * current.pageSize + 1;
   const lastRow = firstRow + current.rows.length - 1;
+  // Columna numérica: su primer valor no nulo es un número. Se alinea a la derecha entera.
+  const numeric = new Set(
+    current.columns.filter((col) => typeof current.rows.find((r) => r[col] != null)?.[col] === 'number'),
+  );
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-gray-600">
-          Filas {firstRow.toLocaleString('es')}–{lastRow.toLocaleString('es')} de{' '}
-          <strong>{current.totalRows.toLocaleString('es')}</strong>
-        </span>
-        {current.totalPages > 1 && (
-          <span className="flex items-center gap-1">
-            <button
-              onClick={() => goToPage(current.page - 1)}
-              disabled={loading || current.page <= 1}
-              className="rounded border px-2 py-1 disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <span className="px-1 text-gray-600">
-              Página {current.page} de {current.totalPages}
-            </span>
-            <button
-              onClick={() => goToPage(current.page + 1)}
-              disabled={loading || current.page >= current.totalPages}
-              className="rounded border px-2 py-1 disabled:opacity-50"
-            >
-              Siguiente
-            </button>
+      <Panel
+        title="Resultado"
+        meta={
+          <span className="tabular">
+            Filas {formatNumber(firstRow)}–{formatNumber(lastRow)} de {formatNumber(current.totalRows)}
           </span>
-        )}
-        <button onClick={downloadCsv} className="ml-auto rounded border px-2 py-1">
-          Descargar CSV completo
-        </button>
-      </div>
-
-      {/* Scroll propio con encabezado fijo: 1000 filas no estiran la página. */}
-      <div ref={scrollRef} className="max-h-[60vh] overflow-auto rounded border">
-        <table className="min-w-full text-sm">
-          <thead className="sticky top-0 bg-gray-100">
-            <tr>
-              {current.columns.map((col) => (
-                <th key={col} className="px-3 py-2 text-left font-medium">
-                  {col}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className={loading ? 'opacity-50' : undefined}>
-            {current.rows.map((row, i) => (
-              <tr key={i} className="border-t">
+        }
+        actions={
+          <>
+            {current.totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="ghost" onClick={() => goToPage(current.page - 1)} disabled={loading || current.page <= 1}>
+                  Anterior
+                </Button>
+                <span className="tabular px-1 text-[12px] text-ink-3">
+                  {current.page} / {current.totalPages}
+                </span>
+                <Button size="sm" variant="ghost" onClick={() => goToPage(current.page + 1)} disabled={loading || current.page >= current.totalPages}>
+                  Siguiente
+                </Button>
+              </div>
+            )}
+            <Button size="sm" onClick={downloadCsv}>
+              Descargar CSV completo
+            </Button>
+          </>
+        }
+      >
+        {/* Scroll propio con encabezado fijo: 1000 filas no estiran la página. */}
+        <div ref={scrollRef} className="max-h-[60vh] overflow-auto">
+          <table className="tabular min-w-full text-[13px]">
+            <thead className="sticky top-0 z-10 bg-surface">
+              <tr>
                 {current.columns.map((col) => (
-                  <td key={col} className="px-3 py-2">
-                    {String(row[col] ?? '')}
-                  </td>
+                  <th
+                    key={col}
+                    className={`whitespace-nowrap border-b border-line px-4 py-2 font-mono text-[12px] font-medium text-ink-2 ${numeric.has(col) ? 'text-right' : 'text-left'}`}
+                  >
+                    {col}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className={loading ? 'opacity-50' : undefined}>
+              {current.rows.map((row, i) => (
+                <tr key={i} className="border-b border-line last:border-b-0 hover:bg-surface">
+                  {current.columns.map((col) => {
+                    const value = row[col];
+                    if (value === null || value === undefined) {
+                      return (
+                        <td key={col} className={`px-4 py-1.5 font-mono text-[12px] text-ink-3 ${numeric.has(col) ? 'text-right' : ''}`}>
+                          NULL
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={col} className={`whitespace-nowrap px-4 py-1.5 ${numeric.has(col) ? 'text-right' : ''}`}>
+                        {String(value)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <Notice tone="bad">{error}</Notice>}
     </div>
   );
 }

@@ -157,3 +157,24 @@ export interface GetUsageStatsResponse {
   callsByEngine: Record<DbEngine, number>;
   errorCount: number;
 }
+
+/** Estado del pool de conexiones de un motor (`GET /poolStatus`, solo rol técnico). */
+export interface PoolStatus {
+  engine: DbEngine;
+  /** `false` si el motor todavía no se usó y su pool no existe. */
+  initialized: boolean;
+  /** Máximo de conexiones del pool. */
+  max: number;
+  /** Conexiones abiertas (libres + en uso). */
+  total: number;
+  idle: number;
+  inUse: number;
+  /** Pedidos esperando una conexión libre. */
+  waiting: number;
+}
+
+/**
+ * Rol del usuario (sección 4.2). Lo asigna solo el backend como custom claim de
+ * Firebase (`scripts/set_role.mjs`); sin claim, el usuario es no técnico.
+ */
+export type UserRole = 'tecnico' | 'no_tecnico';
