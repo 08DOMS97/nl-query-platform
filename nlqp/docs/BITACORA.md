@@ -6,6 +6,26 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-10 (3) — Plan de trabajo con cortes por fecha
+
+- David: el plan base **no se cambia** (aunque las fechas no coincidan, es lo que
+  muestra si vamos adelantados o atrasados); lo nuevo entra como **fila nueva
+  resaltada**; un Excel por fecha de corte, mismo formato. Revertido el calendario
+  nuevo que se había puesto en `PLAN_DE_TRABAJO.md`.
+- `nlqp/docs/plan/`: `plantilla_plan_PG2.xlsx` (copia del plan del 02/10, fuente
+  del formato), `plan.json` (línea base + avance), `generar_corte.py` (solo
+  biblioteca estándar) y `cortes/AAAA-MM-DD.json`. Verificado: regenerar el corte
+  02/10 da **0 diferencias** con el Excel original en las 40 tareas; el del 10/10
+  abre en Excel sin reparación, recalcula igual, 16 comentarios, filas nuevas en azul.
+- **Corte 10/10:** plan 96 %, real 90 %, **−6,4 puntos (atrasados)**. Pesa: M4 y M5
+  sin empezar, figuras del Cap. 5, frontend 85 %, pruebas de generación 70 %
+  (criterio de Claude a pedido de David: falta la corrida y el análisis).
+- Filas nuevas (implementadas): 41 uso y costos (21/09), 42 endurecimiento del Query
+  Safety Engine (08/10), 43 migración del SDK (09/10), 44 rediseño de la poda
+  (09/10); la 40 (control de tiempo e integridad, del 02/10) ahora también resaltada.
+- El archivo que subió David como "16/02/2026" no existe: el subido es idéntico
+  byte por byte al del 02/10.
+
 ## 2026-10-10 (2) — Orden de la documentación
 
 - Pedido de David: que cada sesión arranque sabiendo de qué va el proyecto, cómo está

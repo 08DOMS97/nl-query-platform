@@ -34,6 +34,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Texto de tesis | 🟡 25 pendientes + 4 por verificar → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
+| **Plan vs. real** (corte 10/10) | Plan 96 % · real 90 % · **−6,4 puntos: atrasados** (M4, M5, figuras del Cap. 5). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
 ## Próximo paso (actualizado 2026-10-10)
 
@@ -72,7 +73,7 @@ Si algo de este archivo contradice al código, decirlo.
   verificar, se dice.
 - David decide; Claude recomienda una opción, no presenta un menú.
 
-**Al cerrar** (o al terminar un bloque de trabajo, antes del commit), siempre los 4:
+**Al cerrar** (o al terminar un bloque de trabajo, antes del commit), siempre estos pasos:
 1. `nlqp/docs/BITACORA.md`: entrada con la fecha (qué se hizo, qué se verificó con
    qué número, qué decidió David, qué sigue).
 2. Este archivo: tabla "Estado por área", "Próximo paso" y "Abierto", con la fecha.
@@ -80,6 +81,11 @@ Si algo de este archivo contradice al código, decirlo.
 4. `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md`: si algo cambia lo que la tesis afirma,
    mide o describe, agregar la entrada en su capítulo y sección, con la fecha, y
    actualizar el contador.
+5. Plan de trabajo: si avanzó alguna tarea del plan (o se implementó algo nuevo),
+   actualizar `real` y `comentario` en `nlqp/docs/plan/plan.json` (lo nuevo, como
+   tarea nueva con `"nueva"`) y generar el corte del día:
+   `python nlqp/docs/plan/generar_corte.py AAAA-MM-DD`. **Nunca cambiar las fechas
+   del plan base**: la comparación contra ellas es lo que muestra el atraso.
 
 Commits: en español, terminando con `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`;
 commitear y hacer push cuando David lo pida o lo apruebe.
@@ -93,7 +99,7 @@ commitear y hacer push cuando David lo pida o lo apruebe.
 | Tocar la ejecución, paginación, CSV o fechas | `nlqp/docs/RENDIMIENTO_E_INTEGRIDAD.md` |
 | Tocar el registro de uso y costos | `nlqp/docs/USO_Y_COSTOS.md` |
 | Trabajar el texto de la tesis | `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` (qué hacer) + `CAPITULO_6.md` (texto) |
-| Replanificar o ver riesgos | `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| Avance contra el plan, cortes por fecha, riesgos | `nlqp/docs/PLAN_DE_TRABAJO.md` (+ `nlqp/docs/plan/`) |
 | Saber qué pasó y cuándo | `nlqp/docs/BITACORA.md` |
 | Probar la API a mano | `nlqp/docs/MANUAL_POSTMAN.md` |
 | Credenciales y datos del banco de pruebas | `Bases de datos/README.md` |
@@ -101,7 +107,8 @@ commitear y hacer push cuando David lo pida o lo apruebe.
 
 Históricos (no citar como vigentes): `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` (arranque
 del 17/09) y `nlqp/docs/historico/`. Plan con fechas en Excel:
-`Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx` (sin commitear, a pedido de David).
+`Claude outputs/Plan_de_Trabajo_PG2 DD-MM-AAAA.xlsx`, uno por corte (la carpeta no se
+commitea, a pedido de David; los datos de cada corte sí, en `nlqp/docs/plan/cortes/`).
 
 ## Levantar todo
 
