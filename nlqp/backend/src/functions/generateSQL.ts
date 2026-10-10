@@ -5,7 +5,7 @@ import { pruneSchema } from '../services/schemaPruning.service.js';
 import { generateSql } from '../services/vertexAI.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { estimateCostUsd } from '../services/vertexAiPricing.service.js';
-import { recordUsageEvent } from '../services/usageTracking.service.js';
+import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
 import {
   DB_ENGINES,
   type DbEngine,
@@ -37,6 +37,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
   }
 
   const uid = (req as Request & { uid?: string }).uid ?? null;
+  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER]);
   const startedAt = Date.now();
 
   try {
@@ -56,6 +57,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       type: 'generateSQL',
       engine: body.engine,
       uid,
+      origin,
       success: true,
       latencyMs,
       tokensInput,
@@ -82,6 +84,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       type: 'generateSQL',
       engine: body.engine,
       uid,
+      origin,
       success: false,
       latencyMs: Date.now() - startedAt,
       errorReason: err instanceof Error ? err.message : String(err),

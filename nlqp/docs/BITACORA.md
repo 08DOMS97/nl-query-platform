@@ -6,6 +6,29 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-10 — Runner de la evaluación con Gemini (sin costo de Vertex AI)
+
+- David eligió: runner por **HTTP como el frontend** (opción a) y **con
+  paráfrasis**. Aclarado: el costo por consulta no cambia (~$0.012); cambia el
+  total (200 → 400 llamadas, ~$2.40 → ~$4.75).
+- `scripts/evaluacion_gemini.mjs` (`npm run eval:gemini`): modos prueba (gratis) /
+  piloto / completa, guardado incremental sin repetir llamadas pagadas, renovación
+  de token, reintentos ante 429, comparación por contenido, antipatrones, resumen.
+  Modo prueba: 400/400.
+- Uso y costos: eventos con `origin` (`usuario`/`evaluacion`); `getUsageStats`
+  excluye las evaluaciones por defecto.
+- **Bug del sistema corregido:** fechas distintas según el motor (mysql2 leía
+  `DATETIME` y pg leía `DATE` en hora local, corridos 6 h). Ahora idénticas en los 4.
+- **Referencias corregidas:** C10 tenía `LIMIT 10` no pedido (recortaba 20 → 10);
+  M19, C02, C04, C07 con empates no deterministas (desempate por id); M20 con días
+  fraccionarios en Postgres vs. calendario en el resto. El "0 inconsistencias"
+  anterior comparaba solo número de filas; ahora la regresión compara contenido:
+  57/57 + 200/200, 50/50 idénticas en los 4 motores.
+- `parafrasis_50.json`: **aprobadas por David** sin cambios. Medición
+  gratis: la poda pierde tablas en 2/50 paráfrasis (M17, C08); no se ajustan los
+  sinónimos (sería ajustar con el examen).
+- Siguiente: piloto (~$0.25) → corrida completa con paráfrasis (~$4.75).
+
 ## 2026-10-09 (3) — Referencias S10 y M13 eficientes
 
 - S10 y M13 (`consultas_prueba_50.json`) filtran por rango de fechas en vez de

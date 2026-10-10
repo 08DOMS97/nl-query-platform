@@ -5,10 +5,24 @@ const COLLECTION = 'usageEvents';
 
 export type UsageEventType = 'generateSQL' | 'executeQuery';
 
+/**
+ * De dónde vino la llamada. Las corridas de evaluación (runner de la tesis) se
+ * marcan aparte para que no inflen el consumo de uso normal; los eventos
+ * anteriores a este campo cuentan como 'usuario'.
+ */
+export type UsageOrigin = 'usuario' | 'evaluacion';
+export const USAGE_ORIGIN_HEADER = 'x-nlqp-origin';
+
+/** Lee el origen del encabezado `X-NLQP-Origin`; cualquier otro valor es 'usuario'. */
+export function usageOriginFrom(headerValue: unknown): UsageOrigin {
+  return headerValue === 'evaluacion' ? 'evaluacion' : 'usuario';
+}
+
 export interface UsageEvent {
   type: UsageEventType;
   engine: DbEngine;
   uid: string | null;
+  origin: UsageOrigin;
   success: boolean;
   latencyMs: number;
   errorReason?: string;
@@ -37,7 +51,11 @@ export async function recordUsageEvent(event: UsageEvent): Promise<void> {
   }
 }
 
-export async function getUsageStats(periodDays = 30): Promise<GetUsageStatsResponse> {
+/** `origin`: qué eventos contar; por defecto solo el uso normal, sin las evaluaciones. */
+export async function getUsageStats(
+  periodDays = 30,
+  origin: UsageOrigin | 'todos' = 'usuario',
+): Promise<GetUsageStatsResponse> {
   const since = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
   const snapshot = await getFirestore()
     .collection(COLLECTION)
@@ -46,6 +64,7 @@ export async function getUsageStats(periodDays = 30): Promise<GetUsageStatsRespo
 
   const stats: GetUsageStatsResponse = {
     periodDays,
+    origin,
     totalCalls: 0,
     totalCostUsd: 0,
     callsByType: { generateSQL: 0, executeQuery: 0 },
@@ -55,6 +74,7 @@ export async function getUsageStats(periodDays = 30): Promise<GetUsageStatsRespo
 
   for (const doc of snapshot.docs) {
     const data = doc.data() as UsageEvent;
+    if (origin !== 'todos' && (data.origin ?? 'usuario') !== origin) continue;
     stats.totalCalls += 1;
     stats.totalCostUsd += data.costUsd ?? 0;
     stats.callsByType[data.type] += 1;

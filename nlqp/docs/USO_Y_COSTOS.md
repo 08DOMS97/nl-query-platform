@@ -69,6 +69,14 @@ API) devuelve un agregado de los últimos N días: total de llamadas, costo
 total estimado, desglose por tipo de llamada y por motor, y cantidad de
 errores. Ver `GetUsageStatsResponse` en `src/types/index.ts`.
 
+**Origen de las llamadas (10/10/2026).** Cada evento guarda `origin`: `'usuario'`
+(uso normal) o `'evaluacion'` (el runner de la tesis manda `X-NLQP-Origin:
+evaluacion`). `getUsageStats` cuenta por defecto solo `origin=usuario`, para que las
+corridas de evaluación no inflen el consumo normal; `?origin=evaluacion` da el costo
+de las evaluaciones y `?origin=todos` el total. Los eventos anteriores, sin el campo,
+cuentan como `'usuario'`. El costo por consulta no cambia: Vertex AI factura igual
+cualquier llamada; solo cambia en qué cifra se cuenta.
+
 ## Qué falta (fuera del alcance de este backend)
 
 El "tiempo real" de un dashboard depende del frontend (Módulo 8): cuando se

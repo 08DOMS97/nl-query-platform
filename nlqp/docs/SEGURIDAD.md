@@ -443,7 +443,9 @@ sea reproducible.
 `nlqp/backend/scripts/regresion_seguridad.mjs`, con `npm run test:seguridad` (compila
 y corre todo; `-- --solo-bateria` no toca las bases). 57 casos: 44 que deben
 bloquearse y 13 legítimos. Resultado tras las correcciones de §9 y §10: **57/57, y
-las 50 consultas 200/200 con 0 inconsistencias entre motores.**
+las 50 consultas 200/200 con 0 inconsistencias entre motores.** (Desde el 10/10 la
+comparación entre motores es por contenido, no solo por número de filas; ver
+`PREPARACION_EVALUACION_GEMINI.md` §8, 2g.)
 
 ---
 

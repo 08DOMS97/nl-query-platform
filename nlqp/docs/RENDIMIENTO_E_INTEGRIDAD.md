@@ -139,6 +139,15 @@ otra página: ~5 ms. CSV completo: ~1 s.
    llega un `error`, lo que se saltaba el borrado.
 3. Si el usuario cancelaba una descarga, la escritura del CSV quedaba esperando
    para siempre un evento `drain` que nunca llegaba.
+4. **(10/10/2026) Las fechas salían distintas según el motor.** El dato guardado era
+   el mismo en los 4 (p. ej. pedido 48: `2026-08-26 16:45`), pero `mysql2` leía los
+   `DATETIME` como hora local del servidor de NLQP (Guatemala, UTC-6) y los
+   devolvía 6 h corridos (`22:45Z`), y `pg` hacía lo mismo con las columnas `DATE`
+   (`1979-07-28T06:00Z` en vez de `T00:00Z`). La app y el CSV mostraban otra hora u
+   otro día según el motor. Corregido en `connectionManager.service.ts`: `mysql2`
+   con `timezone: 'Z'` y parser de `DATE` en `pg` a medianoche UTC. Ahora los 4
+   motores devuelven el mismo valor. Lo detectó el runner de evaluación al comparar
+   contenido (antes solo se comparaba el número de filas).
 
 ## Limitaciones conocidas
 

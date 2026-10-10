@@ -295,6 +295,12 @@ dialectos, y no la precisión del proceso de conversión de lenguaje natural a S
 > **Nota (08/10/2026):** el 02/10 se corrigieron 5 referencias (M03, M07, M12, M13,
 > C11). Re-verificado el 08/10 con las referencias corregidas: 200/200 y 50/50
 > consistentes; la tabla sigue siendo válida. Mencionar la corrección en el texto.
+> **Actualización 10/10/2026:** "consistente" significaba *mismo número de filas*.
+> Comparando el contenido, 6 referencias diferían entre motores (empates en top N,
+> M20 con otra fórmula de días y un bug de zona horaria del sistema, ya corregido).
+> Tras corregirlas, las 50 dan contenido idéntico en los 4 motores. El texto debe
+> decir "mismo resultado (filas y valores)" y mencionar esta segunda corrección
+> (`PREPARACION_EVALUACION_GEMINI.md` §8, 2g).
 > Además, este párrafo dice que la integración con el modelo está "pendiente": ya
 > no lo está (verificada el 21/09), actualizarlo.
 

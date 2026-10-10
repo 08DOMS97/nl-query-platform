@@ -8,6 +8,12 @@ import { DB_ENGINES } from '../types/index.js';
 
 const { Pool: PgPool } = pg;
 
+// DATE no tiene hora ni zona: `pg` lo convierte a medianoche en la hora local del
+// servidor de NLQP (en Guatemala, 06:00 UTC), distinto de los otros 3 motores.
+// Se lee como medianoche UTC, igual que mysql2 (timezone 'Z') y mssql.
+const PG_DATE_OID = 1082;
+pg.types.setTypeParser(PG_DATE_OID, (value: string) => new Date(`${value}T00:00:00Z`));
+
 /** Resultado uniforme de una consulta, sin importar el driver de origen. */
 export interface RawQueryResult {
   columns: string[];
@@ -104,6 +110,11 @@ function getMysqlPool(): mysql.Pool {
       password: cfg.password,
       connectionLimit: 5,
       connectTimeout: 5_000,
+      // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
+      // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
+      // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
+      // los otros motores.
+      timezone: 'Z',
     });
     // max_execution_time (ms) solo aplica a SELECT de solo lectura, que es lo único
     // que deja pasar el Query Safety Engine.
@@ -125,6 +136,11 @@ function getMariadbPool(): mysql.Pool {
       password: cfg.password,
       connectionLimit: 5,
       connectTimeout: 5_000,
+      // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
+      // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
+      // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
+      // los otros motores.
+      timezone: 'Z',
     });
     // MariaDB no tiene max_execution_time: su equivalente es max_statement_time, en segundos.
     mariadbPool.pool.on('connection', (conn) => {

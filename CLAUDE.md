@@ -65,7 +65,7 @@ decirlo.
 
 Plan con fechas: `Claude outputs/Plan_de_Trabajo_PG2 02-10-2026.xlsx`.
 
-## Próximo paso (actualizado 2026-10-09)
+## Próximo paso (actualizado 2026-10-10)
 
 Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
 
@@ -74,13 +74,16 @@ Orden acordado; marcar con ~~tachado~~ y fecha al terminar cada uno:
 2. **Corrida con Gemini** ← **SIGUIENTE** (crítico, antes del 14/10):
    ~~migrar a `@google/genai`~~ (hecho 09/10, verificado con llamada real);
    ~~ajustar la poda~~ (hecho 09/10, §8 punto 2f); ~~corregir S10/M13~~ (hecho
-   09/10, §8 punto 4); **runner nuevo** (§8 punto 6), piloto y corrida completa (~$2–3, **pedir confirmación antes**). Ver
-   `PREPARACION_EVALUACION_GEMINI.md` §8.
+   09/10, §8 punto 4); ~~runner nuevo~~ (hecho 10/10, §8 punto 6, probado gratis
+   400/400); ~~paráfrasis revisadas~~ (aprobadas por David 10/10). **Ahora:
+   piloto** (~$0.25) → **corrida completa con
+   paráfrasis** (~$4.75). **Pedir confirmación antes de cada una.** Comandos en
+   `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
 3. **Módulo 5 — historial, versión mínima** (atrasado según el plan).
 4. Si no da el tiempo: Módulo 4 (herramientas técnicas, atrasado desde 07/10),
-   banco de volumen alto y paráfrasis → alcance reducido / trabajo futuro.
+   banco de volumen alto → alcance reducido / trabajo futuro.
 
-## Estado (actualizado 2026-10-09)
+## Estado (actualizado 2026-10-10)
 
 Historial fechado completo en `nlqp/docs/BITACORA.md`.
 
@@ -88,13 +91,19 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
 - Módulos 1–3, 5 y 6 del backend (conexiones, esquema, poda con sinónimos ES→EN,
   Gemini vía Vertex AI en `proyectog-340d3`, Query Safety Engine, ejecución) en los
   4 motores.
-- 50 consultas de referencia (con las 5 corregidas el 02/10 y S10/M13 pasadas a
-  rango de fechas el 09/10): **200/200, 0 inconsistencias** (re-verificado 09/10). Es SQL de referencia, **no** generado
-  por Gemini. `run_consultas_prueba.mjs` ya no sirve (no manda token ni entiende la
-  respuesta paginada); el runner nuevo es parte del paso 2.
+- 50 consultas de referencia (corregidas 02/10, 09/10 y 10/10: C10 sin `LIMIT` no
+  pedido, desempates en M19/C02/C04/C07, M20 en días calendario): **200/200 y las
+  50 con contenido idéntico en los 4 motores** (10/10; antes se comparaba solo el
+  número de filas). Es SQL de referencia, **no** generado por Gemini.
+- Runner de evaluación (10/10): `npm run eval:gemini` en `nlqp/backend`, por HTTP
+  como el frontend, llamadas marcadas `origin=evaluacion`. `run_consultas_prueba.mjs`
+  quedó obsoleto.
+- Fechas idénticas en los 4 motores (10/10): bug de zona horaria de mysql2/pg
+  corregido (`RENDIMIENTO_E_INTEGRIDAD.md`, bug 4).
 - Firebase Auth + Firestore: todas las llamadas exigen ID token real
   (`npm run test:token`, expira a la hora).
-- Uso y costos (`USO_Y_COSTOS.md`): backend, `GET /getUsageStats`. Sin dashboard.
+- Uso y costos (`USO_Y_COSTOS.md`): backend, `GET /getUsageStats` (por defecto sin
+  las corridas de evaluación, `?origin=`). Sin dashboard.
 - Frontend v1 (Módulo 8): login, flujo motor → pregunta → SQL → ejecutar →
   resultados paginados + CSV. Falta probar "Generar SQL" con Gemini real desde la UI.
 - Rendimiento e integridad (`RENDIMIENTO_E_INTEGRIDAD.md`): timeout 60 s en el
@@ -110,7 +119,8 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
   Postgres → SQL eficiente y correcto, $0.01188, 998 tokens de razonamiento, 14,5 s.
 - Query Safety Engine endurecido (08/10): ignora el contenido de los literales
   (con modo estricto ante `\`, `$`, `[`), bloquea funciones de archivo y las que
-  ejecutan SQL como texto. Regresión: `npm run test:seguridad` → 57/57 + 200/200.
+  ejecutan SQL como texto. Regresión: `npm run test:seguridad` → 57/57 + 200/200
+  (compara contenido entre motores desde el 10/10).
 
 **Abierto:**
 - Texto de tesis: 6.3.4 de `CAPITULO_6_Y_PLAN.md` tiene un aviso pendiente (dice
@@ -118,8 +128,9 @@ Historial fechado completo en `nlqp/docs/BITACORA.md`.
   correcciones de figuras del Cap. 5 en 0 %; cambios pendientes en Cap. 1–4.
 - Módulo 4 (herramientas técnicas) y Módulo 5 (historial): sin empezar.
 - Dashboard de uso/costos en el frontend: sin empezar.
+- Paráfrasis (`parafrasis_50.json`): aprobadas por David el 10/10, sin cambios.
 - Riesgos: retiro de `gemini-2.5-pro` (~20/10); Vertex AI **sin crédito de prueba** — cada llamada se
-  factura (hasta ~$0.011), avisar antes.
+  factura (~$0.012), avisar antes.
 - Coordinar los 35 participantes de la encuesta (no depende de código).
 - Despliegue: no hace falta, se presenta **en local** (decisión 01/10). Acceso
   remoto analizado en `ACCESO_REMOTO.md`, no implementado.

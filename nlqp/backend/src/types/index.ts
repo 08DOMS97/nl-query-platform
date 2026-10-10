@@ -123,6 +123,8 @@ export interface ExecuteQueryResponse {
 /** Respuesta agregada del módulo de uso y costos (`GET /getUsageStats`). */
 export interface GetUsageStatsResponse {
   periodDays: number;
+  /** Qué eventos se contaron: uso normal, corridas de evaluación o todos. */
+  origin: 'usuario' | 'evaluacion' | 'todos';
   totalCalls: number;
   totalCostUsd: number;
   callsByType: { generateSQL: number; executeQuery: number };

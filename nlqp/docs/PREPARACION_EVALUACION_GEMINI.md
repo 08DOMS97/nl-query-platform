@@ -1,12 +1,13 @@
-# Preparación de la evaluación con Gemini (2026-10-02, actualizada 2026-10-08)
+# Preparación de la evaluación con Gemini (2026-10-02, actualizada 2026-10-10)
 
 Trabajo previo a correr las 50 consultas de prueba **generando el SQL con Gemini**
 (hasta ahora se habían corrido con el SQL de referencia escrito a mano). Objetivo:
 que la corrida mida al modelo y al sistema, y no fallas de configuración o de las
 propias referencias — y no pagar dos veces la misma corrida por errores evitables.
 
-Estado: **en preparación, la corrida todavía no se ejecutó.** Nada de lo de este
-documento llamó a Vertex AI con costo.
+Estado (10/10/2026): **runner listo y probado gratis; el piloto y la corrida
+completa todavía no se ejecutaron.** Única llamada pagada hasta ahora: 1 (09/10,
+$0.01188, §8 punto 2b).
 
 ## 1. Qué se mide
 
@@ -198,9 +199,12 @@ contaba el razonamiento.
 
 | Corrida | Llamadas | Costo estimado |
 |---|---|---|
-| Piloto (5 consultas × 4 motores) | 20 | ~$0.05–0.2 |
-| 50 consultas × 4 motores | 200 | ~$0.5–2.5 |
-| + 50 paráfrasis × 4 motores | 400 en total | ~$1–5 |
+| Piloto (5 consultas × 4 motores) | 20 | ~$0.25 (~$0.50 con sus paráfrasis) |
+| 50 consultas × 4 motores | 200 | ~$2.40 |
+| + 50 paráfrasis × 4 motores | 400 en total | ~$4.75 |
+
+Actualizado 10/10 con la llamada real del 09/10 (~$0.012 por llamada, casi todo
+razonamiento). El piloto se reutiliza en la corrida completa: no se paga dos veces.
 
 Se confirma con David antes de cada corrida pagada.
 
@@ -294,6 +298,23 @@ Se confirma con David antes de cada corrida pagada.
      si se omiten las paráfrasis, decirlo explícitamente.
    - El Cap. 5 cita un 71 % sobre 42 tablas: irreproducible, reemplazar por estas
      cifras.
+2g. **Hallazgos del 10/10/2026 al probar el runner (gratis):**
+   - **C10 tenía `LIMIT 10` sin que la pregunta lo pidiera** ("¿Qué clientes tienen
+     pagos incompletos…?"): la referencia recortaba 20 filas a 10. Un SQL generado
+     correcto (sin límite, como exige la regla de no truncar) habría contado como
+     error. Quitado el `LIMIT` y el override de SQL Server.
+   - **"0 inconsistencias entre motores" solo comparaba el número de filas.**
+     Comparando el contenido, 6 de 50 referencias daban resultados distintos entre
+     motores: S11 por un bug de zona horaria del sistema
+     (`RENDIMIENTO_E_INTEGRIDAD.md`, bug 4, corregido); M19, C02, C04 y C07 por
+     **empates en el corte del top N** (cada motor elegía otros registros
+     empatados; se agregó desempate por id); M20 porque Postgres calculaba días
+     fraccionarios (5,30) y los otros 3 días calendario (5,43): alineado a días
+     calendario. Ahora las 50 dan **contenido idéntico** en los 4 motores, y
+     `regresion_seguridad.mjs` compara contenido (verificado que detecta las 5
+     referencias viejas).
+   - Para la tesis: los "200/200, 50/50 consistentes" anteriores al 10/10 eran por
+     número de filas.
 3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
    fijos del banco actual).
 4. ~~Auditoría de eficiencia del SQL de referencia~~ — **hecho 09/10/2026.** S10 y
@@ -308,11 +329,46 @@ Se confirma con David antes de cada corrida pagada.
    fecha de M12/M13/M20 están en `SELECT`/`GROUP BY`, no en el filtro). Regresión:
    57/57 y 200/200. La auditoría con `EXPLAIN` sobre volumen alto queda para el
    banco grande (punto 3).
-5. Paráfrasis (50), revisadas por David antes de guardarlas. (08/10: si no se
-   revisan antes del piloto, quedan como trabajo futuro; el banco de volumen alto
-   (punto 3) puede hacerse después de la corrida, porque `EXPLAIN` sobre el SQL ya
-   generado no necesita a Gemini.)
-6. Runner nuevo: modo de prueba gratuito, piloto, guardado incremental (no repetir
-   llamadas pagadas), renovación del token, reintentos ante 429, comparación de
-   resultados, `EXPLAIN`/antipatrones/latencia.
-7. Piloto pagado y corrida completa, con confirmación de costo.
+5. Paráfrasis (50): **borrador escrito 10/10/2026** (`parafrasis_50.json`,
+   **aprobadas por David el 10/10 sin cambios**, `"estado": "revisada"`; el runner
+   no gasta en paráfrasis sin revisar).
+   David decidió incluirlas (10/10). Se escribieron sin tocar el diccionario de
+   sinónimos de la poda. Medición gratis: en 2/50 la poda pierde tablas (M17 "ya se
+   pagaron… despachado" → solo `orders`; C08 "más dinero han generado" → sin
+   `orders`/`order_items`); 2/50 caen en esquema completo; promedio 2,44 tablas
+   (originales 2,18). **No ajustar los sinónimos por esto**: sería volver a ajustar
+   con el examen. Es el resultado de robustez a reportar. El banco de volumen alto
+   (punto 3) puede hacerse después de la corrida: `EXPLAIN` sobre el SQL ya
+   generado no necesita a Gemini.
+6. ~~Runner nuevo~~ — **hecho 10/10/2026**: `nlqp/backend/scripts/evaluacion_gemini.mjs`
+   (`npm run eval:gemini`). Opción (a) elegida por David: pasa por HTTP como el
+   frontend (Firebase Auth → `/generateSQL` → `/executeQuery` → `/getResultPage`),
+   con las llamadas marcadas como `origin=evaluacion` (`USO_Y_COSTOS.md`).
+   - Modos: `--modo prueba` (gratis, usa la referencia como "SQL generado"),
+     `--modo piloto` (S10, S13, M03, M05, C02 × 4 motores) y `--modo completa`;
+     los pagados exigen `--confirmar` y tienen tope `--max-costo`. `--parafrasis`
+     agrega las paráfrasis (solo si están revisadas). `--resumen` regenera el
+     reporte sin llamadas.
+   - Guarda cada caso en `nlqp/docs/evaluacion_gemini/resultados.jsonl` apenas lo
+     obtiene y nunca repite una generación pagada; si solo falló la ejecución, la
+     rehace con el SQL guardado. Renueva el token cada 50 min (y ante un 401);
+     reintenta errores pasajeros de Vertex AI (429/503) con espera creciente.
+   - Comparación por contenido: `exacto`, `columnas_extra` (las de la referencia y
+     además otras), `empate_posible` (top N con el mismo puntaje y otros registros
+     empatados: revisión manual, no cuenta como correcto), `distinto`,
+     `bloqueada`, `error_*`. Números a 2 decimales, sin importar orden de filas,
+     de columnas ni alias. Comparador probado con 17 casos sintéticos.
+   - Antipatrones por detección estática (`SELECT *`, `NOT IN` con subconsulta,
+     función sobre columna en `WHERE`, `LIMIT`/`TOP` no pedido, `DISTINCT` que la
+     referencia no usa). **`EXPLAIN` no está en el runner**: se hace sobre el SQL ya
+     guardado cuando exista el banco de volumen alto (punto 3), sin volver a pagar.
+   - Escribe `nlqp/docs/evaluacion_gemini/resumen.md`: precisión por variante,
+     categoría y motor, consistencia entre motores, robustez, seguridad, tokens,
+     latencia, tablas enviadas, antipatrones y la lista para revisión manual.
+   - Verificado gratis: `--modo prueba --parafrasis` → 400/400 exactos, 100/100
+     preguntas con el mismo resultado en los 4 motores; resumen y filtro de origen
+     probados.
+7. Piloto pagado y corrida completa, con confirmación de costo. Comandos (con el
+   backend corriendo, `npm run dev`):
+   `npm run eval:gemini -- --modo piloto --confirmar` y luego
+   `npm run eval:gemini -- --modo completa --parafrasis --confirmar`.

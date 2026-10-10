@@ -9,12 +9,15 @@
  *    bloquearse (falsos positivos). Solo valida, no ejecuta nada.
  * 2. Las 50 consultas de referencia (`nlqp/docs/consultas_prueba_50.json`, con sus
  *    `overrides` por motor): cada una pasa por `validateQuerySafety()` y recién
- *    entonces se ejecuta con `runQuery()`. Se compara el número de filas entre
+ *    entonces se ejecuta con `runQuery()`. Se compara el contenido entre motores
+ *    (filas y valores normalizados, sin importar orden ni alias; antes del 10/10
+ *    solo se comparaba el número de filas y eso ocultó 6 diferencias reales).
  *    motores. No llama a Vertex AI ni a Firebase.
  *
  * Usa el código compilado (`lib/`): el script de npm corre `tsc` antes.
  * Termina con código 1 si algo falla.
  */
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -120,6 +123,19 @@ if (!soloBateria) {
     readFileSync(path.join(dir, '../../docs/consultas_prueba_50.json'), 'utf8'),
   );
   const motores = ['postgres', 'mysql', 'mariadb', 'mssql'];
+  // Misma normalización que el runner de evaluación (evaluacion_gemini.mjs).
+  const normalizar = (v) => {
+    if (v === null || v === undefined) return '∅';
+    if (v instanceof Date) v = v.toISOString();
+    if (typeof v === 'boolean') return v ? '1' : '0';
+    if (typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(e[+-]?\d+)?$/i.test(v.trim()))) {
+      const n = Math.round(Number(v) * 100) / 100;
+      return String(Object.is(n, -0) ? 0 : n);
+    }
+    return String(v).trim();
+  };
+  const contenido = (rows) =>
+    rows.map((f) => Object.values(f).map(normalizar).sort().join('\u0001')).sort().join('\n');
   let ok = 0;
   const inconsistentes = [];
   for (const q of consultas) {
@@ -133,7 +149,8 @@ if (!soloBateria) {
         continue;
       }
       try {
-        filas[motor] = (await runQuery(motor, sql)).rows.length;
+        const { rows } = await runQuery(motor, sql);
+        filas[motor] = `${rows.length} filas #${createHash('sha1').update(contenido(rows)).digest('hex').slice(0, 8)}`;
         ok++;
       } catch (err) {
         filas[motor] = 'ERROR';

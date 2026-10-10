@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { QueryTimeoutError } from '../services/connectionManager.service.js';
 import { createResult, readPage, ResultTooLargeError } from '../services/resultStore.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
-import { recordUsageEvent } from '../services/usageTracking.service.js';
+import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
 import { DB_ENGINES, type DbEngine, type ExecuteQueryRequest } from '../types/index.js';
 
 function isDbEngine(value: unknown): value is DbEngine {
@@ -44,6 +44,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   }
 
   const uid = (req as Request & { uid?: string }).uid ?? null;
+  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER]);
   const startedAt = Date.now();
 
   try {
@@ -53,6 +54,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
       type: 'executeQuery',
       engine: body.engine,
       uid,
+      origin,
       success: true,
       latencyMs: Date.now() - startedAt,
     });
@@ -62,6 +64,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
       type: 'executeQuery',
       engine: body.engine,
       uid,
+      origin,
       success: false,
       latencyMs: Date.now() - startedAt,
       errorReason: err instanceof Error ? err.message : String(err),
