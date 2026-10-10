@@ -130,9 +130,10 @@ def construir_hoja(sheet, tareas, hijos, raiz, corte, estilos, filas_cab, mapa_r
     rows = []
     for rnum, row in filas_cab:
         if rnum == 2:
+            # Sin textos extra en el Excel (pedido de David, 10/10): la fecha del
+            # corte va solo en el nombre del archivo.
             s = re.search(r'<c r="B2" s="(\d+)"', row).group(1)
-            texto = f'Corte de avance: {corte:%d-%m-%Y} (%plan calculado por fechas a esa fecha)'
-            row = celda_txt('B2', s, texto)
+            row = f'<c r="B2" s="{s}"/>'
         rows.append(f'<row r="{rnum}" {ROW_ATTRS}>{row}</row>')
     for t in tareas:
         r = fila[t['no']]
@@ -164,15 +165,8 @@ def construir_hoja(sheet, tareas, hijos, raiz, corte, estilos, filas_cab, mapa_r
         else:
             celdas.append(celda_num(f'K{r}', st['K'], t['padre']))
         rows.append(f'<row r="{r}" {ROW_ATTRS}>{"".join(celdas)}</row>')
-    ultima = 3 + len(tareas)
-    estilo_nota = re.search(r'<c r="B2" s="(\d+)"', ''.join(r for _, r in filas_cab)).group(1)
-    nota = ultima + 2
-    if any(t.get('nueva') for t in tareas):
-        rows.append(f'<row r="{nota}" {ROW_ATTRS}>' + celda_txt(
-            f'B{nota}', estilo_nota,
-            'Filas en azul: tareas nuevas, fuera del plan original, ya implementadas (detalle en el comentario de %real).') + '</row>')
-    else:
-        nota = ultima
+    # Sin nota al pie: el resaltado azul y el comentario de %real bastan.
+    nota = 3 + len(tareas)
     sheet = re.sub(r'<sheetData>.*</sheetData>', '<sheetData>' + ''.join(rows) + '</sheetData>', sheet, flags=re.S)
     sheet = re.sub(r'<dimension ref="[^"]+"/>', f'<dimension ref="A1:K{nota}"/>', sheet)
     return sheet, fila
