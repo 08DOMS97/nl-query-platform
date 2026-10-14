@@ -103,7 +103,7 @@ export default function ConexionesPage() {
           </thead>
           <tbody className={checking ? 'opacity-50' : undefined}>
             {DB_ENGINES.map((engine) => {
-              const result = status?.results.find((r) => r.engine === engine);
+              const result = status?.results.find((r) => r.connectionId === engine);
               const pool = status?.pools.find((p) => p.engine === engine);
               return (
                 <tr key={engine} className="last:[&>td]:border-b-0">

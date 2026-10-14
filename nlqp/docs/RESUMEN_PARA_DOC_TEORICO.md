@@ -24,22 +24,15 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-10, con los Módulos 4 y 5)
+## Contador (actualizado 2026-10-13, con el registro de conexiones del Módulo 1)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 20 |
 | 5 | 1 | 0 | 4 |
-| 6 | 8 | 0 | 30 |
+| 6 | 9 | 0 | 30 |
 | Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **22** | **1** | **54** |
-
----|---|---|---|
-| Preliminares y 1–4 | 7 | 1 | 15 |
-| 5 | 1 | 0 | 4 |
-| 6 | 7 | 0 | 25 |
-| Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **22** | **1** | **44** |
+| **Total** | **23** | **1** | **54** |
 
 ---
 
@@ -231,6 +224,16 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   versión limpia, sin control de cambios.
 
 ### 6.1 y 6.2 — Conexiones y esquema
+- [ ] (13/10) **Actualizar 6.1** con el texto de `CAPITULO_6.md`: (1) en "Arquitectura
+  de conexión", el pool es **por conexión registrada** (no por motor) y la contraseña
+  se lee de Secret Manager **al abrir el pool** y queda en la memoria del backend
+  mientras el pool está activo: reemplaza la frase "se descarta al finalizar la
+  operación, sin persistir en memoria entre invocaciones", que ya no es cierta;
+  registro en Firestore, un secreto por conexión, dentro de la cuota gratuita.
+  (2) Subsección nueva **"Registro de conexiones"**: alta, edición y baja solo del
+  técnico, prueba antes de guardar, motor fijo al editar, cerrar el pool al editar o
+  eliminar, el no técnico ve solo nombre, motor y base. (3) En "Verificación", párrafo
+  nuevo con **33/33** (API). Sale de `BITACORA.md` (13/10).
 - [x] (10/10) **Unificar los títulos**: 6.2 → "6.2 Módulo 2 — Extracción e
   interpretación de esquema" y 6.3 → "6.3 Módulo 3 — Generación NL2SQL y Query Safety
   Engine", como 6.1 y como dice el índice. **Aplicado el 10/10** en `PG2-2026 capítulo 6

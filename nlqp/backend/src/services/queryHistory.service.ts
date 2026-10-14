@@ -44,6 +44,9 @@ export async function listHistory(uid: string): Promise<HistoryEntry[]> {
     return {
       id: doc.id,
       question: data.question ?? null,
+      // Entradas anteriores al 10/10: solo motor; el id de su conexión inicial es el motor.
+      connectionId: data.connectionId ?? data.engine,
+      connectionName: data.connectionName ?? data.engine,
       engine: data.engine as DbEngine,
       sql: data.sql,
       success: data.success,
@@ -62,6 +65,8 @@ export async function listSavedQueries(uid: string): Promise<SavedQuery[]> {
       id: doc.id,
       name: data.name,
       question: data.question ?? null,
+      connectionId: data.connectionId ?? data.engine,
+      connectionName: data.connectionName ?? data.engine,
       engine: data.engine as DbEngine,
       sql: data.sql,
       savedAt: data.savedAt.toDate().toISOString(),

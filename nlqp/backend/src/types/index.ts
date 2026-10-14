@@ -11,8 +11,37 @@ export interface EngineConnectionConfig {
   password: string;
 }
 
-export interface TestConnectionResult {
+/** Conexión tal como la ve cualquier usuario: nombre, motor y base, sin datos de acceso. */
+export interface ConnectionSummary {
+  id: string;
+  name: string;
   engine: DbEngine;
+  database: string;
+}
+
+/** Conexión completa para el rol técnico. La contraseña nunca sale del backend. */
+export interface ConnectionDetail extends ConnectionSummary {
+  host: string;
+  port: number;
+  user: string;
+  /** ISO 8601. */
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Datos para crear o editar una conexión; en una edición `password` puede omitirse. */
+export interface ConnectionInput {
+  name: string;
+  engine: DbEngine;
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password?: string;
+}
+
+export interface TestConnectionResult {
+  connectionId: string;
   ok: boolean;
   latencyMs?: number;
   error?: string;
@@ -77,7 +106,10 @@ export interface QuerySafetyResult {
 }
 
 export interface GenerateSqlRequest {
-  engine: DbEngine;
+  /** Conexión en la que se va a consultar. */
+  connectionId?: string;
+  /** Alias anterior: el id de las conexiones iniciales es el nombre del motor. */
+  engine?: string;
   naturalLanguageQuery: string;
 }
 
@@ -102,7 +134,9 @@ export interface GenerateSqlResponse {
 }
 
 export interface ExecuteQueryRequest {
-  engine: DbEngine;
+  connectionId?: string;
+  /** Alias anterior (ver `GenerateSqlRequest.engine`). */
+  engine?: string;
   sql: string;
   /** Pregunta en español que originó el SQL; opcional, solo para el historial (M5). */
   question?: string;
@@ -112,6 +146,9 @@ export interface ExecuteQueryRequest {
 export interface HistoryEntry {
   id: string;
   question: string | null;
+  connectionId: string;
+  /** Nombre de la conexión al momento de ejecutar (por si después se renombra o elimina). */
+  connectionName: string;
   engine: DbEngine;
   sql: string;
   success: boolean;
@@ -126,6 +163,8 @@ export interface SavedQuery {
   id: string;
   name: string;
   question: string | null;
+  connectionId: string;
+  connectionName: string;
   engine: DbEngine;
   sql: string;
   /** ISO 8601. */
@@ -160,6 +199,7 @@ export interface GetUsageStatsResponse {
 
 /** Estado del pool de conexiones de un motor (`GET /poolStatus`, solo rol técnico). */
 export interface PoolStatus {
+  connectionId: string;
   engine: DbEngine;
   /** `false` si el motor todavía no se usó y su pool no existe. */
   initialized: boolean;

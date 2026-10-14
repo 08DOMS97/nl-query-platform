@@ -47,7 +47,8 @@ de que las credenciales nunca sean accesibles desde el cliente (RNF-05 y RNF-07)
 ### Arquitectura de conexión
 
 Se implementó un administrador de conexiones que mantiene un conjunto de conexiones
-reutilizables por cada motor, empleando los controladores oficiales de cada uno. La
+reutilizables (pool) por cada conexión registrada, empleando los controladores oficiales
+de cada motor. La
 selección de controladores respondió a criterios de mantenimiento activo y compatibilidad
 con el entorno de ejecución del backend: `pg` para PostgreSQL, `mysql2` para MySQL y
 MariaDB —ambos motores comparten protocolo, por lo que un único controlador atiende a los
@@ -56,9 +57,23 @@ dos— y `mssql` para SQL Server.
 La separación entre metadatos y credenciales se implementó en el nivel del modelo de
 datos. El registro de una conexión almacena el motor, el servidor, el puerto, la base de
 datos y el usuario, junto con una referencia al recurso donde reside la contraseña. El
-valor de la credencial se recupera desde Google Cloud Secret Manager en el momento de
-establecer la conexión y se descarta al finalizar la operación, sin persistir en memoria
-entre invocaciones ni registrarse en las trazas de ejecución.
+registro se guarda en Cloud Firestore y la contraseña, en Google Cloud Secret Manager,
+con un secreto por conexión. El valor de la credencial se recupera de Secret Manager al
+abrir el pool de la conexión, se mantiene únicamente en la memoria del backend mientras
+ese pool está activo y nunca se devuelve al cliente ni se registra en las trazas de
+ejecución. Leer el secreto al abrir el pool, y no en cada consulta, mantiene el uso de
+Secret Manager dentro de su cuota gratuita.
+
+### Registro de conexiones
+
+El usuario técnico registra, edita y elimina conexiones desde el backend; el usuario no
+técnico solo ve el nombre de cada conexión, su motor y su base de datos, sin servidor,
+puerto ni usuario. Antes de guardar una conexión nueva o editada, el backend la prueba:
+una conexión que no responde no se registra. Al editar, la contraseña puede omitirse para
+conservar la actual, y el motor no se puede cambiar, porque el historial y las consultas
+guardadas dependen del dialecto. Editar o eliminar una conexión cierra su pool, de modo
+que el siguiente uso se hace con los datos nuevos. El historial guarda el nombre de la
+conexión al momento de ejecutar, por si después se renombra o se elimina.
 
 ### Prueba de conexión y diagnóstico
 
@@ -74,6 +89,14 @@ La conexión se estableció correctamente contra los cuatro motores del banco de
 utilizando en todos los casos cuentas configuradas con permisos exclusivamente de lectura,
 conforme a la cuarta capa de la estrategia de defensa en profundidad descrita en la
 sección 2.8.
+
+El registro de conexiones se verificó con 33 de 33 casos sobre la API: el usuario no
+técnico recibe la lista sin datos de acceso y recibe 403 al crear, editar, probar o
+eliminar; ninguna respuesta incluye la contraseña ni el nombre del secreto; se rechazan
+el puerto, el motor y el nombre inválidos o repetidos; una conexión con contraseña
+incorrecta no se registra (422); una conexión nueva se usa para ejecutar, leer el
+esquema, guardar consultas y aparecer en el historial con su nombre; editarla cierra su
+pool; y una conexión eliminada responde 404.
 
 ### Corrección de seguridad aplicada
 

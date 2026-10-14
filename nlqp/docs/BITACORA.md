@@ -6,6 +6,38 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 — Registro de conexiones (M1) documentado y verificado
+
+- **Hallazgo de la revisión:** después del commit `a596cff` (10/10, 16:18) quedó sin
+  commitear ni documentar un cambio del backend hecho esa misma tarde: el **registro de
+  conexiones de M1**. La sesión se cortó antes de verificarlo y anotarlo.
+- Qué es: las conexiones salen de Firestore (`connections/{id}`) y la contraseña de
+  Secret Manager (`nlqp-conn-{id}`), ya no del `.env`. Pool por conexión (no por
+  motor). `GET|POST|PUT|DELETE /connections` (lista para todos, sin datos de acceso
+  para el no técnico; el resto, solo técnico, probando antes de guardar) y `POST
+  /testConnectionConfig`. Historial y guardadas registran `connectionId` y
+  `connectionName`. `engine` sigue como alias de `connectionId`, así que el runner de
+  evaluación, Postman y el frontend funcionan sin cambios. `npm run seed:connections`
+  ya se había corrido: 4 conexiones ("Tienda · Servidor A–D", ids `postgres`,
+  `mysql`, `mariadb`, `mssql`) y 4 secretos (cuota gratuita: 6).
+- Corregido hoy: (1) la pantalla Conexiones buscaba `engine` en el resultado de
+  `/testConnection`, que ahora trae `connectionId`, y mostraba el estado vacío; (2)
+  `/testConnectionConfig` exigía `name` aunque solo se prueban los datos.
+- **David decidió:** quedarse con el backend nuevo (hace cierto lo que 6.1 ya afirmaba
+  sobre Secret Manager); el formulario para crear y editar conexiones en la interfaz
+  queda en "Abierto".
+- **Verificado:** conexiones 33/33 (API), roles 23/23, M5 32/32 (cambia un caso:
+  guardar con `engine: 'oracle'` ahora da 404, "la conexión no existe", en vez de
+  400), interfaz 13/13 (las 12 del 10/10 + Conexiones con las 4 conectadas),
+  `test:seguridad` 57/57 + 200/200, `tsc` y `lint` limpios. Gasto en Gemini: $0. Las
+  pruebas siguen en el scratchpad (no versionadas).
+- Docs: `SEGURIDAD.md` §13, `USO_Y_COSTOS.md` (Secret Manager), `MANUAL_POSTMAN.md`,
+  `CAPITULO_6.md` 6.1 (la credencial queda en memoria mientras el pool está abierto;
+  subsección "Registro de conexiones"; 33/33). Resumen: 23 pendientes.
+- Plan: corte del 13/10 generado (plan 97 %, real 95 %, −2,1 puntos); reemplaza al
+  del 10/10 que faltaba regenerar.
+- Sigue: piloto con paráfrasis, a más tardar el 14/10 (~$0.50, con confirmación).
+
 ## 2026-10-10 (11) — M4 por roles y rediseño del frontend
 
 - Commit `7d81e97` (M5 y documentación pendiente), sin push.

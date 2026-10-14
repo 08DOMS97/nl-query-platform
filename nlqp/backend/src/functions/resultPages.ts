@@ -67,7 +67,7 @@ export const exportResultCsvHandler = async (req: Request, res: Response): Promi
   }
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="nlqp-resultado-${stored.engine}.csv"`);
+  res.setHeader('Content-Disposition', `attachment; filename="nlqp-resultado-${stored.connectionId}.csv"`);
   try {
     await writeCsv(stored, res);
     res.end();

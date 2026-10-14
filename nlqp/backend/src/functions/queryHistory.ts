@@ -7,15 +7,12 @@ import {
   saveQuery,
 } from '../services/queryHistory.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
-import { DB_ENGINES, type DbEngine } from '../types/index.js';
+import { connectionFromRequest } from '../services/connectionStore.service.js';
+import { handleConnectionError } from './connectionErrors.js';
 
 type AuthedRequest = Request & { uid?: string };
 
 const NAME_MAX_LENGTH = 100;
-
-function isDbEngine(value: unknown): value is DbEngine {
-  return typeof value === 'string' && (DB_ENGINES as string[]).includes(value);
-}
 
 /** El historial es por usuario: sin uid (bypass de desarrollo) no hay a quién asociarlo. */
 function requireUid(req: Request, res: Response): string | null {
@@ -40,7 +37,7 @@ export const getHistoryHandler = async (req: Request, res: Response): Promise<vo
 
 /**
  * GET    /savedQueries               -> { queries: SavedQuery[] }
- * POST   /savedQueries { name, engine, sql, question? } -> SavedQuery
+ * POST   /savedQueries { name, connectionId, sql, question? } -> SavedQuery
  * DELETE /savedQueries?id=...        -> 204
  *
  * Guardar es siempre una acción del usuario (no automática). Se valida el SQL con
@@ -58,16 +55,13 @@ export const savedQueriesHandler = async (req: Request, res: Response): Promise<
     }
 
     if (req.method === 'POST') {
-      const body = req.body as { name?: unknown; engine?: unknown; sql?: unknown; question?: unknown };
+      const body = req.body as { name?: unknown; connectionId?: unknown; engine?: unknown; sql?: unknown; question?: unknown };
       const name = typeof body.name === 'string' ? body.name.trim() : '';
       if (!name || name.length > NAME_MAX_LENGTH) {
         res.status(400).json({ error: `Campo "name" es requerido (máximo ${NAME_MAX_LENGTH} caracteres).` });
         return;
       }
-      if (!isDbEngine(body.engine)) {
-        res.status(400).json({ error: `Campo "engine" inválido. Válidos: ${DB_ENGINES.join(', ')}.` });
-        return;
-      }
+      const connection = await connectionFromRequest(body);
       if (typeof body.sql !== 'string' || !body.sql.trim()) {
         res.status(400).json({ error: 'Campo "sql" es requerido.' });
         return;
@@ -79,7 +73,16 @@ export const savedQueriesHandler = async (req: Request, res: Response): Promise<
       }
       const question =
         typeof body.question === 'string' && body.question.trim() ? body.question.trim() : null;
-      res.status(201).json(await saveQuery(uid, { name, engine: body.engine, sql: body.sql, question }));
+      res.status(201).json(
+        await saveQuery(uid, {
+          name,
+          connectionId: connection.id,
+          connectionName: connection.name,
+          engine: connection.engine,
+          sql: body.sql,
+          question,
+        }),
+      );
       return;
     }
 
@@ -99,6 +102,7 @@ export const savedQueriesHandler = async (req: Request, res: Response): Promise<
 
     res.status(405).json({ error: 'Método no permitido.' });
   } catch (err) {
+    if (handleConnectionError(err, res)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 };

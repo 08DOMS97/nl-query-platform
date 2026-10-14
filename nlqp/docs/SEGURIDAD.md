@@ -31,6 +31,7 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 10 | Funciones de lectura de archivos (`pg_read_file`, `LOAD_FILE`) pasaban el validador; las frenaban los permisos del motor (08/10) | Baja | Corregido (08/10) |
 | 11 | La batería de 17 casos no estaba versionada en el repo (08/10) | Baja | Corregido (08/10): `npm run test:seguridad` |
 | 12 | Sin control por rol: todo usuario autenticado veía conexiones, esquema y costos (10/10) | Media | Corregido (10/10); queda un riesgo aceptado, ver §12 |
+| 13 | Contraseñas de las bases en `.env` en vez de Secret Manager, contra lo que dice RNF-05 y el texto de 6.1 (13/10) | Media | Corregido (10/10, documentado el 13/10) |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -485,6 +486,42 @@ Engine (solo lectura, una sentencia), así que no puede modificar datos; sí pue
 tablas que el modelo no le habría consultado. Cerrarlo exige firmar en el backend el
 SQL generado por `/generateSQL` y aceptar solo SQL firmado de un no técnico. Queda
 documentado como limitación.
+
+---
+
+## 13. Contraseñas de las bases en `.env` — MEDIA (corregido el 10/10, documentado el 13/10)
+
+### El problema
+
+RNF-05 y el texto de 6.1 dicen que las contraseñas viven en Google Cloud Secret Manager,
+pero el backend las leía de las variables `DB_*` del `.env` al abrir cada pool, y no
+había forma de registrar una conexión que no fuera uno de los 4 motores del banco.
+
+### La corrección
+
+- Registro de conexiones (`connectionStore.service.ts`): datos en Firestore
+  (`connections/{id}`), contraseña en Secret Manager (`nlqp-conn-{id}`, una versión
+  activa por conexión; al cambiarla se destruyen las anteriores). El registro solo
+  guarda el nombre del secreto.
+- La contraseña se lee al abrir el pool de la conexión y queda en la memoria del backend
+  mientras el pool existe. **Nunca sale del backend:** ni `GET /connections` (técnico)
+  ni ninguna otra respuesta incluye la contraseña o el nombre del secreto.
+- `GET /connections` es para todos, pero el no técnico solo recibe nombre, motor y base
+  (sin servidor, puerto ni usuario). Crear, editar, eliminar y `POST
+  /testConnectionConfig` son solo del técnico (403).
+- Crear o editar prueba la conexión antes de guardar (422 si no responde). Editar o
+  eliminar cierra el pool, para que no quede uno abierto con datos viejos.
+- Las variables `DB_*` del `.env` solo las usa `npm run seed:connections`, que cargó
+  las 4 conexiones iniciales (ids `postgres`, `mysql`, `mariadb`, `mssql`). Las
+  solicitudes siguen aceptando `engine` como alias de `connectionId`.
+
+### Verificación (13/10)
+
+33/33 sobre la API (permisos, que no se filtre la contraseña, validaciones, alta con
+contraseña incorrecta rechazada, uso de una conexión nueva en ejecución, esquema,
+historial y guardadas, edición que cierra el pool, baja y 404 posterior). Sin cambios en
+lo demás: roles 23/23, M5 32/32, interfaz 13/13, `npm run test:seguridad` 57/57 y
+200/200.
 
 ---
 

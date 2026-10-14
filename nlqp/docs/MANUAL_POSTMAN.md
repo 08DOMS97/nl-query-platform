@@ -84,9 +84,16 @@ Prueba en este orden:
 `GET /health` → debe responder `200 OK` con `{"ok": true}`. Si esto falla, el
 backend no está corriendo (revisa el paso 3b).
 
+> **Desde el 13/10 las conexiones salen del registro** (Firestore + Secret Manager), no
+> del `.env`. Las 4 iniciales ya están cargadas (`npm run seed:connections`, una sola
+> vez) con id igual al motor, así que en todas las peticiones de abajo `engine=postgres`
+> sigue funcionando como alias de `connectionId=postgres`. La lista: `GET /connections`.
+> Crear, editar o eliminar (`POST`, `PUT ?id=`, `DELETE ?id=`) y `POST
+> /testConnectionConfig` son solo del rol técnico; no están en la colección.
+
 ### 1. Test Connection - los 4 motores
 `GET /testConnection` → debe responder `200 OK` con un arreglo `results` de 4
-elementos (`postgres`, `mysql`, `mariadb`, `mssql`), todos con `"ok": true`. Si
+elementos (`connectionId`: `postgres`, `mysql`, `mariadb`, `mssql`), todos con `"ok": true`. Si
 alguno da `false`, revisa que Docker esté arriba (paso 3a).
 
 ### 1b. Test Connection - un solo motor

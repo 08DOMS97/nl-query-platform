@@ -6,6 +6,7 @@ import { generateSQLHandler } from './functions/generateSQL.js';
 import { executeQueryHandler } from './functions/executeQuery.js';
 import { getUsageStatsHandler } from './functions/getUsageStats.js';
 import { getHistoryHandler, savedQueriesHandler } from './functions/queryHistory.js';
+import { connectionsHandler, testConnectionConfigHandler } from './functions/connections.js';
 import {
   createResultExportHandler,
   exportResultCsvHandler,
@@ -26,6 +27,10 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => res.status(200).json({ ok: true }));
 
+// Módulo 1: lista de conexiones para todos; crear, editar y eliminar, solo técnico
+// (el handler lo verifica por método).
+app.all('/connections', verifyFirebaseAuth, connectionsHandler);
+app.post('/testConnectionConfig', verifyFirebaseAuth, requireTechnicalRole, testConnectionConfigHandler);
 // Módulo 4 (rol técnico): conexiones y pool, esquema, uso y costos.
 app.get('/testConnection', verifyFirebaseAuth, requireTechnicalRole, testConnectionHandler);
 app.get('/poolStatus', verifyFirebaseAuth, requireTechnicalRole, poolStatusHandler);

@@ -1,38 +1,38 @@
 import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
 import { getPoolStatus, testAllConnections, testConnection } from '../services/connectionManager.service.js';
-import { DB_ENGINES, type DbEngine } from '../types/index.js';
+import { connectionFromRequest } from '../services/connectionStore.service.js';
+import { handleConnectionError } from './connectionErrors.js';
 
-function isDbEngine(value: unknown): value is DbEngine {
-  return typeof value === 'string' && (DB_ENGINES as string[]).includes(value);
-}
-
-/** GET /testConnection            -> prueba los 4 motores en paralelo. */
-/** GET /testConnection?engine=X   -> prueba solo el motor X. */
+/** GET /testConnection                  -> prueba todas las conexiones registradas en paralelo. */
+/** GET /testConnection?connectionId=X   -> prueba solo la conexión X (`engine=` como alias). */
 export const testConnectionHandler = async (req: Request, res: Response): Promise<void> => {
-  const engineParam = req.query.engine;
-
-  if (engineParam !== undefined) {
-    if (!isDbEngine(engineParam)) {
-      res.status(400).json({ error: `Motor inválido: "${engineParam}". Válidos: ${DB_ENGINES.join(', ')}.` });
+  try {
+    if (req.query.connectionId !== undefined || req.query.engine !== undefined) {
+      const connection = await connectionFromRequest(req.query);
+      const result = await testConnection(connection.id);
+      res.status(result.ok ? 200 : 502).json(result);
       return;
     }
-    const result = await testConnection(engineParam);
-    res.status(result.ok ? 200 : 502).json(result);
-    return;
+    const results = await testAllConnections();
+    const allOk = results.every((r) => r.ok);
+    res.status(allOk ? 200 : 502).json({ results });
+  } catch (err) {
+    if (handleConnectionError(err, res)) return;
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
-
-  const results = await testAllConnections();
-  const allOk = results.every((r) => r.ok);
-  res.status(allOk ? 200 : 502).json({ results });
 };
 
 /**
  * GET /poolStatus -> { pools: PoolStatus[] }: conexiones abiertas, libres, en uso y en
- * espera de cada motor. Solo lectura; no abre conexiones. Solo rol técnico.
+ * espera del pool de cada conexión. Solo lectura; no abre conexiones. Solo rol técnico.
  */
-export const poolStatusHandler = (_req: Request, res: Response): void => {
-  res.status(200).json({ pools: getPoolStatus() });
+export const poolStatusHandler = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    res.status(200).json({ pools: await getPoolStatus() });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
 };
 
 functions.http('testConnection', testConnectionHandler);

@@ -1,4 +1,5 @@
-import { runQuery, readEngineConfig } from './connectionManager.service.js';
+import { runQuery } from './connectionManager.service.js';
+import { getConnection } from './connectionStore.service.js';
 import type {
   ColumnInfo,
   DbEngine,
@@ -246,10 +247,10 @@ export function parseEnumCheck(clause: string): { column: string; values: string
  * esquema: si la consulta de CHECKs falla (p. ej. permisos), se devuelve vacío
  * y la extracción sigue igual que antes.
  */
-async function readAllowedValues(engine: DbEngine): Promise<Map<string, string[]>> {
+async function readAllowedValues(connectionId: string, engine: DbEngine): Promise<Map<string, string[]>> {
   const allowed = new Map<string, string[]>();
   try {
-    const result = await runQuery(engine, QUERIES[engine].checks);
+    const result = await runQuery(connectionId, QUERIES[engine].checks);
     for (const row of result.rows as unknown as RawCheckRow[]) {
       if (!row.check_clause) continue;
       const parsed = parseEnumCheck(row.check_clause);
@@ -265,10 +266,10 @@ async function readAllowedValues(engine: DbEngine): Promise<Map<string, string[]
  * Índices secundarios por tabla. Igual que los CHECK, es un enriquecimiento
  * opcional: si la consulta falla, el esquema sale sin índices.
  */
-async function readIndexes(engine: DbEngine): Promise<Map<string, IndexInfo[]>> {
+async function readIndexes(connectionId: string, engine: DbEngine): Promise<Map<string, IndexInfo[]>> {
   const byTable = new Map<string, IndexInfo[]>();
   try {
-    const result = await runQuery(engine, QUERIES[engine].indexes);
+    const result = await runQuery(connectionId, QUERIES[engine].indexes);
     const rows = (result.rows as unknown as RawIndexRow[]).sort(
       (a, b) => Number(a.ordinal) - Number(b.ordinal),
     );
@@ -296,16 +297,17 @@ function toBool(isNullable: string): boolean {
   return String(isNullable).toUpperCase() === 'YES';
 }
 
-/** Extrae e introspecciona el esquema completo de `engine` y lo normaliza. */
-export async function extractSchema(engine: DbEngine): Promise<SchemaInfo> {
+/** Extrae e introspecciona el esquema completo de la base de una conexión y lo normaliza. */
+export async function extractSchema(connectionId: string): Promise<SchemaInfo> {
+  const { engine, database } = await getConnection(connectionId);
   const q = QUERIES[engine];
 
   const [columnsResult, pkResult, fkResult, allowedValues, indexesByTable] = await Promise.all([
-    runQuery(engine, q.columns),
-    runQuery(engine, q.primaryKeys),
-    runQuery(engine, q.foreignKeys),
-    readAllowedValues(engine),
-    readIndexes(engine),
+    runQuery(connectionId, q.columns),
+    runQuery(connectionId, q.primaryKeys),
+    runQuery(connectionId, q.foreignKeys),
+    readAllowedValues(connectionId, engine),
+    readIndexes(connectionId, engine),
   ]);
 
   const columnRows = columnsResult.rows as unknown as RawColumnRow[];
@@ -355,7 +357,7 @@ export async function extractSchema(engine: DbEngine): Promise<SchemaInfo> {
 
   return {
     engine,
-    database: readEngineConfig(engine).database,
+    database,
     tables: Array.from(tablesByName.values()).sort((a, b) => a.name.localeCompare(b.name)),
     foreignKeys,
   };

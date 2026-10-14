@@ -4,7 +4,7 @@ import mysql from 'mysql2/promise';
 import type { Connection as MysqlCoreConnection } from 'mysql2';
 import mssql from 'mssql';
 import type { DbEngine, EngineConnectionConfig, PoolStatus, TestConnectionResult } from '../types/index.js';
-import { DB_ENGINES } from '../types/index.js';
+import { listConnections, resolveConnectionConfig } from './connectionStore.service.js';
 
 const { Pool: PgPool } = pg;
 
@@ -21,6 +21,11 @@ export interface RawQueryResult {
   rowCount: number;
 }
 
+/**
+ * Datos de conexión del `.env` (`DB_POSTGRES_*`, etc.). Solo los usa
+ * `scripts/seed_connections.mjs` para cargar las conexiones iniciales: en ejecución,
+ * las conexiones salen del registro (`connectionStore.service.ts`).
+ */
 export function readEngineConfig(engine: DbEngine): EngineConnectionConfig {
   const prefix: Record<DbEngine, string> = {
     postgres: 'DB_POSTGRES',
@@ -75,153 +80,161 @@ function isTimeoutError(err: unknown): boolean {
   );
 }
 
-// Pools cacheados por motor — se crean una sola vez y se reutilizan (lazy singleton).
+// Un pool por conexión: se abre la primera vez que se usa la conexión (y recién ahí
+// se lee su contraseña de Secret Manager) y se reutiliza después. Editar o eliminar
+// la conexión lo cierra.
 const POOL_MAX = 5;
-let pgPool: pg.Pool | undefined;
-let mysqlPool: mysql.Pool | undefined;
-let mariadbPool: mysql.Pool | undefined;
-let mssqlPoolPromise: Promise<mssql.ConnectionPool> | undefined;
-/** El pool de SQL Server ya conectado (solo para `getPoolStatus`, que no espera). */
-let mssqlPoolReady: mssql.ConnectionPool | undefined;
 
-function getPgPool(): pg.Pool {
-  if (!pgPool) {
-    const cfg = readEngineConfig('postgres');
-    pgPool = new PgPool({
-      host: cfg.host,
-      port: cfg.port,
-      database: cfg.database,
-      user: cfg.user,
-      password: cfg.password,
-      max: POOL_MAX,
-      idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 5_000,
-      statement_timeout: QUERY_TIMEOUT_MS,
-    });
-  }
-  return pgPool;
+type PoolHandle =
+  | { engine: 'postgres'; pool: pg.Pool }
+  | { engine: 'mysql' | 'mariadb'; pool: mysql.Pool }
+  | { engine: 'mssql'; pool: mssql.ConnectionPool };
+
+const pools = new Map<string, Promise<PoolHandle>>();
+/** Pools ya abiertos, para `getPoolStatus` (que no espera ni abre ninguno). */
+const readyPools = new Map<string, PoolHandle>();
+
+function createPgPool(cfg: EngineConnectionConfig): pg.Pool {
+  return new PgPool({
+    host: cfg.host,
+    port: cfg.port,
+    database: cfg.database,
+    user: cfg.user,
+    password: cfg.password,
+    max: POOL_MAX,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 5_000,
+    statement_timeout: QUERY_TIMEOUT_MS,
+  });
 }
 
-function getMysqlPool(): mysql.Pool {
-  if (!mysqlPool) {
-    const cfg = readEngineConfig('mysql');
-    mysqlPool = mysql.createPool({
-      host: cfg.host,
-      port: cfg.port,
-      database: cfg.database,
-      user: cfg.user,
-      password: cfg.password,
-      connectionLimit: POOL_MAX,
-      connectTimeout: 5_000,
-      // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
-      // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
-      // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
-      // los otros motores.
-      timezone: 'Z',
-    });
-    // max_execution_time (ms) solo aplica a SELECT de solo lectura, que es lo único
-    // que deja pasar el Query Safety Engine.
-    mysqlPool.pool.on('connection', (conn) => {
-      conn.query(`SET SESSION max_execution_time = ${QUERY_TIMEOUT_MS}`);
-    });
-  }
-  return mysqlPool;
+function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectionConfig): mysql.Pool {
+  const pool = mysql.createPool({
+    host: cfg.host,
+    port: cfg.port,
+    database: cfg.database,
+    user: cfg.user,
+    password: cfg.password,
+    connectionLimit: POOL_MAX,
+    connectTimeout: 5_000,
+    // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
+    // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
+    // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
+    // los otros motores.
+    timezone: 'Z',
+  });
+  pool.pool.on('connection', (conn) => {
+    // MySQL: max_execution_time (ms), solo aplica a SELECT de solo lectura, que es lo
+    // único que deja pasar el Query Safety Engine. MariaDB no lo tiene: su
+    // equivalente es max_statement_time, en segundos.
+    conn.query(
+      engine === 'mysql'
+        ? `SET SESSION max_execution_time = ${QUERY_TIMEOUT_MS}`
+        : `SET SESSION max_statement_time = ${QUERY_TIMEOUT_MS / 1000}`,
+    );
+  });
+  return pool;
 }
 
-function getMariadbPool(): mysql.Pool {
-  if (!mariadbPool) {
-    const cfg = readEngineConfig('mariadb');
-    mariadbPool = mysql.createPool({
-      host: cfg.host,
-      port: cfg.port,
-      database: cfg.database,
-      user: cfg.user,
-      password: cfg.password,
-      connectionLimit: POOL_MAX,
-      connectTimeout: 5_000,
-      // DATETIME no guarda zona: sin esto mysql2 lo interpreta en la hora local del
-      // servidor de NLQP y lo corre (en Guatemala, +6 h), así que el mismo pedido
-      // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
-      // los otros motores.
-      timezone: 'Z',
-    });
-    // MariaDB no tiene max_execution_time: su equivalente es max_statement_time, en segundos.
-    mariadbPool.pool.on('connection', (conn) => {
-      conn.query(`SET SESSION max_statement_time = ${QUERY_TIMEOUT_MS / 1000}`);
-    });
-  }
-  return mariadbPool;
+function createMssqlPool(cfg: EngineConnectionConfig): Promise<mssql.ConnectionPool> {
+  return new mssql.ConnectionPool({
+    server: cfg.host,
+    port: cfg.port,
+    database: cfg.database,
+    user: cfg.user,
+    password: cfg.password,
+    pool: { max: POOL_MAX, idleTimeoutMillis: 30_000 },
+    // trustServerCertificate=true desactiva la validación del certificado TLS (acepta
+    // cualquier certificado, incluido uno falsificado — riesgo de MITM). Necesario en
+    // local porque el contenedor de pruebas usa un certificado autofirmado (ver README
+    // de "Bases de datos"), pero NUNCA debe quedar así contra un SQL Server real en
+    // producción. Se controla por env var (default seguro: false) para que no se
+    // arrastre por accidente al desplegar.
+    options: {
+      encrypt: true,
+      trustServerCertificate: process.env.DB_MSSQL_TRUST_SERVER_CERTIFICATE === 'true',
+    },
+    connectionTimeout: 5_000,
+    requestTimeout: QUERY_TIMEOUT_MS,
+  }).connect();
 }
 
-async function getMssqlPool(): Promise<mssql.ConnectionPool> {
-  if (!mssqlPoolPromise) {
-    const cfg = readEngineConfig('mssql');
-    mssqlPoolPromise = new mssql.ConnectionPool({
-      server: cfg.host,
-      port: cfg.port,
-      database: cfg.database,
-      user: cfg.user,
-      password: cfg.password,
-      pool: { max: POOL_MAX, idleTimeoutMillis: 30_000 },
-      // trustServerCertificate=true desactiva la validación del certificado TLS (acepta
-      // cualquier certificado, incluido uno falsificado — riesgo de MITM). Necesario en
-      // local porque el contenedor de pruebas usa un certificado autofirmado (ver README
-      // de "Bases de datos"), pero NUNCA debe quedar así contra un SQL Server real en
-      // producción. Se controla por env var (default seguro: false) para que no se
-      // arrastre por accidente al desplegar.
-      options: {
-        encrypt: true,
-        trustServerCertificate: process.env.DB_MSSQL_TRUST_SERVER_CERTIFICATE === 'true',
-      },
-      connectionTimeout: 5_000,
-      requestTimeout: QUERY_TIMEOUT_MS,
-    }).connect();
-    mssqlPoolPromise.then(
-      (p) => (mssqlPoolReady = p),
-      () => undefined,
+async function openPool(engine: DbEngine, cfg: EngineConnectionConfig): Promise<PoolHandle> {
+  switch (engine) {
+    case 'postgres':
+      return { engine, pool: createPgPool(cfg) };
+    case 'mysql':
+    case 'mariadb':
+      return { engine, pool: createMysqlFamilyPool(engine, cfg) };
+    case 'mssql':
+      return { engine, pool: await createMssqlPool(cfg) };
+    default: {
+      const exhaustive: never = engine;
+      throw new Error(`Motor no soportado: ${exhaustive}`);
+    }
+  }
+}
+
+async function closeHandle(h: PoolHandle): Promise<void> {
+  if (h.engine === 'mssql') await h.pool.close();
+  else await h.pool.end();
+}
+
+function getPool(connectionId: string): Promise<PoolHandle> {
+  let pending = pools.get(connectionId);
+  if (!pending) {
+    pending = resolveConnectionConfig(connectionId).then(({ engine, config }) => openPool(engine, config));
+    pools.set(connectionId, pending);
+    pending.then(
+      (h) => readyPools.set(connectionId, h),
+      // Si no se pudo abrir (p. ej. SQL Server caído), el próximo uso lo reintenta.
+      () => pools.delete(connectionId),
     );
   }
-  return mssqlPoolPromise;
+  return pending;
 }
 
-/** Ejecuta una consulta contra el motor indicado y normaliza el resultado. */
-export async function runQuery(engine: DbEngine, sql: string): Promise<RawQueryResult> {
+/** Cierra el pool de una conexión (al editarla o eliminarla). */
+export async function closePool(connectionId: string): Promise<void> {
+  const pending = pools.get(connectionId);
+  pools.delete(connectionId);
+  readyPools.delete(connectionId);
+  const h = await pending?.catch(() => undefined);
+  if (h) await closeHandle(h).catch(() => undefined);
+}
+
+/** Ejecuta una consulta en la conexión indicada y normaliza el resultado. */
+export async function runQuery(connectionId: string, sql: string): Promise<RawQueryResult> {
+  return runQueryOnPool(await getPool(connectionId), sql);
+}
+
+async function runQueryOnPool(h: PoolHandle, sql: string): Promise<RawQueryResult> {
   try {
-    return await runQueryOnDriver(engine, sql);
+    return await runQueryOnDriver(h, sql);
   } catch (err) {
-    if (isTimeoutError(err)) throw new QueryTimeoutError(engine);
+    if (isTimeoutError(err)) throw new QueryTimeoutError(h.engine);
     throw err;
   }
 }
 
-async function runQueryOnDriver(engine: DbEngine, sql: string): Promise<RawQueryResult> {
-  switch (engine) {
+async function runQueryOnDriver(h: PoolHandle, sql: string): Promise<RawQueryResult> {
+  switch (h.engine) {
     case 'postgres': {
-      const result = await getPgPool().query(sql);
+      const result = await h.pool.query(sql);
       const columns = result.fields?.map((f) => f.name) ?? [];
       return { columns, rows: result.rows, rowCount: result.rowCount ?? result.rows.length };
     }
-    case 'mysql': {
-      const [rows, fields] = await getMysqlPool().query(sql);
-      const rowsArray = rows as Record<string, unknown>[];
-      const columns = (fields ?? []).map((f) => f.name);
-      return { columns, rows: rowsArray, rowCount: rowsArray.length };
-    }
+    case 'mysql':
     case 'mariadb': {
-      const [rows, fields] = await getMariadbPool().query(sql);
+      const [rows, fields] = await h.pool.query(sql);
       const rowsArray = rows as Record<string, unknown>[];
       const columns = (fields ?? []).map((f) => f.name);
       return { columns, rows: rowsArray, rowCount: rowsArray.length };
     }
     case 'mssql': {
-      const pool = await getMssqlPool();
-      const result = await pool.request().query(sql);
+      const result = await h.pool.request().query(sql);
       const columns = result.recordset?.columns ? Object.keys(result.recordset.columns) : [];
       return { columns, rows: result.recordset ?? [], rowCount: result.recordset?.length ?? 0 };
-    }
-    default: {
-      const exhaustive: never = engine;
-      throw new Error(`Motor no soportado: ${exhaustive}`);
     }
   }
 }
@@ -247,10 +260,12 @@ const PG_CURSOR_BATCH = 2000;
  * se rechaza — nunca se resuelve con un resultado a medias.
  */
 export async function streamQuery(
-  engine: DbEngine,
+  connectionId: string,
   sql: string,
   handlers: StreamHandlers,
 ): Promise<{ rowCount: number }> {
+  const h = await getPool(connectionId);
+  const engine = h.engine;
   const deadline = Date.now() + QUERY_TIMEOUT_MS;
   let rowCount = 0;
   // Solo devuelve promesa si el consumidor pidió pausa: esperar en cada fila
@@ -262,23 +277,17 @@ export async function streamQuery(
   };
 
   try {
-    switch (engine) {
+    switch (h.engine) {
       case 'postgres':
-        await streamPostgres(sql, handlers.onColumns, onRow);
+        await streamPostgres(h.pool, sql, handlers.onColumns, onRow);
         break;
       case 'mysql':
-        await streamMysqlFamily(getMysqlPool(), sql, handlers.onColumns, onRow);
-        break;
       case 'mariadb':
-        await streamMysqlFamily(getMariadbPool(), sql, handlers.onColumns, onRow);
+        await streamMysqlFamily(h.pool, sql, handlers.onColumns, onRow);
         break;
       case 'mssql':
-        await streamMssql(sql, handlers.onColumns, onRow);
+        await streamMssql(h.pool, sql, handlers.onColumns, onRow);
         break;
-      default: {
-        const exhaustive: never = engine;
-        throw new Error(`Motor no soportado: ${exhaustive}`);
-      }
     }
   } catch (err) {
     if (isTimeoutError(err)) throw new QueryTimeoutError(engine);
@@ -298,8 +307,8 @@ function callRow(onRow: RowFn, row: Record<string, unknown>): Promise<void> | vo
   }
 }
 
-async function streamPostgres(sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
-  const client = await getPgPool().connect();
+async function streamPostgres(pool: pg.Pool, sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
+  const client = await pool.connect();
   const cursor = client.query(new Cursor(sql));
   let failed = false;
   try {
@@ -379,8 +388,7 @@ async function streamMysqlFamily(
   }
 }
 
-async function streamMssql(sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
-  const pool = await getMssqlPool();
+async function streamMssql(pool: mssql.ConnectionPool, sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
   const request = pool.request();
   request.stream = true;
   await new Promise<void>((resolve, reject) => {
@@ -414,80 +422,75 @@ async function streamMssql(sql: string, onColumns: (c: string[]) => void, onRow:
   });
 }
 
-/** Verifica conectividad de un motor con una consulta trivial y mide latencia. */
-export async function testConnection(engine: DbEngine): Promise<TestConnectionResult> {
+/** Verifica una conexión registrada con una consulta trivial y mide la latencia. */
+export async function testConnection(connectionId: string): Promise<TestConnectionResult> {
   const start = Date.now();
   try {
-    await runQuery(engine, 'SELECT 1 AS ok');
-    return { engine, ok: true, latencyMs: Date.now() - start };
+    await runQuery(connectionId, 'SELECT 1 AS ok');
+    return { connectionId, ok: true, latencyMs: Date.now() - start };
   } catch (err) {
-    return { engine, ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { connectionId, ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
-/** Verifica conectividad de los 4 motores en paralelo. */
+/** Verifica todas las conexiones registradas en paralelo. */
 export async function testAllConnections(): Promise<TestConnectionResult[]> {
-  return Promise.all(DB_ENGINES.map((engine) => testConnection(engine)));
+  const connections = await listConnections();
+  return Promise.all(connections.map((c) => testConnection(c.id)));
+}
+
+/**
+ * Prueba datos de conexión que todavía no se guardaron (alta o edición): abre un
+ * pool temporal, ejecuta `SELECT 1` y lo cierra. No toca el registro ni Secret Manager.
+ */
+export async function testConnectionConfig(
+  engine: DbEngine,
+  config: EngineConnectionConfig,
+): Promise<{ ok: boolean; latencyMs?: number; error?: string }> {
+  const start = Date.now();
+  let h: PoolHandle | undefined;
+  try {
+    h = await openPool(engine, config);
+    await runQueryOnPool(h, 'SELECT 1 AS ok');
+    return { ok: true, latencyMs: Date.now() - start };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    if (h) await closeHandle(h).catch(() => undefined);
+  }
 }
 
 /** Cierra todos los pools abiertos. Uso: tests y apagado ordenado del proceso. */
 export async function closeAllPools(): Promise<void> {
-  await Promise.all([
-    pgPool?.end(),
-    mysqlPool?.end(),
-    mariadbPool?.end(),
-    mssqlPoolPromise?.then((p) => p.close()),
-  ]);
-  pgPool = undefined;
-  mysqlPool = undefined;
-  mariadbPool = undefined;
-  mssqlPoolPromise = undefined;
-  mssqlPoolReady = undefined;
+  await Promise.all([...pools.keys()].map((id) => closePool(id)));
 }
 
 /**
- * Estado de los pools de conexión (pantalla de Conexiones, solo rol técnico). No
- * crea pools: un motor que todavía no se usó aparece como no iniciado.
+ * Estado del pool de cada conexión registrada (pantalla de Conexiones, solo rol
+ * técnico). No abre pools: una conexión que todavía no se usó aparece sin iniciar.
  */
-export function getPoolStatus(): PoolStatus[] {
-  /** mysql2 no expone contadores públicos: se leen las colas internas del pool. */
-  const mysqlFamily = (pool: mysql.Pool | undefined) => {
-    if (!pool) return null;
-    const core = pool.pool as unknown as {
+export async function getPoolStatus(): Promise<PoolStatus[]> {
+  const connections = await listConnections();
+  return connections.map((c) => {
+    const h = readyPools.get(c.id);
+    const base = { connectionId: c.id, engine: c.engine, max: POOL_MAX };
+    if (!h) return { ...base, initialized: false, total: 0, idle: 0, inUse: 0, waiting: 0 };
+    if (h.engine === 'postgres') {
+      const p = h.pool;
+      return { ...base, initialized: true, total: p.totalCount, idle: p.idleCount, inUse: p.totalCount - p.idleCount, waiting: p.waitingCount };
+    }
+    if (h.engine === 'mssql') {
+      const p = h.pool;
+      return { ...base, initialized: true, total: p.size, idle: p.available, inUse: p.borrowed, waiting: p.pending };
+    }
+    // mysql2 no expone contadores públicos: se leen las colas internas del pool.
+    const core = h.pool.pool as unknown as {
       _allConnections: { length: number };
       _freeConnections: { length: number };
       _connectionQueue: { length: number };
     };
     const total = core._allConnections.length;
     const idle = core._freeConnections.length;
-    return { total, idle, inUse: total - idle, waiting: core._connectionQueue.length };
-  };
-
-  const counts: Record<DbEngine, Omit<PoolStatus, 'engine' | 'initialized' | 'max'> | null> = {
-    postgres: pgPool
-      ? {
-          total: pgPool.totalCount,
-          idle: pgPool.idleCount,
-          inUse: pgPool.totalCount - pgPool.idleCount,
-          waiting: pgPool.waitingCount,
-        }
-      : null,
-    mysql: mysqlFamily(mysqlPool),
-    mariadb: mysqlFamily(mariadbPool),
-    mssql: mssqlPoolReady
-      ? {
-          total: mssqlPoolReady.size,
-          idle: mssqlPoolReady.available,
-          inUse: mssqlPoolReady.borrowed,
-          waiting: mssqlPoolReady.pending,
-        }
-      : null,
-  };
-
-  return DB_ENGINES.map((engine) => {
-    const c = counts[engine];
-    return c
-      ? { engine, initialized: true, max: POOL_MAX, ...c }
-      : { engine, initialized: false, max: POOL_MAX, total: 0, idle: 0, inUse: 0, waiting: 0 };
+    return { ...base, initialized: true, total, idle, inUse: total - idle, waiting: core._connectionQueue.length };
   });
 }

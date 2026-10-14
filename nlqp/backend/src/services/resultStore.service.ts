@@ -6,7 +6,6 @@ import path from 'node:path';
 import readline from 'node:readline';
 import type { Writable } from 'node:stream';
 import { streamQuery } from './connectionManager.service.js';
-import type { DbEngine } from '../types/index.js';
 
 /**
  * Snapshot del resultado de una consulta, para entregarlo por páginas y como CSV
@@ -39,7 +38,7 @@ const STORE_DIR = path.join(os.tmpdir(), 'nlqp-results');
 interface StoredResult {
   id: string;
   uid: string | null;
-  engine: DbEngine;
+  connectionId: string;
   columns: string[];
   totalRows: number;
   filePath: string;
@@ -111,7 +110,7 @@ function closeStream(stream: WriteStream): Promise<void> {
 
 /** Ejecuta la consulta una vez y guarda el resultado completo como snapshot. */
 export async function createResult(
-  engine: DbEngine,
+  connectionId: string,
   sql: string,
   uid: string | null,
 ): Promise<StoredResult> {
@@ -142,7 +141,7 @@ export async function createResult(
   };
 
   try {
-    await streamQuery(engine, sql, {
+    await streamQuery(connectionId, sql, {
       onColumns: (c) => {
         columns = c;
       },
@@ -176,7 +175,7 @@ export async function createResult(
   const stored: StoredResult = {
     id,
     uid,
-    engine,
+    connectionId,
     columns,
     totalRows,
     filePath,

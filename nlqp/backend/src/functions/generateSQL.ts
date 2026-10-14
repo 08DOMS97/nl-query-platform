@@ -6,19 +6,13 @@ import { generateSql } from '../services/vertexAI.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { estimateCostUsd } from '../services/vertexAiPricing.service.js';
 import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
-import {
-  DB_ENGINES,
-  type DbEngine,
-  type GenerateSqlMetrics,
-  type GenerateSqlRequest,
-} from '../types/index.js';
-
-function isDbEngine(value: unknown): value is DbEngine {
-  return typeof value === 'string' && (DB_ENGINES as string[]).includes(value);
-}
+import { connectionFromRequest } from '../services/connectionStore.service.js';
+import type { ConnectionDetail, GenerateSqlMetrics, GenerateSqlRequest } from '../types/index.js';
+import { handleConnectionError } from './connectionErrors.js';
 
 /**
- * POST /generateSQL  { engine, naturalLanguageQuery } -> { sql, engine, safety, metrics }
+ * POST /generateSQL  { connectionId, naturalLanguageQuery } -> { sql, engine, connectionId, safety, metrics }
+ * (`engine` se acepta como alias de `connectionId`: el runner de evaluación lo usa).
  *
  * Solo genera y hace una validación informativa de seguridad para la respuesta.
  * El Query Safety Engine se vuelve a aplicar de forma obligatoria en `executeQuery`
@@ -27,8 +21,12 @@ function isDbEngine(value: unknown): value is DbEngine {
 export const generateSQLHandler = async (req: Request, res: Response): Promise<void> => {
   const body = req.body as Partial<GenerateSqlRequest>;
 
-  if (!isDbEngine(body.engine)) {
-    res.status(400).json({ error: `Campo "engine" inválido. Válidos: ${DB_ENGINES.join(', ')}.` });
+  let connection: ConnectionDetail;
+  try {
+    connection = await connectionFromRequest(body);
+  } catch (err) {
+    if (handleConnectionError(err, res)) return;
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     return;
   }
   if (!body.naturalLanguageQuery || !body.naturalLanguageQuery.trim()) {
@@ -41,10 +39,10 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
   const startedAt = Date.now();
 
   try {
-    const schema = await extractSchema(body.engine);
+    const schema = await extractSchema(connection.id);
     const prunedSchema = pruneSchema(schema, body.naturalLanguageQuery);
     const { sql, tokensInput, tokensOutput, tokensThinking, tokensTotal } = await generateSql(
-      body.engine,
+      connection.engine,
       prunedSchema,
       body.naturalLanguageQuery,
     );
@@ -55,7 +53,8 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
 
     await recordUsageEvent({
       type: 'generateSQL',
-      engine: body.engine,
+      engine: connection.engine,
+      connectionId: connection.id,
       uid,
       origin,
       success: true,
@@ -78,11 +77,12 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       tablesSent: prunedSchema.tables.length,
       tablesTotal: schema.tables.length,
     };
-    res.status(200).json({ sql, engine: body.engine, safety, metrics });
+    res.status(200).json({ sql, engine: connection.engine, connectionId: connection.id, safety, metrics });
   } catch (err) {
     await recordUsageEvent({
       type: 'generateSQL',
-      engine: body.engine,
+      engine: connection.engine,
+      connectionId: connection.id,
       uid,
       origin,
       success: false,

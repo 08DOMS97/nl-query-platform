@@ -5,14 +5,12 @@ import { createResult, readPage, ResultTooLargeError } from '../services/resultS
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { recordHistoryEntry } from '../services/queryHistory.service.js';
 import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
-import { DB_ENGINES, type DbEngine, type ExecuteQueryRequest } from '../types/index.js';
-
-function isDbEngine(value: unknown): value is DbEngine {
-  return typeof value === 'string' && (DB_ENGINES as string[]).includes(value);
-}
+import { connectionFromRequest } from '../services/connectionStore.service.js';
+import type { ConnectionDetail, ExecuteQueryRequest } from '../types/index.js';
+import { handleConnectionError } from './connectionErrors.js';
 
 /**
- * POST /executeQuery  { engine, sql, question? }
+ * POST /executeQuery  { connectionId, sql, question? }   (`engine` como alias de `connectionId`)
  *   -> { resultId, columns, rows, rowCount, totalRows, page, pageSize, totalPages }
  *
  * Ejecuta la consulta UNA vez, guarda el resultado completo como snapshot (ver
@@ -33,8 +31,12 @@ function isDbEngine(value: unknown): value is DbEngine {
 export const executeQueryHandler = async (req: Request, res: Response): Promise<void> => {
   const body = req.body as Partial<ExecuteQueryRequest>;
 
-  if (!isDbEngine(body.engine)) {
-    res.status(400).json({ error: `Campo "engine" inválido. Válidos: ${DB_ENGINES.join(', ')}.` });
+  let connection: ConnectionDetail;
+  try {
+    connection = await connectionFromRequest(body);
+  } catch (err) {
+    if (handleConnectionError(err, res)) return;
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     return;
   }
   if (!body.sql || !body.sql.trim()) {
@@ -53,13 +55,14 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   const startedAt = Date.now();
   const question =
     typeof body.question === 'string' && body.question.trim() ? body.question.trim() : null;
-  const engine = body.engine;
   const sql = body.sql;
   const recordHistory = async (outcome: { success: boolean; totalRows?: number; errorReason?: string }) => {
     if (!uid || origin === 'evaluacion') return;
     await recordHistoryEntry(uid, {
       question,
-      engine,
+      connectionId: connection.id,
+      connectionName: connection.name,
+      engine: connection.engine,
       sql,
       success: outcome.success,
       totalRows: outcome.totalRows ?? null,
@@ -68,11 +71,12 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   };
 
   try {
-    const stored = await createResult(body.engine, body.sql, uid);
+    const stored = await createResult(connection.id, sql, uid);
     const firstPage = await readPage(stored.id, uid, 1);
     await recordUsageEvent({
       type: 'executeQuery',
-      engine: body.engine,
+      engine: connection.engine,
+      connectionId: connection.id,
       uid,
       origin,
       success: true,
@@ -83,7 +87,8 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   } catch (err) {
     await recordUsageEvent({
       type: 'executeQuery',
-      engine: body.engine,
+      engine: connection.engine,
+      connectionId: connection.id,
       uid,
       origin,
       success: false,

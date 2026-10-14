@@ -47,6 +47,16 @@ exacto. Los precios se pueden ajustar sin tocar código vía
 `VERTEX_AI_PRICE_INPUT_PER_1M_USD` / `VERTEX_AI_PRICE_OUTPUT_PER_1M_USD` en
 `.env`.
 
+### Secret Manager (13/10/2026)
+
+Las contraseñas de las conexiones están en Secret Manager (ver `SEGURIDAD.md` §13).
+Cobra por versión activa y por lectura, con cuota gratuita de 6 versiones activas y
+10 000 lecturas al mes. Para no salir de ella: una sola versión activa por conexión
+(al cambiar la contraseña se destruyen las anteriores) y el secreto se lee al abrir el
+pool, no en cada consulta. Hoy hay 4 secretos (las conexiones iniciales): quedan 2
+conexiones más antes de empezar a pagar (unos $0.06 por versión al mes). No entra en el
+registro de uso y costos, que solo mide Vertex AI.
+
 ## Métricas en la respuesta de `/generateSQL` (02/10/2026)
 
 Además de registrarse en `usageEvents`, cada respuesta exitosa de `/generateSQL`

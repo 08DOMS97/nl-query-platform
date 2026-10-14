@@ -202,7 +202,7 @@
       "inicio": "2026-09-07",
       "fin": "2026-09-11",
       "real": 1.0,
-      "comentario": "Completo y verificado en los 4 motores (sección 6.1)."
+      "comentario": "Completo y verificado en los 4 motores (sección 6.1). 13/10: registro de conexiones (Firestore + Secret Manager, alta/edición/baja del técnico por API), verificado 33/33; falta el formulario en la interfaz."
     },
     {
       "no": 23,

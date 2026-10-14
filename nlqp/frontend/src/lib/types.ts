@@ -89,14 +89,16 @@ export interface ReusedQuery {
 
 /* --- Módulo 4 (rol técnico) --- */
 
+/** `connectionId`: las conexiones iniciales usan como id el nombre del motor. */
 export interface TestConnectionResult {
-  engine: DbEngine;
+  connectionId: string;
   ok: boolean;
   latencyMs?: number;
   error?: string;
 }
 
 export interface PoolStatus {
+  connectionId: string;
   engine: DbEngine;
   initialized: boolean;
   max: number;

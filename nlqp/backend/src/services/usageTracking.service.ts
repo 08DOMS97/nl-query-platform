@@ -21,6 +21,8 @@ export function usageOriginFrom(headerValue: unknown): UsageOrigin {
 export interface UsageEvent {
   type: UsageEventType;
   engine: DbEngine;
+  /** Conexión usada (los eventos anteriores al 10/10 solo tienen el motor). */
+  connectionId?: string;
   uid: string | null;
   origin: UsageOrigin;
   success: boolean;

@@ -20,38 +20,36 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **17/10/2026** | **Entrega PG2** |
 | ~20/10/2026 | Retiro más temprano de `gemini-2.5-pro` (provisorio, verificado 08/10) |
 
-## Estado por área (actualizado 2026-10-10, con M4, M5 y rediseño)
+## Estado por área (actualizado 2026-10-13, con el registro de conexiones de M1)
 
 | Área | Estado |
 |---|---|
-| Backend M1–M3 | ✅ Completo y verificado en los 4 motores |
+| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico por API, 33/33. `engine` sigue como alias de `connectionId`. Falta el formulario en la UI |
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. UI 12/12. Falta probar "Generar SQL" con Gemini real desde la UI |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. UI 13/13 (13/10). Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
-| Texto de tesis | 🟡 22 pendientes + 1 por verificar + 54 aplicados (M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Texto de tesis | 🟡 23 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 10/10, actualizado) | Plan 96 % · real 91 % · **−4,6 puntos: atrasados** (pruebas de generación 70 %). **No incluye M4 90 %, M5 90 % ni frontend 95 %**: falta regenerar el corte. Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 13/10) | Plan 97 % · real 95 % · **−2,1 puntos: atrasados** (pruebas de generación 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-10)
+## Próximo paso (actualizado 2026-10-13)
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
-1. **Regenerar el corte del 10/10** ← **SIGUIENTE** (`generar_corte.py 2026-10-10`):
-   David tiene que cerrar el Excel del corte; falló dos veces por estar abierto.
-2. **Piloto con paráfrasis**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
+1. **Piloto con paráfrasis** ← **SIGUIENTE**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
    automático $0.60. **Pedir confirmación a David antes.** Requiere Docker y el
    backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
    reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
    `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-3. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
+2. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
    del piloto no se repite). **Confirmación aparte.** Después: revisar a mano "Para
    revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras
    en el resumen para la tesis (6.3.5) el 16/10.
-4. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
+3. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
    (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba).
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
@@ -129,6 +127,12 @@ contraseñas, en `scripts/get_test_token.mjs` y en la bitácora del 10/10.
 
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
 
+- Formulario de la pantalla Conexiones para crear, editar y eliminar conexiones (el
+  backend ya lo tiene, 13/10; hoy se cargan con `npm run seed:connections`).
+- 6.1 "Verificación" dice que se usaron "cuentas con permisos exclusivamente de
+  lectura", pero `testuser` tiene permisos amplios a propósito: corregir el texto o
+  crear una cuenta de solo lectura (detectado 13/10).
+- Versionar las pruebas de API e interfaz (hoy solo en el scratchpad de cada sesión).
 - Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.012 por intento).
 - Banco de volumen alto para medir eficiencia con `EXPLAIN`.
 - Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.
