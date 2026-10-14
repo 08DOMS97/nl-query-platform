@@ -24,11 +24,11 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 
 | Área | Estado |
 |---|---|
-| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 33/33, UI 23/23. `engine` sigue como alias de `connectionId` |
+| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 38/38, UI 27/27. `engine` sigue como alias de `connectionId` |
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 13/13 + 23/23. Falta probar "Generar SQL" con Gemini real desde la UI |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 13/13 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
 | Texto de tesis | 🟡 23 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |

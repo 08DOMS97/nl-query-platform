@@ -74,7 +74,9 @@ mostrar y, al editar, dejarla vacía conserva la guardada. Antes de guardar una 
 una conexión que no responde no se registra. Al editar, la contraseña puede omitirse para
 conservar la actual, y el motor no se puede cambiar, porque el historial y las consultas
 guardadas dependen del dialecto. Editar o eliminar una conexión cierra su pool, de modo
-que el siguiente uso se hace con los datos nuevos. El historial guarda el nombre de la
+que el siguiente uso se hace con los datos nuevos. Como las conexiones son compartidas
+por todos los usuarios, su nombre es único en todo el sistema, sin distinguir mayúsculas
+ni espacios repetidos. El historial guarda el nombre de la
 conexión al momento de ejecutar, por si después se renombra o se elimina.
 
 ### Prueba de conexión y diagnóstico
@@ -92,15 +94,17 @@ utilizando en todos los casos cuentas configuradas con permisos exclusivamente d
 conforme a la cuarta capa de la estrategia de defensa en profundidad descrita en la
 sección 2.8.
 
-El registro de conexiones se verificó con 33 de 33 casos sobre la API: el usuario no
+El registro de conexiones se verificó con 38 de 38 casos sobre la API: el usuario no
 técnico recibe la lista sin datos de acceso y recibe 403 al crear, editar, probar o
 eliminar; ninguna respuesta incluye la contraseña ni el nombre del secreto; se rechazan
-el puerto, el motor y el nombre inválidos o repetidos; una conexión con contraseña
+el puerto, el motor y el nombre inválidos; se rechaza un nombre ya usado por otra
+conexión, al crear y al editar, aunque cambien las mayúsculas o los espacios, y se avisa
+antes de probar la conexión; una conexión con contraseña
 incorrecta no se registra (422); una conexión nueva se usa para ejecutar, leer el
 esquema, guardar consultas y aparecer en el historial con su nombre; editarla cierra su
-pool; y una conexión eliminada responde 404. En la interfaz, 23 de 23 comprobaciones
+pool; y una conexión eliminada responde 404. En la interfaz, 27 de 27 comprobaciones
 fueron correctas: con una contraseña incorrecta la prueba avisa y la conexión no se
-registra; con los datos correctos se registra, aparece conectada, sin mostrar la
+registra; con un nombre repetido, al crear o al editar, se avisa y no se guarda; con los datos correctos se registra, aparece conectada, sin mostrar la
 contraseña, y se puede elegir en Consultar y en Esquema (donde muestra sus ocho
 tablas); al editarla el motor queda bloqueado y la contraseña vacía; al eliminarla
 desaparece de la lista y de los selectores; y el usuario no técnico ve las conexiones

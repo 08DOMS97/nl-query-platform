@@ -45,6 +45,9 @@ check('puerto inválido 400', (await call(tec, 'POST', '/connections', { ...pg, 
 check('motor inválido 400', (await call(tec, 'POST', '/connections', { ...pg, name: 'x', engine: 'oracle' })).status === 400);
 check('sin contraseña 400', (await call(tec, 'POST', '/connections', { ...pg, name: 'x', password: '' })).status === 400);
 check('nombre repetido 400', (await call(tec, 'POST', '/connections', { ...pg, name: 'Tienda · Servidor A' })).status === 400);
+const rep = await call(tec, 'POST', '/connections', { ...pg, name: '  tienda  ·  SERVIDOR a ' });
+check('nombre repetido con otras mayúsculas y espacios 400', rep.status === 400 && /Ya existe/.test(rep.json?.error), JSON.stringify(rep.json));
+check('nombre repetido se avisa antes de probar (400, no 422)', (await call(tec, 'POST', '/connections', { ...pg, name: 'Tienda · Servidor A', password: 'incorrecta' })).status === 400);
 
 // Probar sin guardar
 const t1 = await call(tec, 'POST', '/testConnectionConfig', pg);
@@ -84,6 +87,11 @@ check('editar sin contraseña 200', ed.status === 200 && ed.json.name === nuevoN
 pool = (await call(tec, 'GET', '/poolStatus')).json.pools.find((p) => p.connectionId === id);
 check('editar cierra el pool', pool?.initialized === false);
 check('sigue funcionando tras editar', (await call(usr, 'POST', '/executeQuery', { connectionId: id, sql: 'SELECT 1 AS x' })).status === 200);
+const dup = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: 'tienda · servidor b', password: undefined });
+check('editar con el nombre de otra conexión 400', dup.status === 400 && /Ya existe/.test(dup.json?.error), JSON.stringify(dup.json));
+check('la conexión conserva su nombre tras el rechazo', (await call(tec, 'GET', '/connections')).json.connections.find((x) => x.id === id)?.name === nuevoNombre);
+const esp = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: `  ${nuevoNombre.replace(' ', '   ')} `, password: undefined });
+check('espacios repetidos se guardan como uno', esp.status === 200 && esp.json.name === nuevoNombre, JSON.stringify(esp.json));
 check('editar con contraseña incorrecta 422', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: 'incorrecta' })).status === 422);
 check('editar con contraseña correcta 200', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre })).status === 200);
 check('usuario: editar 403', (await call(usr, 'PUT', `/connections?id=${id}`, { ...pg, name: 'x' })).status === 403);

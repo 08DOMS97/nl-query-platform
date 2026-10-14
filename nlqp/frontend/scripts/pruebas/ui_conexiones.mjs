@@ -66,8 +66,15 @@ await page.waitForSelector('text=No se pudo conectar', { timeout: 15000 });
 await page.waitForTimeout(500);
 check('Guardar con contraseña incorrecta: no se registra', (await fila(page, nombre).count()) === 0);
 
-// Alta correcta
+// Nombre repetido (de otra conexión, con otras mayúsculas): no se registra y se avisa
+await page.fill('#conn-name', 'TIENDA · servidor a');
 await page.fill('#conn-password', pg.password);
+await page.getByRole('button', { name: 'Guardar', exact: true }).click();
+check('Guardar con nombre repetido: avisa', await page.waitForSelector('text=Ya existe una conexión llamada', { timeout: 15000 }).then(() => true, () => false));
+check('Guardar con nombre repetido: no se registra', (await page.locator('tbody tr').count()) === 4);
+await page.fill('#conn-name', nombre);
+
+// Alta correcta
 await page.getByRole('button', { name: 'Probar', exact: true }).click();
 check('Probar con datos correctos: correcta', await page.waitForSelector('text=Conexión correcta', { timeout: 15000 }).then(() => true, () => false));
 await page.screenshot({ path: path.join(OUT, '1_formulario.png'), fullPage: true });
@@ -94,6 +101,10 @@ await page.waitForSelector(`text=${nombre}`);
 await fila(page, nombre).getByRole('button', { name: 'Editar' }).click();
 check('Editar: motor bloqueado', await page.getByRole('radio', { name: 'PostgreSQL' }).isDisabled());
 check('Editar: contraseña vacía', (await page.inputValue('#conn-password')) === '');
+await page.fill('#conn-name', 'Tienda · Servidor B');
+await page.getByRole('button', { name: 'Guardar', exact: true }).click();
+check('Editar con el nombre de otra: avisa', await page.waitForSelector('text=Ya existe una conexión llamada', { timeout: 15000 }).then(() => true, () => false));
+check('Editar con el nombre de otra: no cambia', (await fila(page, nombre).count()) === 1);
 await page.fill('#conn-name', editado);
 await page.getByRole('button', { name: 'Guardar', exact: true }).click();
 check('Editar: actualizada', await page.waitForSelector(`text=Conexión «${editado}» actualizada.`, { timeout: 15000 }).then(() => true, () => false));
@@ -118,9 +129,9 @@ await page.goto('http://localhost:3000/conexiones');
 check('Usuario: /conexiones restringido', await page.waitForSelector('text=Acceso restringido').then(() => true, () => false));
 check('Usuario: no ve formulario', (await page.getByRole('button', { name: 'Nueva conexión' }).count()) === 0);
 
-// El 422 es el guardado con contraseña incorrecta, provocado a propósito.
-const inesperados = consoleErrors.filter((e) => !e.includes('422'));
-check('Sin errores de consola (salvo el 422 esperado)', inesperados.length === 0, inesperados.join(' | '));
+// 422 (contraseña incorrecta) y 400 (nombre repetido) los provoca la prueba a propósito.
+const inesperados = consoleErrors.filter((e) => !/status of (400|422)/.test(e));
+check('Sin errores de consola (salvo los 400 y 422 esperados)', inesperados.length === 0, inesperados.join(' | '));
 console.log(`\n${ok}/${ok + fail} OK`);
 await browser.close();
 process.exit(fail ? 1 : 0);

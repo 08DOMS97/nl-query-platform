@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import type { AuthedRequest } from '../middleware/auth.middleware.js';
 import { closePool, testConnectionConfig } from '../services/connectionManager.service.js';
 import {
+  assertUniqueName,
   configForEdit,
   createConnection,
   deleteConnection,
@@ -53,6 +54,8 @@ export const connectionsHandler = async (req: Request, res: Response): Promise<v
 
     if (req.method === 'POST') {
       const input = parseConnectionInput(req.body);
+      // El nombre se revisa antes de probar la conexión: es más rápido y el error es más claro.
+      await assertUniqueName(input.name);
       const test = await testConnectionConfig(input.engine, { ...input, password: input.password! });
       if (!test.ok) {
         res.status(422).json({ error: `No se pudo conectar: ${test.error}` });
@@ -68,6 +71,7 @@ export const connectionsHandler = async (req: Request, res: Response): Promise<v
       if (!id) return;
       const current = await getConnection(id);
       const input = parseConnectionInput({ ...req.body, engine: current.engine }, true);
+      await assertUniqueName(input.name, id);
       const { engine, config } = await configForEdit(id, input);
       const test = await testConnectionConfig(engine, config);
       if (!test.ok) {
@@ -106,7 +110,7 @@ export const connectionsHandler = async (req: Request, res: Response): Promise<v
 export const testConnectionConfigHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     // El nombre no hace falta para probar (el formulario puede no tenerlo todavía).
-    const body = { ...((req.body ?? {}) as Record<string, unknown>), name: 'prueba' };
+    const body: Record<string, unknown> = { ...((req.body ?? {}) as Record<string, unknown>), name: 'prueba' };
     const id = typeof body.id === 'string' && body.id.trim() ? body.id.trim() : null;
     let result;
     if (id) {

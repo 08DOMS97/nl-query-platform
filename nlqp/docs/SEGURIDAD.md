@@ -517,11 +517,11 @@ había forma de registrar una conexión que no fuera uno de los 4 motores del ba
 
 ### Verificación (13/10)
 
-33/33 sobre la API (permisos, que no se filtre la contraseña, validaciones, alta con
+38/38 sobre la API (permisos, nombre único aunque cambien mayúsculas o espacios, que no se filtre la contraseña, validaciones, alta con
 contraseña incorrecta rechazada, uso de una conexión nueva en ejecución, esquema,
 historial y guardadas, edición que cierra el pool, baja y 404 posterior). Sin cambios en
 lo demás: roles 23/23, M5 32/32, interfaz 13/13, `npm run test:seguridad` 57/57 y
-200/200. Formulario en la interfaz (13/10): 23/23 (`npm run test:ui`), entre ellas que
+200/200. Formulario en la interfaz (13/10): 27/27 (`npm run test:ui`), entre ellas que
 la contraseña no aparece en la página después de guardar y que el no técnico no ve la
 pantalla. Las pruebas de API e interfaz quedaron en el repo: `npm run test:api`
 (backend) y `npm run test:ui` (frontend).

@@ -234,7 +234,8 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   desde la pantalla Conexiones (formulario con "Probar"), prueba antes de guardar,
   motor fijo al editar, contraseña que no se vuelve a mostrar, cerrar el pool al editar
   o eliminar, el no técnico ve solo nombre, motor y base. (3) En "Verificación",
-  párrafo nuevo con **33/33** (API) y **23/23** (interfaz). Sale de `BITACORA.md`
+  párrafo nuevo con **38/38** (API) y **27/27** (interfaz); nombre de conexión único en
+  todo el sistema (las conexiones son compartidas). Sale de `BITACORA.md`
   (13/10).
 - [x] (10/10) **Unificar los títulos**: 6.2 → "6.2 Módulo 2 — Extracción e
   interpretación de esquema" y 6.3 → "6.3 Módulo 3 — Generación NL2SQL y Query Safety

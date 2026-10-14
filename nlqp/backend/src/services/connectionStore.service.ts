@@ -162,7 +162,8 @@ export function parseConnectionInput(body: unknown, partial = false): Connection
   if (!partial && !password) throw new ConnectionValidationError('El campo "password" es requerido.');
   if (password && password.length > 256) throw new ConnectionValidationError('La contraseña admite hasta 256 caracteres.');
   return {
-    name: text(b.name, 'name', 80),
+    // Espacios repetidos dentro del nombre se reducen a uno («Ventas  A» = «Ventas A»).
+    name: text(b.name, 'name', 80).replace(/\s+/g, ' '),
     engine: engine as DbEngine,
     host: text(b.host, 'host', 255),
     port,
@@ -172,9 +173,15 @@ export function parseConnectionInput(body: unknown, partial = false): Connection
   };
 }
 
-async function assertUniqueName(name: string, exceptId?: string): Promise<void> {
+/**
+ * Las conexiones son compartidas por todos los usuarios, así que el nombre es único en
+ * todo el sistema, sin distinguir mayúsculas ni espacios repetidos. `exceptId`: la
+ * conexión que se edita (puede conservar su propio nombre).
+ */
+export async function assertUniqueName(name: string, exceptId?: string): Promise<void> {
+  const key = (n: string) => n.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es');
   const all = await listConnections();
-  if (all.some((c) => c.id !== exceptId && c.name.toLowerCase() === name.toLowerCase())) {
+  if (all.some((c) => c.id !== exceptId && key(c.name) === key(name))) {
     throw new ConnectionValidationError(`Ya existe una conexión llamada "${name}".`);
   }
 }

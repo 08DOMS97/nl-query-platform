@@ -6,6 +6,26 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 (3) — Nombre de conexión único
+
+- **David pidió:** que no se puedan guardar dos conexiones con el mismo nombre. Las
+  conexiones son compartidas (no por usuario), así que el nombre es único en todo el
+  sistema.
+- Ya se rechazaba (400) al crear y al editar, sin distinguir mayúsculas. Se agregó:
+  espacios repetidos se reducen a uno (al guardar y al comparar), y el nombre se revisa
+  **antes** de probar la conexión (antes, un nombre repetido con contraseña incorrecta
+  daba 422 en vez de "Ya existe una conexión llamada…").
+- **Error mío corregido:** el arreglo de `/testConnectionConfig` del commit `89e28ff`
+  tenía un error de tipos que no se vio porque se compiló con `npm run build | tail -1`
+  (el pipe ocultó el fallo de `tsc`; el JS se emitió igual y funcionaba). Ya compila
+  limpio.
+- **Verificado:** `test:api` 38/38 (5 casos nuevos: mayúsculas y espacios, aviso antes
+  de probar, editar con el nombre de otra, conserva su nombre, espacios al guardar) +
+  23/23 + 32/32; `test:ui` 13/13 + 27/27 (4 nuevos: crear y editar con nombre
+  repetido); `test:seguridad` 57/57 + 200/200; `tsc` limpio.
+- Tesis: 6.1 con el nombre único y las cifras 38/38 y 27/27 (misma entrada del
+  resumen).
+
 ## 2026-10-13 (2) — Conexiones desde la interfaz y pruebas en el repo
 
 - **David decidió:** lo que cuesta dinero (piloto, corrida completa y "Generar SQL"
