@@ -54,6 +54,12 @@ David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha lí
    figuras 9 y 10 ya no muestran la interfaz actual: selector de conexiones y
    formulario de Conexiones, 13/10).
 
+4. **Siguiente sesión (pedido de David, 13/10):** el historial de los usuarios de prueba
+   está lleno de consultas de las pruebas automáticas (`SELECT 40 + 2 AS ui166705`,
+   `SELECT 1 AS x`, etc.), que se ven en la pantalla y no se entienden. Proponer cómo
+   resolverlo (p. ej., usuarios exclusivos para las pruebas o que las pruebas borren lo
+   que dejan en el historial) y limpiar lo que ya quedó. No tocar antes.
+
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 
 ## Cómo se trabaja en cada sesión

@@ -6,6 +6,16 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 (6) — Cierre del día
+
+- David notó en Historial consultas como `SELECT 40 + 2 AS ui166705`: las dejan las
+  pruebas automáticas (`test:api`, `test:ui`), que usan los mismos usuarios de prueba
+  que él ve en la interfaz. **David decidió:** dejarlo para la siguiente sesión (punto 4
+  de "Próximo paso" en `CLAUDE.md`).
+- Commits del día subidos: `c546cc5`, `d48e359`, `0b73a87` y este cierre.
+- Sigue: piloto con paráfrasis (~$0.50, con confirmación; el tablero lo fija a más
+  tardar el 14/10) y la limpieza del historial de prueba.
+
 ## 2026-10-13 (5) — Textos de la interfaz con tono de producto
 
 - **David pidió:** que la interfaz no tenga textos que parezcan aclaraciones para él ni
