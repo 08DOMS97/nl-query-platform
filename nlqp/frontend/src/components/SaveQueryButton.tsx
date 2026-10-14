@@ -3,22 +3,27 @@
 import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { apiFetch } from '@/lib/api';
-import type { ReusedQuery, SavedQuery } from '@/lib/types';
+import type { ReusedQuery, SavedQuery, SqlEditInfo } from '@/lib/types';
 import { Button } from './ui';
 
 /**
  * Guarda una consulta con un nombre (M5). Guardar es siempre una acción del
- * usuario: el historial se llena solo, las guardadas no.
+ * usuario: el historial se llena solo, las guardadas no. Si el técnico editó la
+ * sentencia, `edit` la manda para la auditoría.
  */
 export function SaveQueryButton({
   query,
   user,
   onSaved,
+  edit,
+  label = 'Guardar',
   size = 'md',
 }: {
   query: ReusedQuery;
   user: User;
-  onSaved?: () => void;
+  onSaved?: (saved: SavedQuery) => void;
+  edit?: SqlEditInfo;
+  label?: string;
   size?: 'sm' | 'md';
 }) {
   const [open, setOpen] = useState(false);
@@ -31,13 +36,13 @@ export function SaveQueryButton({
     setError(null);
     setSaving(true);
     try {
-      await apiFetch<SavedQuery>('/savedQueries', user, {
+      const saved = await apiFetch<SavedQuery>('/savedQueries', user, {
         method: 'POST',
-        body: { name, connectionId: query.connectionId, sql: query.sql, question: query.question },
+        body: { name, connectionId: query.connectionId, sql: query.sql, question: query.question, edit },
       });
       setOpen(false);
       setSaved(true);
-      onSaved?.();
+      onSaved?.(saved);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -49,7 +54,7 @@ export function SaveQueryButton({
     return (
       <span className="inline-flex items-center gap-2">
         <Button size={size} onClick={() => { setOpen(true); setSaved(false); }}>
-          Guardar
+          {label}
         </Button>
         {saved && <span className="text-[12px] text-ok">Guardada</span>}
       </span>

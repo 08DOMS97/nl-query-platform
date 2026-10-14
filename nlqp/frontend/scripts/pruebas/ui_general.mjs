@@ -1,5 +1,5 @@
-// Interfaz general (M4, M5): SQL editable, bloqueo, guardar/reutilizar/eliminar,
-// rutas técnicas. NUNCA aprieta "Generar SQL". Se corre con `npm run test:ui`.
+// Interfaz general (M4, M5): edición del SQL (no desde el historial: se guarda y se
+// edita como guardada), Guardar cambios, auditoría, bloqueo, guardadas y rutas técnicas. NUNCA aprieta "Generar SQL". Se corre con `npm run test:ui`.
 // Requiere que el técnico tenga en su historial al menos una ejecución con filas.
 import { chromium } from 'playwright-core';
 import os from 'node:os';
@@ -37,15 +37,31 @@ await page.click('nav >> text=Conexiones');
 await page.waitForSelector('text=Conectado', { timeout: 30000 }).catch(() => undefined);
 check('técnico: Conexiones muestra las 4 conectadas', (await page.getByText('Conectado', { exact: true }).count()) === 4, String(await page.getByText('Conectado', { exact: true }).count()));
 await page.screenshot({ path: path.join(OUT, '0_conexiones.png'), fullPage: true });
+// Del historial: se reutiliza tal cual, sin editar
 await page.click('nav >> text=Historial');
 await page.waitForSelector('table');
 await page.locator('tr', { hasText: /[0-9] fila/ }).first().getByRole('button', { name: 'Reutilizar' }).click();
 await page.waitForURL('http://localhost:3000/');
 const sqlBox = page.locator('textarea[aria-label="Sentencia SQL"]');
-const SQL_EDITADO = `SELECT 40 + 2 AS r${Date.now() % 100000}`;
-check('técnico: SQL editable', (await sqlBox.count()) === 1);
+check('historial: no editable', (await sqlBox.count()) === 0 && (await page.getByText('Las consultas del historial no se editan').count()) === 1);
+await page.getByRole('button', { name: 'Ejecutar' }).click();
+check('historial: se ejecuta tal cual', await page.waitForSelector('text=Descargar CSV completo', { timeout: 30000 }).then(() => true, () => false));
+
+// Para editarla, se guarda: queda editable como guardada
+const marca = `ui${Date.now() % 1000000}`;
+const nombre = `Prueba edición ${marca}`;
+await page.getByRole('button', { name: 'Guardar', exact: true }).click();
+await page.fill('input[aria-label="Nombre de la consulta"]', nombre);
+await page.locator('form').getByRole('button', { name: 'Guardar', exact: true }).click();
+await page.waitForSelector(`text=«${nombre}»`);
+check('al guardarla queda editable', (await sqlBox.count()) === 1);
+const original = await sqlBox.inputValue();
+
+// Editar y ejecutar
+const SQL_EDITADO = `SELECT 40 + 2 AS ${marca}`;
 await sqlBox.fill(SQL_EDITADO);
 check('técnico: insignia de editada', await page.waitForSelector('text=Editada · se valida al ejecutar', { timeout: 5000 }).then(() => true, () => false));
+check('guardada editada: botón Guardar cambios', (await page.getByRole('button', { name: 'Guardar cambios' }).count()) === 1);
 await page.getByRole('button', { name: 'Ejecutar' }).click();
 await page.waitForSelector('text=Descargar CSV completo');
 check('técnico: ejecuta SQL editado', (await page.locator('table td', { hasText: '42' }).count()) === 1);
@@ -55,39 +71,56 @@ await sqlBox.fill('DELETE FROM customers');
 await page.getByRole('button', { name: 'Ejecutar' }).click();
 await page.waitForSelector('text=/El Query Safety Engine bloqueó la sentencia: .+/');
 check('técnico: insignia Bloqueada y Ejecutar deshabilitado', (await page.locator('text=Bloqueada').count()) === 1 && await page.getByRole('button', { name: 'Ejecutar' }).isDisabled());
-check('técnico: DELETE editado bloqueado por el backend', true);
 await page.screenshot({ path: `${OUT}/09_tec_sql_editado_bloqueado.png` });
 
-// Guardar desde Consultar y eliminar desde Historial
+// Guardar cambios en la guardada
 await sqlBox.fill(SQL_EDITADO);
-const nombre = `Prueba rediseño ${Date.now()}`;
-await page.getByRole('button', { name: 'Guardar' }).click();
-await page.fill('input[aria-label="Nombre de la consulta"]', nombre);
-await page.locator('form').getByRole('button', { name: 'Guardar' }).click();
-await page.waitForSelector('text=Guardada');
+await page.getByRole('button', { name: 'Guardar cambios' }).click();
+check('guardar cambios: confirmado', await page.waitForSelector('text=Cambios guardados', { timeout: 15000 }).then(() => true, () => false));
+check('guardar cambios: ya no figura editada', (await page.getByText('Editada · se valida al ejecutar').count()) === 0);
+
+// Guardadas y auditoría
 await page.click('nav >> text=Historial');
 await page.waitForSelector('table');
 const antes = await savedCount(page);
 await page.getByRole('tab', { name: /Guardadas/ }).click();
 const fila = page.locator('tr', { hasText: nombre });
-check('guardada aparece con su nombre', (await fila.count()) === 1);
-await page.screenshot({ path: `${OUT}/10_tec_guardadas.png` });
-await fila.getByRole('button', { name: 'Reutilizar' }).click();
+check('guardada aparece con su nombre y la sentencia nueva', (await fila.count()) === 1 && (await fila.textContent()).includes(SQL_EDITADO));
+await page.getByRole('tab', { name: /Cambios/ }).click();
+const cambio = page.locator('li', { hasText: `«${nombre}»` }).filter({ hasText: 'Reemplazó' }).first();
+check('cambios: registro con lo reemplazado', (await cambio.count()) === 1);
+check('cambios: quién y acciones', (await cambio.textContent()).includes('nlqp-test@example.com') && (await cambio.getByText('Ejecutada', { exact: true }).count()) === 1 && (await cambio.getByText('Guardada', { exact: true }).count()) === 1);
+check('cambios: fecha y hora', /\d{1,2} \w+ \d{4}, \d{2}:\d{2}/.test(await cambio.textContent()));
+await cambio.getByText('Ver la sentencia completa con los cambios').click();
+check('cambios: sentencia con lo agregado', (await cambio.locator('pre').textContent()).includes(marca));
+await page.screenshot({ path: `${OUT}/11_tec_cambios.png`, fullPage: true });
+check('cambios: el original era el del historial', original !== SQL_EDITADO);
+
+// Reutilizar la guardada: editable y con la sentencia nueva
+await page.getByRole('tab', { name: /Guardadas/ }).click();
+await fila.getByRole('button', { name: 'Reutilizar o editar' }).click();
 await page.waitForURL('http://localhost:3000/');
-check('reutilizar guardada carga el SQL', (await sqlBox.inputValue()) === SQL_EDITADO);
+check('reutilizar guardada: editable con el SQL guardado', (await sqlBox.inputValue()) === SQL_EDITADO);
 await page.click('nav >> text=Historial');
 await page.getByRole('tab', { name: /Guardadas/ }).click();
 await page.locator('tr', { hasText: nombre }).getByRole('button', { name: 'Eliminar' }).click();
 await page.waitForFunction((n) => !document.body.innerText.includes(n), nombre);
 check('eliminar guardada', (await savedCount(page)) === antes - 1);
 
+// Limpieza de la auditoría de esta corrida (no hay endpoint para borrarla)
+const { getFirestore } = await import('../../../backend/lib/services/firebaseAdmin.service.js');
+const snap = await getFirestore().collection('sqlEdits').get();
+await Promise.all(snap.docs.filter((d) => String(d.data().editedSql).includes(marca)).map((d) => d.ref.delete()));
+
 // --- Usuario: sin SQL editable, sin menú técnico, sin acceso directo ---
 page = await login('nlqp-usuario@example.com', USR_PASSWORD);
+await page.click('nav >> text=Historial');
+await page.waitForSelector('[role=tab]');
+check('usuario: sin pestaña Cambios', (await page.getByRole('tab', { name: /Cambios/ }).count()) === 0);
 check('usuario: sin menú técnico', (await page.locator('nav >> text=Conexiones').count()) === 0);
 for (const ruta of ['/conexiones', '/esquema', '/uso']) {
   await page.goto(`http://localhost:3000${ruta}`);
-  await page.waitForSelector('text=Acceso restringido');
-  check(`usuario: ${ruta} restringido`, true);
+  check(`usuario: ${ruta} restringido`, await page.waitForSelector('text=Acceso restringido').then(() => true, () => false));
 }
 
 await browser.close();

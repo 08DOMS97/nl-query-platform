@@ -30,9 +30,9 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 20 |
 | 5 | 1 | 0 | 4 |
-| 6 | 9 | 0 | 30 |
+| 6 | 10 | 0 | 30 |
 | Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **23** | **1** | **54** |
+| **Total** | **24** | **1** | **54** |
 
 ---
 
@@ -351,6 +351,13 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   Figura 9.
 
 ### Módulos 4 y 5 (6.5 y 6.6)
+- [ ] (13/10) **Edición del SQL y auditoría** en 6.5 y 6.6, con el texto actual de
+  `CAPITULO_6.md`: el técnico edita la sentencia generada y las guardadas, no las del
+  historial (se guardan antes); «Guardar cambios»; auditoría de cada edición ejecutada o
+  guardada (lo reemplazado, quién, fecha y hora, base, origen), sin duplicados y con el
+  original tomado del backend; fila nueva **"Auditoría de cambios"** en la Tabla 16;
+  verificación **23/23** (interfaz) + **25/25** (API); en 6.6, cómo se reusa cada una.
+  Sale de `BITACORA.md` (13/10, 4).
 - [ ] (10/10) **Agregar 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos**
   (sección nueva, después de 6.4) con el texto de `CAPITULO_6.md`: roles técnico y no
   técnico como custom claim que solo asigna el backend, control en el backend (403);

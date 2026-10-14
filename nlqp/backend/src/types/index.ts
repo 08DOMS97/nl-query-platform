@@ -133,6 +133,57 @@ export interface GenerateSqlResponse {
   metrics: GenerateSqlMetrics;
 }
 
+/* --- Auditoría de ediciones del SQL (rol técnico) --- */
+
+/** De dónde venía la sentencia que el técnico editó. */
+export type SqlEditOrigin = 'generada' | 'guardada';
+export type SqlEditAction = 'ejecutada' | 'guardada';
+
+export interface SqlDiffSegment {
+  type: 'equal' | 'removed' | 'added';
+  text: string;
+}
+
+/** Un cambio legible: `removed` reemplazado por `added` (uno de los dos puede ser vacío). */
+export interface SqlChange {
+  removed: string;
+  added: string;
+}
+
+/**
+ * Datos de una edición que acompañan a `/executeQuery` o `/savedQueries`. En una
+ * guardada, la sentencia original la toma el backend de la consulta guardada.
+ */
+export interface SqlEditInfo {
+  /** `historial`: la interfaz no deja editarla; si llega editada, se rechaza (409). */
+  origin: SqlEditOrigin | 'historial';
+  /** Sentencia antes de editarla (`generada`; en `historial`, para comprobar que no cambió). */
+  originalSql?: string;
+  /** Consulta guardada que se editó (solo `origin: 'guardada'`). */
+  savedQueryId?: string;
+}
+
+/** Un registro de la auditoría (`GET /sqlEdits`, solo rol técnico). */
+export interface SqlEdit {
+  id: string;
+  email: string | null;
+  connectionId: string;
+  connectionName: string;
+  engine: DbEngine;
+  origin: SqlEditOrigin;
+  savedQueryId: string | null;
+  savedQueryName: string | null;
+  originalSql: string;
+  editedSql: string;
+  segments: SqlDiffSegment[];
+  changes: SqlChange[];
+  actions: SqlEditAction[];
+  /** ISO 8601: primera vez que se ejecutó o guardó la edición. */
+  createdAt: string;
+  /** ISO 8601: última vez. */
+  lastAt: string;
+}
+
 export interface ExecuteQueryRequest {
   connectionId?: string;
   /** Alias anterior (ver `GenerateSqlRequest.engine`). */
@@ -140,6 +191,8 @@ export interface ExecuteQueryRequest {
   sql: string;
   /** Pregunta en español que originó el SQL; opcional, solo para el historial (M5). */
   question?: string;
+  /** Solo si el técnico editó la sentencia: para la auditoría. */
+  edit?: SqlEditInfo;
 }
 
 /** Una ejecución del historial automático (`GET /history`, M5). */

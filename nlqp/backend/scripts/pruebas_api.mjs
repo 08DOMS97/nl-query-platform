@@ -6,8 +6,8 @@
  * Requiere Docker con los 4 motores y el backend corriendo en http://localhost:8080.
  * Pide un token para cada usuario de prueba (técnico y no técnico; la contraseña del no
  * técnico va en NLQP_USUARIO_PASSWORD del .env) y corre, en
- * orden, las pruebas de `scripts/pruebas/`: conexiones (M1), roles (M4) e historial
- * y guardadas (M5). La de conexiones crea una conexión temporal y la elimina.
+ * orden, las pruebas de `scripts/pruebas/`: conexiones (M1), roles (M4), historial
+ * y guardadas (M5) y edición del SQL con su auditoría. La de conexiones crea una conexión temporal y la elimina.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -46,6 +46,7 @@ const PRUEBAS = [
   ['Conexiones (M1)', 'api_conexiones.mjs', [tec, usr]],
   ['Roles (M4)', 'api_roles.mjs', [tec, usr]],
   ['Historial y guardadas (M5)', 'api_m5.mjs', [usr]],
+  ['Edición del SQL y auditoría', 'api_auditoria.mjs', [tec, usr]],
 ];
 
 const resumen = [];

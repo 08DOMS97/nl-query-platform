@@ -478,6 +478,17 @@ el historial de uno no se ve desde el otro. En la interfaz, 12/12 (menú y rutas
 técnicas restringidas al rol usuario; SQL editado con `DELETE` lo rechaza el backend).
 `npm run test:seguridad` sin cambios: 57/57 y 200/200.
 
+### Edición del SQL y auditoría (13/10/2026)
+
+El técnico edita la sentencia generada y las guardadas; las del historial no (se
+guardan antes). El backend lo exige además de la interfaz: una edición de un no técnico
+→ 403, una del historial → 409, y en una guardada la sentencia original sale de lo
+guardado, no del cliente. Cada edición ejecutada o guardada queda en `sqlEdits`
+(original, editada, partes reemplazadas, correo, fecha y hora, base, origen); solo el
+técnico la lee (`GET /sqlEdits`, 403 al resto). No hay endpoint para borrarla. Límite:
+en una sentencia **generada**, el original lo informa la interfaz (no está firmado, igual
+que el riesgo de abajo). Verificado 25/25 (API) y 23/23 (interfaz).
+
 ### Riesgo aceptado
 
 La interfaz no deja editar el SQL al rol no técnico, pero con su token puede enviar

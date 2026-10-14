@@ -6,6 +6,8 @@ import { validateQuerySafety } from '../services/querySafety.service.js';
 import { recordHistoryEntry } from '../services/queryHistory.service.js';
 import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
 import { connectionFromRequest } from '../services/connectionStore.service.js';
+import { recordSqlEdit, resolveEdit, SqlEditError, type ResolvedEdit } from '../services/sqlEditAudit.service.js';
+import type { AuthedRequest } from '../middleware/auth.middleware.js';
 import type { ConnectionDetail, ExecuteQueryRequest } from '../types/index.js';
 import { handleConnectionError } from './connectionErrors.js';
 
@@ -23,6 +25,10 @@ import { handleConnectionError } from './connectionErrors.js';
  * ejecutarse SQL aquí sin pasar antes por el Query Safety Engine (RF-07),
  * incluso si `sql` ya vino de `generateSQL` — la cuenta de BD de pruebas tiene
  * permisos amplios a propósito (ver INSTRUCCIONES_INICIALES_CLAUDE_CODE.md §2).
+ *
+ * Si el técnico editó la sentencia, `edit` dice de dónde venía y la edición queda en
+ * la auditoría (`sqlEditAudit.service.ts`) antes de ejecutarla. Una consulta del
+ * historial no se puede editar (409): primero se guarda.
  *
  * Cada ejecución (con éxito o con error) queda en el historial del usuario (M5,
  * `queryHistory.service.ts`), salvo las corridas de evaluación. Lo bloqueado por
@@ -50,7 +56,32 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
     return;
   }
 
-  const uid = (req as Request & { uid?: string }).uid ?? null;
+  const { uid: authUid, email, role } = req as AuthedRequest;
+  const uid = authUid ?? null;
+  let edit: ResolvedEdit | null = null;
+  if (body.edit !== undefined) {
+    try {
+      if (!uid) throw new SqlEditError(403, 'Editar la sentencia requiere un usuario autenticado.');
+      edit = await resolveEdit(uid, role, body.edit, body.sql);
+    } catch (err) {
+      const status = err instanceof SqlEditError ? err.status : 500;
+      res.status(status).json({ error: err instanceof Error ? err.message : String(err) });
+      return;
+    }
+  }
+  if (edit && uid) {
+    await recordSqlEdit({
+      uid,
+      email: email ?? null,
+      connectionId: connection.id,
+      connectionName: connection.name,
+      engine: connection.engine,
+      ...edit,
+      editedSql: body.sql,
+      action: 'ejecutada',
+    });
+  }
+
   const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER]);
   const startedAt = Date.now();
   const question =

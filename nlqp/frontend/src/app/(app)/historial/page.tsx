@@ -7,18 +7,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryDraft } from '@/hooks/useQueryDraft';
 import { connectionLabel } from '@/hooks/useConnections';
 import { apiFetch } from '@/lib/api';
-import type { HistoryEntry, ReusedQuery, SavedQuery } from '@/lib/types';
+import type { HistoryEntry, ReusedQuery, SavedQuery, SqlEdit } from '@/lib/types';
 import { Badge, Button, EmptyState, Notice, PageHeader, Panel, formatDateTime, formatNumber } from '@/components/ui';
 import { SaveQueryButton } from '@/components/SaveQueryButton';
+import { SqlEditList } from '@/components/SqlEditList';
 
-type Tab = 'history' | 'saved';
+type Tab = 'history' | 'saved' | 'changes';
 
-async function fetchLists(user: User) {
-  const [h, s] = await Promise.all([
+/** La auditoría de ediciones (`/sqlEdits`) solo la pide el rol técnico. */
+async function fetchLists(user: User, technical: boolean) {
+  const [h, s, e] = await Promise.all([
     apiFetch<{ entries: HistoryEntry[] }>('/history', user),
     apiFetch<{ queries: SavedQuery[] }>('/savedQueries', user),
+    technical ? apiFetch<{ edits: SqlEdit[] }>('/sqlEdits', user) : Promise.resolve({ edits: [] as SqlEdit[] }),
   ]);
-  return { history: h.entries, saved: s.queries };
+  return { history: h.entries, saved: s.queries, edits: e.edits };
 }
 
 /** Pregunta (o aviso si no hubo) y la sentencia, recortada a dos líneas. */
@@ -42,12 +45,14 @@ const TH = 'border-b border-line px-4 py-2 text-left text-[12px] font-medium tex
 const TD = 'border-b border-line px-4 py-3 align-top';
 
 export default function HistorialPage() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isTechnical = role === 'tecnico';
   const { reuse } = useQueryDraft();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('history');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [saved, setSaved] = useState<SavedQuery[]>([]);
+  const [edits, setEdits] = useState<SqlEdit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadCount, setReloadCount] = useState(0);
@@ -56,11 +61,12 @@ export default function HistorialPage() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    fetchLists(user)
+    fetchLists(user, isTechnical)
       .then((lists) => {
         if (cancelled) return;
         setHistory(lists.history);
         setSaved(lists.saved);
+        setEdits(lists.edits);
         setError(null);
       })
       .catch((err) => {
@@ -72,12 +78,16 @@ export default function HistorialPage() {
     return () => {
       cancelled = true;
     };
-  }, [user, reloadCount]);
+  }, [user, isTechnical, reloadCount]);
 
   if (!user) return null;
 
-  function handleReuse(query: ReusedQuery) {
-    reuse({ connectionId: query.connectionId, connectionName: query.connectionName, engine: query.engine, question: query.question, sql: query.sql });
+  /** Del historial se reutiliza tal cual; de las guardadas, el técnico además puede editarla. */
+  function handleReuse(query: ReusedQuery, from: Parameters<typeof reuse>[1]) {
+    reuse(
+      { connectionId: query.connectionId, connectionName: query.connectionName, engine: query.engine, question: query.question, sql: query.sql },
+      from,
+    );
     router.push('/');
   }
 
@@ -95,6 +105,7 @@ export default function HistorialPage() {
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: 'history', label: 'Historial', count: history.length },
     { id: 'saved', label: 'Guardadas', count: saved.length },
+    ...(isTechnical ? [{ id: 'changes' as const, label: 'Cambios', count: edits.length }] : []),
   ];
 
   return (
@@ -170,7 +181,7 @@ export default function HistorialPage() {
                     </td>
                     <td className={TD}>
                       <div className="flex flex-wrap justify-end gap-1.5">
-                        <Button size="sm" onClick={() => handleReuse(entry)}>
+                        <Button size="sm" onClick={() => handleReuse(entry, { origin: 'historial' })}>
                           Reutilizar
                         </Button>
                         <SaveQueryButton size="sm" query={entry} user={user} onSaved={reload} />
@@ -218,8 +229,8 @@ export default function HistorialPage() {
                     </td>
                     <td className={TD}>
                       <div className="flex justify-end gap-1.5">
-                        <Button size="sm" onClick={() => handleReuse(query)}>
-                          Reutilizar
+                        <Button size="sm" onClick={() => handleReuse(query, { origin: 'guardada', id: query.id, name: query.name })}>
+                          {isTechnical ? 'Reutilizar o editar' : 'Reutilizar'}
                         </Button>
                         <Button size="sm" variant="danger" onClick={() => handleDelete(query)}>
                           Eliminar
@@ -230,6 +241,21 @@ export default function HistorialPage() {
                 ))}
               </tbody>
             </table>
+          )}
+        </Panel>
+      )}
+
+      {tab === 'changes' && isTechnical && (
+        <Panel
+          title="Sentencias editadas"
+          meta="Cada edición que se ejecutó o se guardó: qué se reemplazó, quién, cuándo y en qué base."
+        >
+          {edits.length === 0 ? (
+            <EmptyState title={loading ? 'Cargando…' : 'Todavía no hay sentencias editadas.'}>
+              {!loading && 'Se registran al ejecutar o guardar una sentencia generada o guardada que se modificó.'}
+            </EmptyState>
+          ) : (
+            <SqlEditList edits={edits} />
           )}
         </Panel>
       )}

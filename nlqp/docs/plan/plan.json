@@ -371,6 +371,20 @@
       "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado 23/23 API + 12/12 UI. Falta pasarlo al Word con su captura."
     },
     {
+      "no": 45,
+      "tarea": "Edición del SQL por origen y auditoría de cambios",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-13",
+      "fin": "2026-10-13",
+      "real": 1.0,
+      "comentario": "Tarea nueva, implementada 13/10 a pedido de David: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado 25/25 API + 23/23 UI.",
+      "nueva": {
+        "agregada": "2026-10-13",
+        "implementada": "2026-10-13"
+      }
+    },
+    {
       "no": 33,
       "tarea": "Módulo 5: Historial y gestión de consultas guardadas",
       "nivel": 2,

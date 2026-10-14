@@ -90,6 +90,12 @@ backend no está corriendo (revisa el paso 3b).
 > sigue funcionando como alias de `connectionId=postgres`. La lista: `GET /connections`.
 > Crear, editar o eliminar (`POST`, `PUT ?id=`, `DELETE ?id=`) y `POST
 > /testConnectionConfig` son solo del rol técnico; no están en la colección.
+>
+> **13/10:** el técnico puede mandar `edit` en `POST /executeQuery` y `POST
+> /savedQueries` (`{ "origin": "generada", "originalSql": "..." }` o `{ "origin":
+> "guardada", "savedQueryId": "..." }`) para que la edición quede en la auditoría;
+> `PUT /savedQueries?id=...` con `{ "sql": "..." }` edita una guardada y `GET /sqlEdits`
+> lista la auditoría. Tampoco están en la colección.
 
 ### 1. Test Connection - los 4 motores
 `GET /testConnection` → debe responder `200 OK` con un arreglo `results` de 4

@@ -602,7 +602,8 @@ seguirían disponibles para quien llame a la API directamente.
 
 | Herramienta | Qué muestra | Para qué sirve |
 |---|---|---|
-| Edición del SQL | La sentencia generada, editable antes de ejecutarla, con tokens, costo, tiempo y tablas enviadas al modelo | Corregir o ajustar una sentencia y ver cuánto costó generarla |
+| Edición del SQL | La sentencia generada o una consulta guardada, editable antes de ejecutarla; en la generada, con tokens, costo, tiempo y tablas enviadas al modelo | Corregir o ajustar una sentencia y ver cuánto costó generarla |
+| Auditoría de cambios | Cada sentencia editada que se ejecutó o se guardó: lo que se reemplazó y por qué texto, quién, fecha y hora, base de datos y origen | Rastrear qué se modificó de lo que generó el modelo o de lo guardado |
 | Conexiones | Las conexiones registradas con su servidor y base, su estado y latencia, y la ocupación de su pool (en uso, libres, en espera); formulario para agregar, probar, editar y eliminar conexiones | Administrar las bases de datos disponibles y diagnosticar fallas de conexión y saturación del pool |
 | Esquema | Tablas, columnas, tipos, nulos, claves primarias y foráneas, valores permitidos e índices de cada motor | Ver el esquema tal como lo recibe el modelo y entender sus respuestas |
 | Uso y costos | Llamadas, costo total y por generación, errores y llamadas por motor, por período y origen | Seguir el consumo de Vertex AI (sección 6.7.1) |
@@ -611,6 +612,24 @@ Una sentencia editada no se considera aprobada por haber sido generada antes: la
 interfaz la marca como editada y el backend la valida con el Query Safety Engine al
 ejecutarla, como a cualquier otra. Si la rechaza, la sentencia queda marcada como
 bloqueada con el motivo y no se puede ejecutar hasta que se corrija.
+
+El técnico puede editar la sentencia recién generada y las consultas guardadas, pero no
+las del historial: una consulta del historial se reutiliza tal como se ejecutó, y para
+modificarla primero se guarda con un nombre. Así, toda sentencia editada parte de una
+versión identificable —la que produjo el modelo o la que el usuario decidió conservar—.
+Al editar una guardada, la interfaz ofrece «Guardar cambios», que la actualiza, o
+guardarla como una consulta nueva. El backend aplica la misma regla: rechaza una
+sentencia del historial que llegue editada y responde 403 si quien edita no es técnico.
+
+Cada edición que se ejecuta o se guarda queda en un registro de auditoría en Firestore
+con la sentencia original, la editada, las partes reemplazadas —calculadas en el
+backend comparando ambas sentencias palabra por palabra, sin contar los cambios de
+espacios—, el usuario, la fecha y la hora, la base de datos y el origen. En una
+consulta guardada, la sentencia original la toma el backend de lo guardado, no de lo que
+envía la interfaz. La misma edición ejecutada o guardada varias veces es un solo
+registro con sus acciones y la fecha de la última. El técnico la consulta en la pestaña
+«Cambios» del historial, donde cada registro se lee como «Reemplazó X por Y», con la
+sentencia completa marcada.
 
 El estado del pool se obtiene de un endpoint nuevo de solo lectura, que informa las
 conexiones abiertas, libres, en uso y en espera de cada conexión registrada sin abrir
@@ -624,10 +643,15 @@ Con un usuario de cada rol, contra el backend, 23 de 23 comprobaciones fueron
 correctas: las cuatro funciones técnicas responden 403 al usuario no técnico, 200 al
 técnico y 401 sin sesión; el historial, las consultas guardadas y la ejecución
 funcionan con ambos roles, y el historial de uno no es visible para el otro. En la
-interfaz, con un navegador automatizado, 12 de 12: el usuario no técnico no ve el menú
-técnico y no accede a esas pantallas escribiendo la dirección; el técnico edita y
-ejecuta una sentencia, y una sentencia editada con `DELETE` es rechazada por el
-backend. La regresión de seguridad siguió en 57 de 57 casos y 200 de 200 ejecuciones.
+interfaz, con un navegador automatizado, 23 de 23: el usuario no técnico no ve el menú
+técnico ni la pestaña de cambios y no accede a esas pantallas escribiendo la dirección;
+una consulta del historial se ejecuta pero no se edita hasta guardarla; el técnico la
+edita, la ejecuta y guarda los cambios; una sentencia editada con `DELETE` es rechazada
+por el backend; y la auditoría muestra lo reemplazado, quién, la fecha y la hora y las
+acciones. La edición y su auditoría se verificaron además con 25 de 25 comprobaciones
+sobre la API (permisos, historial no editable, original tomado de la guardada, sin
+duplicados, cambios solo de espacios no auditados). La regresión de seguridad siguió en
+57 de 57 casos y 200 de 200 ejecuciones.
 
 Queda una limitación: la interfaz no permite editar el SQL al usuario no técnico, pero
 con su token podría enviar una sentencia propia directamente a `executeQuery`. El Query
@@ -665,8 +689,10 @@ por separado igual que en el registro de uso y costos (sección 6.7.1). El histo
 muestra las 50 ejecuciones más recientes.
 
 Desde el historial o desde las consultas guardadas, el usuario puede **reusar** una
-consulta: la sentencia vuelve al formulario con su motor y su pregunta, y se ejecuta con
-el mismo botón «Ejecutar». Reusar no vuelve a llamar al modelo, por lo que no tiene costo
+consulta: la sentencia vuelve al formulario con su base de datos y su pregunta, y se
+ejecuta con el mismo botón «Ejecutar». La del historial se ejecuta tal como quedó
+registrada; el usuario técnico puede editar una guardada, y para editar una del
+historial primero la guarda (sección 6.5). Reusar no vuelve a llamar al modelo, por lo que no tiene costo
 en Vertex AI. Una sentencia guardada no se considera confiable por haber sido guardada:
 el Query Safety Engine la valida al guardarla y de nuevo cada vez que se ejecuta, porque
 `executeQuery` sigue siendo el único punto de ejecución contra las bases de datos.

@@ -131,6 +131,48 @@ export interface ReusedQuery {
   sql: string;
 }
 
+/* --- Auditoría de ediciones del SQL (rol técnico) --- */
+
+export type SqlEditOrigin = 'generada' | 'guardada';
+export type SqlEditAction = 'ejecutada' | 'guardada';
+
+export interface SqlDiffSegment {
+  type: 'equal' | 'removed' | 'added';
+  text: string;
+}
+
+/** `removed` reemplazado por `added` (uno de los dos puede ser vacío). */
+export interface SqlChange {
+  removed: string;
+  added: string;
+}
+
+/** Lo que se manda junto con el SQL cuando el técnico lo editó. */
+export interface SqlEditInfo {
+  origin: SqlEditOrigin | 'historial';
+  originalSql?: string;
+  savedQueryId?: string;
+}
+
+/** Un registro de la auditoría (`GET /sqlEdits`). */
+export interface SqlEdit {
+  id: string;
+  email: string | null;
+  connectionId: string;
+  connectionName: string;
+  engine: DbEngine;
+  origin: SqlEditOrigin;
+  savedQueryId: string | null;
+  savedQueryName: string | null;
+  originalSql: string;
+  editedSql: string;
+  segments: SqlDiffSegment[];
+  changes: SqlChange[];
+  actions: SqlEditAction[];
+  createdAt: string;
+  lastAt: string;
+}
+
 /* --- Módulo 4 (rol técnico) --- */
 
 /** `connectionId`: las conexiones iniciales usan como id el nombre del motor. */

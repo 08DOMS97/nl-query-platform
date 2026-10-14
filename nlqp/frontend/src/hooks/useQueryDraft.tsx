@@ -1,7 +1,10 @@
 'use client';
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, ReusedQuery } from '@/lib/types';
+import type { ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, ReusedQuery, SqlEditInfo } from '@/lib/types';
+
+/** De dónde salió la sentencia en curso. Define si el técnico puede editarla. */
+export type PendingOrigin = 'generada' | 'historial' | 'guardada';
 
 /**
  * SQL listo para ejecutar. `safety` es el veredicto del backend al generarlo; es
@@ -11,8 +14,31 @@ import type { ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, Reuse
 export interface PendingQuery extends ReusedQuery {
   safety: QuerySafetyResult | null;
   metrics: GenerateSqlMetrics | null;
-  /** El usuario técnico modificó la sentencia generada. */
-  edited: boolean;
+  origin: PendingOrigin;
+  /** Sentencia antes de editarla: la generada o la guardada (después de «Guardar cambios», la nueva). */
+  originalSql: string;
+  /** Consulta guardada de la que viene (o en la que se guardó), si la hay. */
+  savedQueryId: string | null;
+  savedQueryName: string | null;
+}
+
+/** El técnico edita la sentencia generada y las guardadas; las del historial, no (primero se guardan). */
+export function canEdit(p: PendingQuery): boolean {
+  return p.origin !== 'historial';
+}
+
+/** La sentencia cambió en algo más que espacios. */
+export function isEdited(p: PendingQuery): boolean {
+  const norm = (s: string) => s.trim().replace(/\s+/g, ' ');
+  return norm(p.sql) !== norm(p.originalSql);
+}
+
+/** Datos de la edición para `/executeQuery` y `/savedQueries` (auditoría), o `undefined` si no cambió. */
+export function editInfo(p: PendingQuery): SqlEditInfo | undefined {
+  if (!isEdited(p)) return undefined;
+  return p.origin === 'guardada' && p.savedQueryId
+    ? { origin: 'guardada', savedQueryId: p.savedQueryId }
+    : { origin: p.origin === 'historial' ? 'historial' : 'generada', originalSql: p.originalSql };
 }
 
 export interface QueryDraft {
@@ -29,7 +55,7 @@ interface QueryDraftState {
   draft: QueryDraft;
   setDraft: (update: (d: QueryDraft) => QueryDraft) => void;
   /** Carga una consulta del historial o de las guardadas en la pantalla Consultar. */
-  reuse: (query: ReusedQuery) => void;
+  reuse: (query: ReusedQuery, from: { origin: 'historial' } | { origin: 'guardada'; id: string; name: string }) => void;
 }
 
 const QueryDraftContext = createContext<QueryDraftState | null>(null);
@@ -44,11 +70,19 @@ export function QueryDraftProvider({ children }: { children: ReactNode }) {
   const value: QueryDraftState = {
     draft,
     setDraft: (update) => setDraftState(update),
-    reuse: (query) =>
+    reuse: (query, from) =>
       setDraftState({
         connectionId: query.connectionId,
         question: query.question ?? '',
-        pending: { ...query, safety: null, metrics: null, edited: false },
+        pending: {
+          ...query,
+          safety: null,
+          metrics: null,
+          origin: from.origin,
+          originalSql: query.sql,
+          savedQueryId: from.origin === 'guardada' ? from.id : null,
+          savedQueryName: from.origin === 'guardada' ? from.name : null,
+        },
         result: null,
       }),
   };

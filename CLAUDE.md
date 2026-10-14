@@ -20,7 +20,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **17/10/2026** | **Entrega PG2** |
 | ~20/10/2026 | Retiro más temprano de `gemini-2.5-pro` (provisorio, verificado 08/10) |
 
-## Estado por área (actualizado 2026-10-13, con el registro de conexiones de M1)
+## Estado por área (actualizado 2026-10-13, con conexiones de M1 y auditoría de ediciones)
 
 | Área | Estado |
 |---|---|
@@ -28,10 +28,10 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 13/13 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
-| M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. Falta pasarlo al Word |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 23/23 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
+| M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
-| Texto de tesis | 🟡 23 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Texto de tesis | 🟡 24 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
 | **Plan vs. real** (corte 13/10) | Plan 97 % · real 95 % · **−2,1 puntos: atrasados** (pruebas de generación 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |

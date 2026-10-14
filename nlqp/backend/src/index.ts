@@ -5,7 +5,7 @@ import { getSchemaHandler } from './functions/getSchema.js';
 import { generateSQLHandler } from './functions/generateSQL.js';
 import { executeQueryHandler } from './functions/executeQuery.js';
 import { getUsageStatsHandler } from './functions/getUsageStats.js';
-import { getHistoryHandler, savedQueriesHandler } from './functions/queryHistory.js';
+import { getHistoryHandler, savedQueriesHandler, sqlEditsHandler } from './functions/queryHistory.js';
 import { connectionsHandler, testConnectionConfigHandler } from './functions/connections.js';
 import {
   createResultExportHandler,
@@ -40,6 +40,7 @@ app.post('/executeQuery', verifyFirebaseAuth, executeQueryHandler);
 app.get('/getUsageStats', verifyFirebaseAuth, requireTechnicalRole, getUsageStatsHandler);
 app.get('/history', verifyFirebaseAuth, getHistoryHandler);
 app.all('/savedQueries', verifyFirebaseAuth, savedQueriesHandler);
+app.get('/sqlEdits', verifyFirebaseAuth, requireTechnicalRole, sqlEditsHandler);
 app.get('/getResultPage', verifyFirebaseAuth, getResultPageHandler);
 app.post('/createResultExport', verifyFirebaseAuth, createResultExportHandler);
 // Sin verifyFirebaseAuth a propósito: lo autoriza el token de un solo uso (ver handler).

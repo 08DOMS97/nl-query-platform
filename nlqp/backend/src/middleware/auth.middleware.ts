@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { getFirebaseAdmin } from '../services/firebaseAdmin.service.js';
 import type { UserRole } from '../types/index.js';
 
-export type AuthedRequest = Request & { uid?: string; role?: UserRole };
+export type AuthedRequest = Request & { uid?: string; email?: string; role?: UserRole };
 
 /** Solo un claim `role: 'tecnico'` explícito da el rol técnico; cualquier otra cosa, no técnico. */
 export function roleFromClaims(claims: Record<string, unknown>): UserRole {
@@ -52,6 +52,7 @@ export async function verifyFirebaseAuth(
   try {
     const decoded = await getFirebaseAdmin().auth().verifyIdToken(idToken);
     (req as AuthedRequest).uid = decoded.uid;
+    (req as AuthedRequest).email = decoded.email;
     (req as AuthedRequest).role = roleFromClaims(decoded);
     next();
   } catch (err) {

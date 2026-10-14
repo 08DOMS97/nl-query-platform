@@ -2,10 +2,10 @@
 
 import { useState, type KeyboardEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQueryDraft } from '@/hooks/useQueryDraft';
+import { canEdit, editInfo, isEdited, useQueryDraft } from '@/hooks/useQueryDraft';
 import { connectionLabel, useConnections } from '@/hooks/useConnections';
 import { apiFetch, apiRequest } from '@/lib/api';
-import { ENGINE_LABELS, type ExecuteQueryResponse, type GenerateSqlMetrics, type GenerateSqlResponse } from '@/lib/types';
+import { ENGINE_LABELS, type ExecuteQueryResponse, type GenerateSqlMetrics, type GenerateSqlResponse, type SavedQuery } from '@/lib/types';
 import { Badge, Button, ConnectionSelector, FieldLabel, Notice, PageHeader, Panel, formatNumber, formatUsd } from '@/components/ui';
 import { QueryResult } from '@/components/QueryResult';
 import { SaveQueryButton } from '@/components/SaveQueryButton';
@@ -38,6 +38,8 @@ export default function ConsultarPage() {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const [savingChanges, setSavingChanges] = useState(false);
+  const [changesSaved, setChangesSaved] = useState(false);
 
   if (!user) return null;
   const isTechnical = role === 'tecnico';
@@ -45,6 +47,8 @@ export default function ConsultarPage() {
   // Si la conexión elegida ya no existe (se eliminó), se usa la primera.
   const selected = connections?.find((c) => c.id === draft.connectionId) ?? connections?.[0] ?? null;
   const blocked = pending?.safety?.safe === false;
+  const edited = !!pending && isEdited(pending);
+  const editable = isTechnical && !!pending && canEdit(pending);
 
   async function handleGenerate() {
     if (!user || !selected || !question.trim() || generating) return;
@@ -66,7 +70,10 @@ export default function ConsultarPage() {
           question: question.trim(),
           safety: data.safety,
           metrics: data.metrics ?? null,
-          edited: false,
+          origin: 'generada',
+          originalSql: data.sql,
+          savedQueryId: null,
+          savedQueryName: null,
         },
       }));
     } catch (err) {
@@ -83,7 +90,13 @@ export default function ConsultarPage() {
     try {
       const { ok, status, data } = await apiRequest<ExecuteQueryResponse & { reason?: string }>('/executeQuery', user, {
         method: 'POST',
-        body: { connectionId: pending.connectionId, sql: pending.sql, question: pending.question ?? undefined },
+        body: {
+          connectionId: pending.connectionId,
+          sql: pending.sql,
+          question: pending.question ?? undefined,
+          // Si el técnico la editó: de dónde venía, para la auditoría.
+          edit: isTechnical ? editInfo(pending) : undefined,
+        },
       });
       if (status === 403 && data.reason) {
         // El backend la rechazó al validarla (SQL editado o reutilizado): queda marcada en su panel.
@@ -99,6 +112,44 @@ export default function ConsultarPage() {
     }
   }
 
+  /** Reemplaza la sentencia de la consulta guardada de la que viene (solo técnico). */
+  async function handleSaveChanges() {
+    if (!user || !pending?.savedQueryId) return;
+    setError(null);
+    setSavingChanges(true);
+    try {
+      const { ok, status, data } = await apiRequest<SavedQuery & { reason?: string }>(
+        `/savedQueries?id=${encodeURIComponent(pending.savedQueryId)}`,
+        user,
+        { method: 'PUT', body: { sql: pending.sql } },
+      );
+      if (status === 403 && data.reason) {
+        setDraft((d) => (d.pending ? { ...d, pending: { ...d.pending, safety: { safe: false, reason: data.reason } } } : d));
+        return;
+      }
+      if (!ok) throw new Error(data.error ?? `Error ${status} al guardar los cambios.`);
+      // La versión guardada pasa a ser la original: los próximos cambios se comparan con ella.
+      setDraft((d) => (d.pending ? { ...d, pending: { ...d.pending, originalSql: data.sql } } : d));
+      setChangesSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSavingChanges(false);
+    }
+  }
+
+  /** Al guardar con nombre, la sentencia pasa a ser esa guardada: desde ahí se puede editar. */
+  function handleSaved(saved: SavedQuery) {
+    setDraft((d) =>
+      d.pending
+        ? {
+            ...d,
+            pending: { ...d.pending, origin: 'guardada', originalSql: saved.sql, savedQueryId: saved.id, savedQueryName: saved.name },
+          }
+        : d,
+    );
+  }
+
   function handleQuestionKey(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
@@ -109,7 +160,7 @@ export default function ConsultarPage() {
   let status = null;
   if (pending) {
     if (blocked) status = <Badge tone="bad">Bloqueada</Badge>;
-    else if (pending.edited) status = <Badge tone="warn">Editada · se valida al ejecutar</Badge>;
+    else if (edited) status = <Badge tone="warn">Editada · se valida al ejecutar</Badge>;
     else if (pending.safety === null) status = <Badge tone="neutral">Reutilizada · se valida al ejecutar</Badge>;
     else status = <Badge tone="ok">Validada: solo lectura</Badge>;
   }
@@ -164,20 +215,31 @@ export default function ConsultarPage() {
       {error && <Notice tone="bad">{error}</Notice>}
 
       {pending && (
-        <Panel title="Sentencia SQL" meta={`${connectionLabel(pending)} · ${ENGINE_LABELS[pending.engine]}`} actions={status}>
-          {isTechnical ? (
+        <Panel
+          title={pending.savedQueryName ? `Sentencia SQL · «${pending.savedQueryName}»` : 'Sentencia SQL'}
+          meta={`${connectionLabel(pending)} · ${ENGINE_LABELS[pending.engine]}`}
+          actions={status}
+        >
+          {editable ? (
             <textarea
               aria-label="Sentencia SQL"
               spellCheck={false}
               value={pending.sql}
               rows={Math.min(Math.max(pending.sql.split('\n').length, 3), 16)}
-              onChange={(e) =>
-                setDraft((d) =>
-                  d.pending ? { ...d, result: null, pending: { ...d.pending, sql: e.target.value, safety: null, edited: true } } : d,
-                )
-              }
+              onChange={(e) => {
+                setChangesSaved(false);
+                setDraft((d) => (d.pending ? { ...d, result: null, pending: { ...d.pending, sql: e.target.value, safety: null } } : d));
+              }}
               className="block w-full resize-y bg-canvas px-4 py-3 font-mono text-[13px] leading-relaxed focus:bg-accent-50/40 focus:outline-none"
             />
+          ) : isTechnical ? (
+            <>
+              <pre className="overflow-x-auto bg-surface px-4 py-3 font-mono text-[13px] leading-relaxed">{pending.sql}</pre>
+              <p className="border-t border-line px-4 py-2 text-[12px] text-ink-3">
+                Las consultas del historial no se editan. Para modificarla, guárdela con un nombre: queda en Guardadas y se
+                puede editar aquí mismo.
+              </p>
+            </>
           ) : (
             <details className="group">
               <summary className="cursor-pointer select-none px-4 py-2.5 text-[13px] text-ink-2 hover:text-ink">
@@ -189,7 +251,7 @@ export default function ConsultarPage() {
             </details>
           )}
 
-          {isTechnical && pending.metrics && !pending.edited && <MetricsStrip metrics={pending.metrics} />}
+          {isTechnical && pending.metrics && !edited && <MetricsStrip metrics={pending.metrics} />}
 
           {blocked && (
             <div className="border-t border-line px-4 py-3">
@@ -203,7 +265,22 @@ export default function ConsultarPage() {
             <Button variant="primary" onClick={handleExecute} disabled={blocked || executing || !pending.sql.trim()}>
               {executing ? 'Ejecutando…' : 'Ejecutar'}
             </Button>
-            {!blocked && <SaveQueryButton key={pending.sql} query={pending} user={user} />}
+            {!blocked && pending.origin === 'guardada' && edited && isTechnical && (
+              <Button onClick={handleSaveChanges} disabled={savingChanges || !pending.sql.trim()}>
+                {savingChanges ? 'Guardando…' : 'Guardar cambios'}
+              </Button>
+            )}
+            {!blocked && (
+              <SaveQueryButton
+                key={`${pending.savedQueryId ?? ''}|${pending.sql}`}
+                query={pending}
+                user={user}
+                edit={isTechnical ? editInfo(pending) : undefined}
+                label={pending.origin === 'guardada' ? 'Guardar como nueva' : 'Guardar'}
+                onSaved={handleSaved}
+              />
+            )}
+            {changesSaved && !edited && <span className="text-[12px] text-ok">Cambios guardados</span>}
           </div>
         </Panel>
       )}

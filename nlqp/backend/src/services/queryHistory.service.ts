@@ -83,6 +83,31 @@ export async function saveQuery(
   return { id: ref.id, ...query, savedAt: savedAt.toISOString() };
 }
 
+/** Una consulta guardada del usuario, o `null` si no existe. */
+export async function getSavedQuery(uid: string, id: string): Promise<SavedQuery | null> {
+  const doc = await userCollection(uid, 'saved').doc(id).get();
+  if (!doc.exists) return null;
+  const data = doc.data()!;
+  return {
+    id: doc.id,
+    name: data.name,
+    question: data.question ?? null,
+    connectionId: data.connectionId ?? data.engine,
+    connectionName: data.connectionName ?? data.engine,
+    engine: data.engine as DbEngine,
+    sql: data.sql,
+    savedAt: data.savedAt.toDate().toISOString(),
+  };
+}
+
+/** Reemplaza la sentencia de una consulta guardada (edición del rol técnico). */
+export async function updateSavedQuerySql(uid: string, id: string, sql: string): Promise<SavedQuery | null> {
+  const ref = userCollection(uid, 'saved').doc(id);
+  if (!(await ref.get()).exists) return null;
+  await ref.update({ sql, updatedAt: new Date() });
+  return getSavedQuery(uid, id);
+}
+
 /** Devuelve `false` si la consulta no existe (para responder 404). */
 export async function deleteSavedQuery(uid: string, id: string): Promise<boolean> {
   const ref = userCollection(uid, 'saved').doc(id);

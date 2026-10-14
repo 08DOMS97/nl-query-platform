@@ -6,6 +6,37 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 (4) — Edición del SQL por origen y auditoría de cambios
+
+- **David decidió:** el técnico edita la sentencia al generarla y las consultas
+  guardadas, **no** las del historial: para editar una del historial, primero la guarda
+  (y ahí mismo queda editable). La auditoría de los cambios la ve solo el técnico.
+- Backend: `sqlEditAudit.service.ts` (colección `sqlEdits`): sentencia original,
+  editada, partes reemplazadas (comparación por palabras, LCS, sin dependencias nuevas;
+  los cambios solo de espacios no cuentan), quién (correo), fecha y hora, base, origen y
+  acciones (ejecutada / guardada). El id es un hash: la misma edición no se duplica.
+  `/executeQuery` y `POST /savedQueries` aceptan `edit` { origin, originalSql |
+  savedQueryId }; en una guardada el original lo toma el backend. Historial editado →
+  409; no técnico que edita → 403. `PUT /savedQueries?id=` (técnico) reemplaza la
+  sentencia; `GET /sqlEdits` (técnico) lista las últimas 100. El middleware guarda el
+  correo del token.
+- Frontend: la consulta en curso sabe su origen (generada / historial / guardada). Del
+  historial se muestra sin editar, con el aviso; al guardarla pasa a guardada y es
+  editable. Con una guardada editada: «Guardar cambios» y «Guardar como nueva». En
+  Guardadas, el técnico ve «Reutilizar o editar». Pestaña «Cambios» en Historial
+  (`SqlEditList`): «Reemplazó X por Y», quién, fecha y hora, base, origen, acciones y la
+  sentencia completa marcada.
+- Indicador de Next.js (la «N» flotante): movido abajo a la derecha
+  (`devIndicators.position` en `next.config.ts`). Es la herramienta de desarrollo de
+  Next.js: solo aparece con `npm run dev`, no la agregó el proyecto, no se puede
+  traducir; a la izquierda tapaba el pie de la barra lateral y su menú no se abría bien.
+- **Verificado:** `test:api` 38/38 + 23/23 + 32/32 + 25/25 (nueva: auditoría);
+  `test:ui` 23/23 (general, reescrita con el flujo nuevo) + 27/27; `tsc` y `lint`
+  limpios. Las pruebas borran sus registros de auditoría al terminar. Gasto en
+  Gemini: $0.
+- Tesis: 6.5 (párrafos de edición y auditoría, fila nueva en la Tabla 16,
+  verificación 23/23 + 25/25) y 6.6 (reusar). Resumen: 24 pendientes.
+
 ## 2026-10-13 (3) — Nombre de conexión único
 
 - **David pidió:** que no se puedan guardar dos conexiones con el mismo nombre. Las

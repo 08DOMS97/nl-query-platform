@@ -68,7 +68,7 @@ check('guardar nombre > 100 400', (await call('POST', '/savedQueries', { name: '
 check('guardar en conexión inexistente 404', (await call('POST', '/savedQueries', { name: 'x', engine: 'oracle', sql: 'SELECT 1' })).status === 404);
 check('guardar sin sql 400', (await call('POST', '/savedQueries', { name: 'x', engine: 'mysql' })).status === 400);
 check('guardar SQL inseguro 403', (await call('POST', '/savedQueries', { name: 'x', engine: 'mssql', sql: 'SELECT 1 DROP TABLE clientes' })).status === 403);
-check('método no permitido 405', (await call('PUT', '/savedQueries', {})).status === 405);
+check('método no permitido 405', (await call('PATCH', '/savedQueries', {})).status === 405);
 
 check('borrar 204', (await call('DELETE', `/savedQueries?id=${s.json.id}`)).status === 204);
 check('borrar de nuevo 404', (await call('DELETE', `/savedQueries?id=${s.json.id}`)).status === 404);
