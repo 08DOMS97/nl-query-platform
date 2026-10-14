@@ -30,8 +30,8 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
 | Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 23/23 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
-| M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
-| Texto de tesis | 🟡 24 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 11) y pasar 6.6 al Word |
+| Texto de tesis | 🟡 24 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 por el registro de conexiones; 6.5 y 6.6 por la edición del SQL y su auditoría. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
 | **Plan vs. real** (corte 13/10) | Plan 97 % · real 95 % · **−2,1 puntos: atrasados** (pruebas de generación 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
@@ -40,25 +40,25 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
-1. **Piloto con paráfrasis** ← **SIGUIENTE**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
+1. **Limpiar el historial de prueba** ← **SIGUIENTE** (pedido de David, 13/10; sin
+   costo): el historial de los usuarios de prueba está lleno de consultas de las pruebas
+   automáticas (`SELECT 40 + 2 AS ui166705`, `SELECT 1 AS x`, etc.), que se ven en la
+   pantalla y no se entienden. Proponer en 3–5 líneas cómo resolverlo (p. ej., usuarios
+   exclusivos para las pruebas o que las pruebas borren lo que dejan en el historial) y,
+   con el "dale", limpiar también lo que ya quedó.
+2. **Piloto con paráfrasis**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
    automático $0.60. **Pedir confirmación a David antes.** Requiere Docker y el
    backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
    reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
    `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-2. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
+3. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
    del piloto no se repite). **Confirmación aparte.** Después: revisar a mano "Para
    revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras
    en el resumen para la tesis (6.3.5) el 16/10.
-3. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
+4. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
    (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba, y las de las
    figuras 9 y 10 ya no muestran la interfaz actual: selector de conexiones y
    formulario de Conexiones, 13/10).
-
-4. **Siguiente sesión (pedido de David, 13/10):** el historial de los usuarios de prueba
-   está lleno de consultas de las pruebas automáticas (`SELECT 40 + 2 AS ui166705`,
-   `SELECT 1 AS x`, etc.), que se ven en la pantalla y no se entienden. Proponer cómo
-   resolverlo (p. ej., usuarios exclusivos para las pruebas o que las pruebas borren lo
-   que dejan en el historial) y limpiar lo que ya quedó. No tocar antes.
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 
