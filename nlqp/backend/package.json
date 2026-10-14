@@ -10,6 +10,7 @@
     "set:role": "node --env-file=.env scripts/set_role.mjs",
     "seed:connections": "tsc && node --env-file=.env scripts/seed_connections.mjs",
     "test:seguridad": "tsc && node --env-file=.env scripts/regresion_seguridad.mjs",
+    "test:api": "node --env-file=.env scripts/pruebas_api.mjs",
     "eval:gemini": "node --env-file=.env scripts/evaluacion_gemini.mjs",
     "deploy": "firebase deploy --only functions"
   },

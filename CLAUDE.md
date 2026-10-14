@@ -24,11 +24,11 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 
 | Área | Estado |
 |---|---|
-| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico por API, 33/33. `engine` sigue como alias de `connectionId`. Falta el formulario en la UI |
+| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 33/33, UI 23/23. `engine` sigue como alias de `connectionId` |
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. UI 13/13 (13/10). Falta probar "Generar SQL" con Gemini real desde la UI |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 13/13 + 23/23. Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 10) y pasar 6.6 al Word |
 | Texto de tesis | 🟡 23 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 actualizada por el registro de conexiones. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
@@ -50,7 +50,9 @@ David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha lí
    revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras
    en el resumen para la tesis (6.3.5) el 16/10.
 3. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
-   (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba).
+   (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba, y las de las
+   figuras 9 y 10 ya no muestran la interfaz actual: selector de conexiones y
+   formulario de Conexiones, 13/10).
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 
@@ -121,18 +123,21 @@ cd nlqp/frontend; npm run dev                         # http://localhost:3000
 
 Docker Desktop en esta máquina: `C:\Users\david\AppData\Local\Programs\DockerDesktop\Docker Desktop.exe`.
 Token de prueba (dura 1 h): `npm run test:token` en `nlqp/backend`.
+Pruebas sin costo (con todo levantado): `npm run test:seguridad` y `npm run test:api` en
+`nlqp/backend`; `npm run test:ui` en `nlqp/frontend` (la primera vez, `npm install
+--no-save playwright-core@1.64.0`). Leen las contraseñas de los usuarios de prueba de
+`nlqp/backend/.env` (`NLQP_TEST_USER_PASSWORD`, `NLQP_USUARIO_PASSWORD`).
 Roles: `npm run set:role -- <correo> <tecnico|no_tecnico>`. Usuarios de prueba:
 `nlqp-test@example.com` (técnico) y `nlqp-usuario@example.com` (no técnico); las
 contraseñas, en `scripts/get_test_token.mjs` y en la bitácora del 10/10.
 
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
 
-- Formulario de la pantalla Conexiones para crear, editar y eliminar conexiones (el
-  backend ya lo tiene, 13/10; hoy se cargan con `npm run seed:connections`).
-- 6.1 "Verificación" dice que se usaron "cuentas con permisos exclusivamente de
-  lectura", pero `testuser` tiene permisos amplios a propósito: corregir el texto o
-  crear una cuenta de solo lectura (detectado 13/10).
-- Versionar las pruebas de API e interfaz (hoy solo en el scratchpad de cada sesión).
+- Las contraseñas de los usuarios de prueba de Firebase están escritas en archivos ya
+  commiteados (`get_test_token.mjs`, `evaluacion_gemini.mjs`, bitácora del 10/10). Son
+  cuentas de prueba, pero si el repo es público convendría cambiarlas y leerlas solo
+  del `.env`, como las pruebas nuevas (detectado 13/10).
+
 - Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.012 por intento).
 - Banco de volumen alto para medir eficiencia con `EXPLAIN`.
 - Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.

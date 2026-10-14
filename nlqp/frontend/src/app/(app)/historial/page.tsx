@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import type { User } from 'firebase/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryDraft } from '@/hooks/useQueryDraft';
+import { connectionLabel } from '@/hooks/useConnections';
 import { apiFetch } from '@/lib/api';
-import { ENGINE_LABELS, type HistoryEntry, type ReusedQuery, type SavedQuery } from '@/lib/types';
+import type { HistoryEntry, ReusedQuery, SavedQuery } from '@/lib/types';
 import { Badge, Button, EmptyState, Notice, PageHeader, Panel, formatDateTime, formatNumber } from '@/components/ui';
 import { SaveQueryButton } from '@/components/SaveQueryButton';
 
@@ -76,7 +77,7 @@ export default function HistorialPage() {
   if (!user) return null;
 
   function handleReuse(query: ReusedQuery) {
-    reuse({ engine: query.engine, question: query.question, sql: query.sql });
+    reuse({ connectionId: query.connectionId, connectionName: query.connectionName, engine: query.engine, question: query.question, sql: query.sql });
     router.push('/');
   }
 
@@ -140,7 +141,7 @@ export default function HistorialPage() {
               <thead className="bg-surface">
                 <tr>
                   <th className={TH}>Fecha</th>
-                  <th className={TH}>Motor</th>
+                  <th className={TH}>Base de datos</th>
                   <th className={TH}>Consulta</th>
                   <th className={TH}>Resultado</th>
                   <th className={TH}>
@@ -152,7 +153,7 @@ export default function HistorialPage() {
                 {history.map((entry) => (
                   <tr key={entry.id} className="last:[&>td]:border-b-0">
                     <td className={`${TD} tabular text-ink-2`}>{formatDateTime(entry.executedAt)}</td>
-                    <td className={`${TD} text-ink-2`}>{ENGINE_LABELS[entry.engine]}</td>
+                    <td className={`${TD} text-ink-2`}>{connectionLabel(entry)}</td>
                     <td className={TD}>
                       <QueryCell question={entry.question} sql={entry.sql} />
                     </td>
@@ -200,7 +201,7 @@ export default function HistorialPage() {
               <thead className="bg-surface">
                 <tr>
                   <th className={TH}>Guardada</th>
-                  <th className={TH}>Motor</th>
+                  <th className={TH}>Base de datos</th>
                   <th className={TH}>Consulta</th>
                   <th className={TH}>
                     <span className="sr-only">Acciones</span>
@@ -211,7 +212,7 @@ export default function HistorialPage() {
                 {saved.map((query) => (
                   <tr key={query.id} className="last:[&>td]:border-b-0">
                     <td className={`${TD} tabular text-ink-2`}>{formatDateTime(query.savedAt)}</td>
-                    <td className={`${TD} text-ink-2`}>{ENGINE_LABELS[query.engine]}</td>
+                    <td className={`${TD} text-ink-2`}>{connectionLabel(query)}</td>
                     <td className={TD}>
                       <QueryCell title={query.name} question={query.question} sql={query.sql} />
                     </td>

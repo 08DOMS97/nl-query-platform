@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { DbEngine, ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, ReusedQuery } from '@/lib/types';
+import type { ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, ReusedQuery } from '@/lib/types';
 
 /**
  * SQL listo para ejecutar. `safety` es el veredicto del backend al generarlo; es
@@ -16,13 +16,14 @@ export interface PendingQuery extends ReusedQuery {
 }
 
 export interface QueryDraft {
-  engine: DbEngine;
+  /** Conexión elegida. Las iniciales tienen como id el nombre del motor. */
+  connectionId: string;
   question: string;
   pending: PendingQuery | null;
   result: ExecuteQueryResponse | null;
 }
 
-const EMPTY: QueryDraft = { engine: 'postgres', question: '', pending: null, result: null };
+const EMPTY: QueryDraft = { connectionId: 'postgres', question: '', pending: null, result: null };
 
 interface QueryDraftState {
   draft: QueryDraft;
@@ -45,7 +46,7 @@ export function QueryDraftProvider({ children }: { children: ReactNode }) {
     setDraft: (update) => setDraftState(update),
     reuse: (query) =>
       setDraftState({
-        engine: query.engine,
+        connectionId: query.connectionId,
         question: query.question ?? '',
         pending: { ...query, safety: null, metrics: null, edited: false },
         result: null,

@@ -12,6 +12,42 @@ export const ENGINE_LABELS: Record<DbEngine, string> = {
   mssql: 'SQL Server',
 };
 
+/**
+ * Conexión registrada (`GET /connections`, M1). El usuario no técnico recibe solo
+ * id, nombre, motor y base; el técnico, además servidor, puerto, usuario y fechas.
+ * La contraseña nunca sale del backend.
+ */
+export interface Connection {
+  id: string;
+  name: string;
+  engine: DbEngine;
+  database: string;
+  host?: string;
+  port?: number;
+  user?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Datos del formulario de conexión; en una edición `password` vacía conserva la actual. */
+export interface ConnectionInput {
+  name: string;
+  engine: DbEngine;
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password?: string;
+}
+
+/** Puerto por defecto de cada motor, para precargar el formulario. */
+export const DEFAULT_PORTS: Record<DbEngine, number> = {
+  postgres: 5432,
+  mysql: 3306,
+  mariadb: 3306,
+  mssql: 1433,
+};
+
 /** Rol del usuario (custom claim de Firebase que asigna el backend). */
 export type UserRole = 'tecnico' | 'no_tecnico';
 
@@ -34,6 +70,7 @@ export interface GenerateSqlMetrics {
 export interface GenerateSqlResponse {
   sql: string;
   engine: DbEngine;
+  connectionId: string;
   safety: QuerySafetyResult;
   metrics: GenerateSqlMetrics;
 }
@@ -60,6 +97,9 @@ export interface ExecuteQueryResponse {
 export interface HistoryEntry {
   id: string;
   question: string | null;
+  connectionId: string;
+  /** Nombre de la conexión al ejecutar (en entradas anteriores al 13/10, el motor). */
+  connectionName: string;
   engine: DbEngine;
   sql: string;
   success: boolean;
@@ -74,6 +114,8 @@ export interface SavedQuery {
   id: string;
   name: string;
   question: string | null;
+  connectionId: string;
+  connectionName: string;
   engine: DbEngine;
   sql: string;
   /** ISO 8601. */
@@ -82,6 +124,8 @@ export interface SavedQuery {
 
 /** Consulta que se reusa desde el historial o las guardadas: vuelve al formulario. */
 export interface ReusedQuery {
+  connectionId: string;
+  connectionName: string;
   engine: DbEngine;
   question: string | null;
   sql: string;

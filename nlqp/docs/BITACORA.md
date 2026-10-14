@@ -6,6 +6,36 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 (2) — Conexiones desde la interfaz y pruebas en el repo
+
+- **David decidió:** lo que cuesta dinero (piloto, corrida completa y "Generar SQL"
+  desde la interfaz) va al final; antes se termina todo lo demás.
+- **David decidió:** dejar 6.1 "Verificación" como está ("cuentas con permisos
+  exclusivamente de lectura"). Su criterio: los permisos amplios de `testuser` son del
+  banco de pruebas, no del proyecto; en producción las cuentas serán de solo lectura,
+  como capa extra.
+- Frontend: pantalla Conexiones con formulario (`ConnectionForm`): nueva, probar,
+  guardar, editar (motor bloqueado, contraseña vacía = se conserva) y eliminar. Lista
+  con servidor y base, estado, latencia y pool por conexión. `useConnections`
+  (contexto con la lista) y `ConnectionSelector` en lugar de `EngineSelector`:
+  Consultar y Esquema eligen entre las conexiones registradas, con nombre y motor.
+  Historial y guardadas muestran el nombre de la conexión (las entradas viejas, el
+  motor). Las solicitudes mandan `connectionId`.
+- Pruebas versionadas: `npm run test:api` (backend; pide los tokens solo y corre
+  `scripts/pruebas/api_*.mjs`) y `npm run test:ui` (frontend; `scripts/pruebas/ui_*.mjs`
+  con `playwright-core`, que no es dependencia: `npm install --no-save
+  playwright-core@1.64.0`). Las contraseñas de los usuarios de prueba se leen de
+  `NLQP_TEST_USER_PASSWORD` y `NLQP_USUARIO_PASSWORD` del `.env` del backend (agregadas
+  hoy): el primer intento de commit se bloqueó porque estaban escritas en los scripts.
+  Quedan escritas en archivos ya commiteados (ver "Abierto" en `CLAUDE.md`).
+- **Verificado:** `test:api` 33/33 + 23/23 + 32/32; `test:ui` 13/13 (general) + 23/23
+  (conexiones nuevas: alta con contraseña incorrecta rechazada, alta correcta, esquema
+  de la nueva con 8 tablas, edición, baja, no técnico); `tsc` y `lint` limpios. Gasto
+  en Gemini: $0.
+- Tesis: `CAPITULO_6.md` 6.1 (formulario y 23/23), 6.4 (se elige la conexión, párrafo
+  de alcance) y Tabla 16 (fila Conexiones). Las capturas de las Figuras 9 y 10 del
+  10/10 ya no muestran la interfaz actual: retomarlas. Contador sin cambios (23).
+
 ## 2026-10-13 — Registro de conexiones (M1) documentado y verificado
 
 - **Hallazgo de la revisión:** después del commit `a596cff` (10/10, 16:18) quedó sin

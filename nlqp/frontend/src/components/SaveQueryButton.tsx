@@ -33,7 +33,7 @@ export function SaveQueryButton({
     try {
       await apiFetch<SavedQuery>('/savedQueries', user, {
         method: 'POST',
-        body: { name, engine: query.engine, sql: query.sql, question: query.question },
+        body: { name, connectionId: query.connectionId, sql: query.sql, question: query.question },
       });
       setOpen(false);
       setSaved(true);

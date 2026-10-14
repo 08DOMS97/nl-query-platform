@@ -202,7 +202,7 @@
       "inicio": "2026-09-07",
       "fin": "2026-09-11",
       "real": 1.0,
-      "comentario": "Completo y verificado en los 4 motores (sección 6.1). 13/10: registro de conexiones (Firestore + Secret Manager, alta/edición/baja del técnico por API), verificado 33/33; falta el formulario en la interfaz."
+      "comentario": "Completo y verificado en los 4 motores (sección 6.1). 13/10: registro de conexiones (Firestore + Secret Manager) con alta, prueba, edición y baja del técnico desde la pantalla Conexiones; Consultar y Esquema eligen entre las conexiones registradas. Verificado 33/33 API + 23/23 UI."
     },
     {
       "no": 23,
@@ -344,7 +344,7 @@
       "inicio": "2026-09-21",
       "fin": "2026-10-02",
       "real": 0.95,
-      "comentario": "10/10: rediseño completo (pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex) y perfiles técnico/no técnico. Verificado en navegador 12/12. Falta: probar \"Generar SQL\" con Gemini desde la interfaz."
+      "comentario": "10/10: rediseño completo (pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex) y perfiles técnico/no técnico. Verificado en navegador 12/12. 13/10: pantalla Conexiones con formulario y selector de conexiones en Consultar y Esquema; pruebas versionadas (npm run test:ui: 13/13 + 23/23). Falta: probar \"Generar SQL\" con Gemini desde la interfaz."
     },
     {
       "no": 41,

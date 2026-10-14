@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFetch } from '@/lib/api';
-import { ENGINE_LABELS, type ColumnInfo, type DbEngine, type SchemaInfo, type TableInfo } from '@/lib/types';
-import { Badge, EmptyState, EngineSelector, Notice, PageHeader, Panel } from '@/components/ui';
+import type { ColumnInfo, SchemaInfo, TableInfo } from '@/lib/types';
+import { useConnections } from '@/hooks/useConnections';
+import { Badge, ConnectionSelector, EmptyState, Notice, PageHeader, Panel } from '@/components/ui';
 
 const TH = 'border-b border-line px-4 py-2 text-left text-[12px] font-medium text-ink-3';
 const TD = 'border-b border-line px-4 py-2 align-top';
@@ -88,30 +89,34 @@ function TableDetail({ table }: { table: TableInfo }) {
 
 export default function EsquemaPage() {
   const { user } = useAuth();
-  const [engine, setEngine] = useState<DbEngine>('postgres');
-  const [schemas, setSchemas] = useState<Partial<Record<DbEngine, SchemaInfo>>>({});
-  const [errors, setErrors] = useState<Partial<Record<DbEngine, string>>>({});
+  const { connections, error: connectionsError } = useConnections();
+  const [connectionId, setConnectionId] = useState('postgres');
+  const [schemas, setSchemas] = useState<Record<string, SchemaInfo>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
 
-  const schema = schemas[engine];
-  const error = errors[engine];
+  // Si la conexión elegida ya no existe, se usa la primera.
+  const connection = connections?.find((c) => c.id === connectionId) ?? connections?.[0] ?? null;
+  const selectedId = connection?.id;
+  const schema = selectedId ? schemas[selectedId] : undefined;
+  const error = (selectedId ? errors[selectedId] : undefined) ?? connectionsError;
 
-  // Cada esquema se pide una vez por visita; cambiar de motor no lo vuelve a pedir.
+  // Cada esquema se pide una vez por visita; cambiar de conexión no lo vuelve a pedir.
   useEffect(() => {
-    if (!user || schema || error) return;
+    if (!user || !selectedId || schema || error) return;
     let cancelled = false;
-    apiFetch<SchemaInfo>(`/getSchema?engine=${engine}`, user)
+    apiFetch<SchemaInfo>(`/getSchema?connectionId=${encodeURIComponent(selectedId)}`, user)
       .then((s) => {
-        if (!cancelled) setSchemas((prev) => ({ ...prev, [engine]: s }));
+        if (!cancelled) setSchemas((prev) => ({ ...prev, [selectedId]: s }));
       })
       .catch((err) => {
-        if (!cancelled) setErrors((prev) => ({ ...prev, [engine]: err instanceof Error ? err.message : String(err) }));
+        if (!cancelled) setErrors((prev) => ({ ...prev, [selectedId]: err instanceof Error ? err.message : String(err) }));
       });
     return () => {
       cancelled = true;
     };
-  }, [user, engine, schema, error]);
+  }, [user, selectedId, schema, error]);
 
   const tables = (schema?.tables ?? []).filter((t) => t.name.toLowerCase().includes(filter.trim().toLowerCase()));
   const current = schema?.tables.find((t) => t.name === selected) ?? tables[0];
@@ -122,19 +127,27 @@ export default function EsquemaPage() {
         title="Esquema"
         description="Tablas, columnas, claves e índices de cada base de datos, tal como los recibe el modelo al generar SQL."
         actions={
-          <EngineSelector
-            value={engine}
-            onChange={(value) => {
-              setEngine(value);
-              setSelected(null);
-            }}
-          />
+          connections &&
+          connection && (
+            <ConnectionSelector
+              connections={connections}
+              value={connection.id}
+              onChange={(c) => {
+                setConnectionId(c.id);
+                setSelected(null);
+              }}
+            />
+          )
         }
       />
 
       {error && <Notice tone="bad">{error}</Notice>}
 
-      {!schema && !error && <p className="text-[13px] text-ink-3">Leyendo el esquema de {ENGINE_LABELS[engine]}…</p>}
+      {!schema && !error && (
+        <p className="text-[13px] text-ink-3">
+          {connections && !connection ? 'No hay conexiones registradas.' : `Leyendo el esquema${connection ? ` de ${connection.name}` : ''}…`}
+        </p>
+      )}
 
       {schema && (
         <div className="grid grid-cols-[240px_minmax(0,1fr)] items-start gap-6">

@@ -66,9 +66,11 @@ Secret Manager dentro de su cuota gratuita.
 
 ### Registro de conexiones
 
-El usuario técnico registra, edita y elimina conexiones desde el backend; el usuario no
-técnico solo ve el nombre de cada conexión, su motor y su base de datos, sin servidor,
-puerto ni usuario. Antes de guardar una conexión nueva o editada, el backend la prueba:
+El usuario técnico registra, edita y elimina conexiones desde la pantalla de Conexiones;
+el usuario no técnico solo ve el nombre de cada conexión, su motor y su base de datos,
+sin servidor, puerto ni usuario, al elegir dónde consultar. El formulario permite probar
+los datos antes de guardarlos, y la contraseña se escribe una sola vez: no se vuelve a
+mostrar y, al editar, dejarla vacía conserva la guardada. Antes de guardar una conexión nueva o editada, el backend la prueba:
 una conexión que no responde no se registra. Al editar, la contraseña puede omitirse para
 conservar la actual, y el motor no se puede cambiar, porque el historial y las consultas
 guardadas dependen del dialecto. Editar o eliminar una conexión cierra su pool, de modo
@@ -96,7 +98,13 @@ eliminar; ninguna respuesta incluye la contraseña ni el nombre del secreto; se 
 el puerto, el motor y el nombre inválidos o repetidos; una conexión con contraseña
 incorrecta no se registra (422); una conexión nueva se usa para ejecutar, leer el
 esquema, guardar consultas y aparecer en el historial con su nombre; editarla cierra su
-pool; y una conexión eliminada responde 404.
+pool; y una conexión eliminada responde 404. En la interfaz, 23 de 23 comprobaciones
+fueron correctas: con una contraseña incorrecta la prueba avisa y la conexión no se
+registra; con los datos correctos se registra, aparece conectada, sin mostrar la
+contraseña, y se puede elegir en Consultar y en Esquema (donde muestra sus ocho
+tablas); al editarla el motor queda bloqueado y la contraseña vacía; al eliminarla
+desaparece de la lista y de los selectores; y el usuario no técnico ve las conexiones
+por nombre, pero no la pantalla de Conexiones.
 
 ### Corrección de seguridad aplicada
 
@@ -531,11 +539,12 @@ usuario y lo envía en el encabezado `Authorization`, de modo que el backend lo 
 en cada solicitud, como se describió en la sección 2.7. Las credenciales de las bases de
 datos nunca pasan por el cliente (RNF-07).
 
-El usuario elige el motor, escribe su pregunta y pulsa «Generar SQL». La interfaz
-muestra la sentencia producida y el resultado del Query Safety Engine, y el botón
-«Ejecutar» solo se habilita si la sentencia fue aprobada. La ejecución reutiliza el
-motor con el que se generó la sentencia, de modo que el SQL siempre se ejecuta en el
-dialecto para el que fue producido. Al ejecutarla se muestra la primera página del
+El usuario elige la base de datos entre las conexiones registradas —cada una con su
+nombre y su motor—, escribe su pregunta y pulsa «Generar SQL». La interfaz muestra la
+sentencia producida y el resultado del Query Safety Engine, y el botón «Ejecutar» solo
+se habilita si la sentencia fue aprobada. La ejecución reutiliza la conexión con la que
+se generó la sentencia, de modo que el SQL siempre se ejecuta en el dialecto para el que
+fue producido. Al ejecutarla se muestra la primera página del
 resultado con el rango y el total de filas (por ejemplo, «Filas 1–1,000 de 20,000»),
 botones para avanzar y retroceder entre páginas y la opción «Descargar CSV completo»; si
 la consulta no devolvió filas, se muestra un aviso.
@@ -562,10 +571,9 @@ generación por una sentencia fija para no generar llamadas a Vertex AI. La gene
 con el modelo desde la interfaz queda pendiente de verificar; el endpoint
 correspondiente ya se probó por separado.
 
-El historial y las consultas guardadas se describen en la sección 6.6. La selección de
-motor corresponde a los cuatro motores del banco de pruebas preconfigurados en el
-backend; esta versión no incluye la administración de conexiones desde la interfaz:
-la pantalla de Conexiones muestra su estado, pero no permite agregarlas ni editarlas.
+El historial y las consultas guardadas se describen en la sección 6.6. La
+administración de conexiones (alta, edición y baja) corresponde al rol técnico y se
+describe en las secciones 6.1 y 6.5.
 
 *[Figura 9. Pantalla Consultar de NLQP. Fuente: Elaboración propia. — reemplazar la captura del Word por la de la interfaz nueva.]*
 
@@ -591,7 +599,7 @@ seguirían disponibles para quien llame a la API directamente.
 | Herramienta | Qué muestra | Para qué sirve |
 |---|---|---|
 | Edición del SQL | La sentencia generada, editable antes de ejecutarla, con tokens, costo, tiempo y tablas enviadas al modelo | Corregir o ajustar una sentencia y ver cuánto costó generarla |
-| Conexiones | Estado de cada motor con su latencia y la ocupación del pool de conexiones (en uso, libres, en espera, máximo) | Diagnosticar fallas de conexión y saturación del pool |
+| Conexiones | Las conexiones registradas con su servidor y base, su estado y latencia, y la ocupación de su pool (en uso, libres, en espera); formulario para agregar, probar, editar y eliminar conexiones | Administrar las bases de datos disponibles y diagnosticar fallas de conexión y saturación del pool |
 | Esquema | Tablas, columnas, tipos, nulos, claves primarias y foráneas, valores permitidos e índices de cada motor | Ver el esquema tal como lo recibe el modelo y entender sus respuestas |
 | Uso y costos | Llamadas, costo total y por generación, errores y llamadas por motor, por período y origen | Seguir el consumo de Vertex AI (sección 6.7.1) |
 
@@ -601,8 +609,8 @@ ejecutarla, como a cualquier otra. Si la rechaza, la sentencia queda marcada com
 bloqueada con el motivo y no se puede ejecutar hasta que se corrija.
 
 El estado del pool se obtiene de un endpoint nuevo de solo lectura, que informa las
-conexiones abiertas, libres, en uso y en espera de cada motor sin abrir conexiones
-nuevas; un motor que todavía no se usó aparece como no iniciado.
+conexiones abiertas, libres, en uso y en espera de cada conexión registrada sin abrir
+conexiones nuevas; una conexión que todavía no se usó aparece como no iniciada.
 
 *[Figura 10. Pantalla de Conexiones del rol técnico. Fuente: Elaboración propia. — captura pendiente.]*
 

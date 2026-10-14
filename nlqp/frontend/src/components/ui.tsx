@@ -1,7 +1,7 @@
 'use client';
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { DB_ENGINES, ENGINE_LABELS, type DbEngine } from '@/lib/types';
+import { ENGINE_LABELS, type Connection } from '@/lib/types';
 
 /* --- Formato --- */
 
@@ -143,35 +143,38 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
   );
 }
 
-/* --- Selector de motor --- */
+/* --- Selector de conexión --- */
 
-/** Control segmentado: los cuatro motores siempre a la vista, uno activo. */
-export function EngineSelector({
+/** Control segmentado: todas las conexiones a la vista, una activa, con su motor debajo del nombre. */
+export function ConnectionSelector({
+  connections,
   value,
   onChange,
   disabled,
 }: {
-  value: DbEngine;
-  onChange: (engine: DbEngine) => void;
+  connections: Connection[];
+  value: string;
+  onChange: (connection: Connection) => void;
   disabled?: boolean;
 }) {
   return (
-    <div role="radiogroup" aria-label="Motor de base de datos" className="inline-flex rounded border border-line-strong bg-canvas p-0.5">
-      {DB_ENGINES.map((engine) => {
-        const active = engine === value;
+    <div role="radiogroup" aria-label="Conexión" className="inline-flex flex-wrap rounded border border-line-strong bg-canvas p-0.5">
+      {connections.map((c) => {
+        const active = c.id === value;
         return (
           <button
-            key={engine}
+            key={c.id}
             type="button"
             role="radio"
             aria-checked={active}
             disabled={disabled}
-            onClick={() => onChange(engine)}
-            className={`h-7 rounded-sm px-3 text-[13px] transition-colors disabled:cursor-not-allowed ${
-              active ? 'bg-accent-100 font-medium text-accent-800' : 'text-ink-2 hover:text-ink'
+            onClick={() => onChange(c)}
+            className={`flex flex-col items-start rounded-sm px-3 py-1 text-left transition-colors disabled:cursor-not-allowed ${
+              active ? 'bg-accent-100 text-accent-800' : 'text-ink-2 hover:text-ink'
             }`}
           >
-            {ENGINE_LABELS[engine]}
+            <span className={`text-[13px] leading-tight ${active ? 'font-medium' : ''}`}>{c.name}</span>
+            <span className={`text-[11.5px] leading-tight ${active ? 'text-accent-700' : 'text-ink-3'}`}>{ENGINE_LABELS[c.engine]}</span>
           </button>
         );
       })}

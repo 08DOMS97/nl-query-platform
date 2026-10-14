@@ -230,10 +230,12 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   mientras el pool está activo: reemplaza la frase "se descarta al finalizar la
   operación, sin persistir en memoria entre invocaciones", que ya no es cierta;
   registro en Firestore, un secreto por conexión, dentro de la cuota gratuita.
-  (2) Subsección nueva **"Registro de conexiones"**: alta, edición y baja solo del
-  técnico, prueba antes de guardar, motor fijo al editar, cerrar el pool al editar o
-  eliminar, el no técnico ve solo nombre, motor y base. (3) En "Verificación", párrafo
-  nuevo con **33/33** (API). Sale de `BITACORA.md` (13/10).
+  (2) Subsección nueva **"Registro de conexiones"**: alta, edición y baja del técnico
+  desde la pantalla Conexiones (formulario con "Probar"), prueba antes de guardar,
+  motor fijo al editar, contraseña que no se vuelve a mostrar, cerrar el pool al editar
+  o eliminar, el no técnico ve solo nombre, motor y base. (3) En "Verificación",
+  párrafo nuevo con **33/33** (API) y **23/23** (interfaz). Sale de `BITACORA.md`
+  (13/10).
 - [x] (10/10) **Unificar los títulos**: 6.2 → "6.2 Módulo 2 — Extracción e
   interpretación de esquema" y 6.3 → "6.3 Módulo 3 — Generación NL2SQL y Query Safety
   Engine", como 6.1 y como dice el índice. **Aplicado el 10/10** en `PG2-2026 capítulo 6
@@ -355,6 +357,10 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   validado al ejecutar; endpoint del pool; verificación 23/23 (API, ambos roles) +
   12/12 (interfaz) + regresión 57/57 y 200/200; limitación del SQL no firmado. Lleva la
   Figura 10 (captura de Conexiones; está en `Claude outputs/capturas 10-10-2026/`).
+  **13/10:** la fila "Conexiones" de la Tabla 16 y el párrafo del pool cambiaron (lista
+  de conexiones registradas con formulario para agregarlas, probarlas, editarlas y
+  eliminarlas): tomar el texto actual de `CAPITULO_6.md`. La captura del 10/10 ya no
+  sirve para la Figura 10: hay que retomarla.
 - [ ] (10/10) **Agregar 6.6 Módulo 5 — Historial y gestión de consultas guardadas**
   (sección nueva, después de 6.5) con el texto de `CAPITULO_6.md`: historial
   automático y consultas guardadas por decisión del usuario, en colecciones separadas
@@ -367,7 +373,10 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   acento naranja claro, IBM Plex), SQL plegado para el no técnico y editable para el
   técnico (cubre RF-09), la consulta se conserva al cambiar de pantalla, y el párrafo
   de alcance sin "todavía no incluye…". **Reemplazar la Figura 9** por la captura de
-  la pantalla Consultar nueva (en la misma carpeta).
+  la pantalla Consultar nueva (en la misma carpeta). **13/10:** el usuario elige la
+  base de datos entre las conexiones registradas (no el motor) y el párrafo de alcance
+  ya no dice que falta administrar conexiones: tomar el texto actual. La captura del
+  10/10 muestra el selector de motores viejo: hay que retomarla.
 
 ### 6.5 — Integración y pruebas del sistema (6.7 cuando entren M4 y M5)
 - [ ] (10/10) **Renumerar la integración a 6.7** (6.7.1 uso y costos, 6.7.2 seguridad,

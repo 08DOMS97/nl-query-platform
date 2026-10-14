@@ -3,9 +3,10 @@
 import { useState, type KeyboardEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryDraft } from '@/hooks/useQueryDraft';
+import { connectionLabel, useConnections } from '@/hooks/useConnections';
 import { apiFetch, apiRequest } from '@/lib/api';
 import { ENGINE_LABELS, type ExecuteQueryResponse, type GenerateSqlMetrics, type GenerateSqlResponse } from '@/lib/types';
-import { Badge, Button, EngineSelector, FieldLabel, Notice, PageHeader, Panel, formatNumber, formatUsd } from '@/components/ui';
+import { Badge, Button, ConnectionSelector, FieldLabel, Notice, PageHeader, Panel, formatNumber, formatUsd } from '@/components/ui';
 import { QueryResult } from '@/components/QueryResult';
 import { SaveQueryButton } from '@/components/SaveQueryButton';
 
@@ -33,28 +34,33 @@ function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
 export default function ConsultarPage() {
   const { user, role } = useAuth();
   const { draft, setDraft } = useQueryDraft();
+  const { connections, error: connectionsError } = useConnections();
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [executing, setExecuting] = useState(false);
 
   if (!user) return null;
   const isTechnical = role === 'tecnico';
-  const { engine, question, pending, result } = draft;
+  const { question, pending, result } = draft;
+  // Si la conexión elegida ya no existe (se eliminó), se usa la primera.
+  const selected = connections?.find((c) => c.id === draft.connectionId) ?? connections?.[0] ?? null;
   const blocked = pending?.safety?.safe === false;
 
   async function handleGenerate() {
-    if (!user || !question.trim() || generating) return;
+    if (!user || !selected || !question.trim() || generating) return;
     setError(null);
     setGenerating(true);
     setDraft((d) => ({ ...d, pending: null, result: null }));
     try {
       const data = await apiFetch<GenerateSqlResponse>('/generateSQL', user, {
         method: 'POST',
-        body: { engine, naturalLanguageQuery: question },
+        body: { connectionId: selected.id, naturalLanguageQuery: question },
       });
       setDraft((d) => ({
         ...d,
         pending: {
+          connectionId: selected.id,
+          connectionName: selected.name,
           engine: data.engine,
           sql: data.sql,
           question: question.trim(),
@@ -77,7 +83,7 @@ export default function ConsultarPage() {
     try {
       const { ok, status, data } = await apiRequest<ExecuteQueryResponse & { reason?: string }>('/executeQuery', user, {
         method: 'POST',
-        body: { engine: pending.engine, sql: pending.sql, question: pending.question ?? undefined },
+        body: { connectionId: pending.connectionId, sql: pending.sql, question: pending.question ?? undefined },
       });
       if (status === 403 && data.reason) {
         // El backend la rechazó al validarla (SQL editado o reutilizado): queda marcada en su panel.
@@ -118,12 +124,19 @@ export default function ConsultarPage() {
       <Panel>
         <div className="space-y-5 p-4">
           <div>
-            <FieldLabel>Motor</FieldLabel>
-            <EngineSelector
-              value={engine}
-              onChange={(value) => setDraft((d) => ({ ...d, engine: value }))}
-              disabled={generating}
-            />
+            <FieldLabel>Base de datos</FieldLabel>
+            {connections && selected ? (
+              <ConnectionSelector
+                connections={connections}
+                value={selected.id}
+                onChange={(c) => setDraft((d) => ({ ...d, connectionId: c.id }))}
+                disabled={generating}
+              />
+            ) : connectionsError ? (
+              <Notice tone="bad">{connectionsError}</Notice>
+            ) : (
+              <p className="text-[13px] text-ink-3">{connections ? 'No hay conexiones registradas.' : 'Cargando conexiones…'}</p>
+            )}
           </div>
           <div>
             <FieldLabel htmlFor="question" hint="Ctrl + Enter para generar">
@@ -142,7 +155,7 @@ export default function ConsultarPage() {
         </div>
         <div className="flex items-center justify-between gap-4 border-t border-line bg-surface px-4 py-2.5">
           <p className="text-[12px] text-ink-3">Cada generación consulta al modelo Gemini y tiene costo.</p>
-          <Button variant="primary" onClick={handleGenerate} disabled={generating || !question.trim()}>
+          <Button variant="primary" onClick={handleGenerate} disabled={generating || !selected || !question.trim()}>
             {generating ? 'Generando…' : 'Generar SQL'}
           </Button>
         </div>
@@ -151,7 +164,7 @@ export default function ConsultarPage() {
       {error && <Notice tone="bad">{error}</Notice>}
 
       {pending && (
-        <Panel title="Sentencia SQL" meta={ENGINE_LABELS[pending.engine]} actions={status}>
+        <Panel title="Sentencia SQL" meta={`${connectionLabel(pending)} · ${ENGINE_LABELS[pending.engine]}`} actions={status}>
           {isTechnical ? (
             <textarea
               aria-label="Sentencia SQL"
