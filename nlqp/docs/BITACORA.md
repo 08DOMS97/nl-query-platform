@@ -6,6 +6,21 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-13 (5) — Textos de la interfaz con tono de producto
+
+- **David pidió:** que la interfaz no tenga textos que parezcan aclaraciones para él ni
+  mencione la tesis: debe ser un sistema listo para producción.
+- Quitados o reescritos: la nota al pie de Uso y costos (precio de lista, «Evaluación»
+  de la tesis), la de Conexiones (explicación del pool), «Secret Manager» y «Gemini» en
+  descripciones y pistas, «tal como los recibe el modelo» en Esquema, la explicación
+  del dialecto al editar una conexión y el aviso largo del historial («Para modificar
+  esta consulta, guárdela primero»). Filtros de Uso: «Usuarios / Pruebas automáticas /
+  Todo»; «Costo total» → «Costo estimado». El aviso de costo al generar solo lo ve el
+  técnico. Las explicaciones siguen en la documentación.
+- **Verificado:** `test:ui` 23/23 + 27/27; `tsc` y `lint` limpios; grep sin «tesis»,
+  «evaluación», «Gemini», «Vertex», «Secret Manager» ni «banco de pruebas» en textos de
+  la interfaz.
+
 ## 2026-10-13 (4) — Edición del SQL por origen y auditoría de cambios
 
 - **David decidió:** el técnico edita la sentencia al generarla y las consultas

@@ -43,7 +43,7 @@ await page.waitForSelector('table');
 await page.locator('tr', { hasText: /[0-9] fila/ }).first().getByRole('button', { name: 'Reutilizar' }).click();
 await page.waitForURL('http://localhost:3000/');
 const sqlBox = page.locator('textarea[aria-label="Sentencia SQL"]');
-check('historial: no editable', (await sqlBox.count()) === 0 && (await page.getByText('Las consultas del historial no se editan').count()) === 1);
+check('historial: no editable', (await sqlBox.count()) === 0 && (await page.getByText('Para modificar esta consulta, guárdela primero').count()) === 1);
 await page.getByRole('button', { name: 'Ejecutar' }).click();
 check('historial: se ejecuta tal cual', await page.waitForSelector('text=Descargar CSV completo', { timeout: 30000 }).then(() => true, () => false));
 

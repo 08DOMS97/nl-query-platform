@@ -8,8 +8,8 @@ import { Notice, PageHeader, Panel, formatNumber, formatUsd } from '@/components
 
 const PERIODS = [7, 30, 90] as const;
 const ORIGINS: { id: UsageOrigin; label: string }[] = [
-  { id: 'usuario', label: 'Uso normal' },
-  { id: 'evaluacion', label: 'Evaluación' },
+  { id: 'usuario', label: 'Usuarios' },
+  { id: 'evaluacion', label: 'Pruebas automáticas' },
   { id: 'todos', label: 'Todo' },
 ];
 
@@ -87,7 +87,7 @@ export default function UsoPage() {
     <div className="space-y-6">
       <PageHeader
         title="Uso y costos"
-        description="Llamadas registradas por el backend y costo estimado de las generaciones con Gemini en Vertex AI."
+        description="Actividad del sistema y costo estimado de la generación de SQL."
         actions={
           <>
             <Segmented label="Origen" options={ORIGINS} value={origin} onChange={setOrigin} />
@@ -113,7 +113,7 @@ export default function UsoPage() {
               value={formatNumber(stats.totalCalls)}
               detail={`${formatNumber(generations)} generaciones · ${formatNumber(stats.callsByType.executeQuery)} ejecuciones`}
             />
-            <Figure label="Costo total" value={formatUsd(stats.totalCostUsd)} detail="Solo las generaciones tienen costo" />
+            <Figure label="Costo estimado" value={formatUsd(stats.totalCostUsd)} detail="Generación de SQL" />
             <Figure
               label="Costo por generación"
               value={generations ? formatUsd(stats.totalCostUsd / generations) : '—'}
@@ -147,10 +147,6 @@ export default function UsoPage() {
             </table>
           </Panel>
 
-          <p className="text-[12px] text-ink-3">
-            Costo estimado a precio de lista de Gemini 2.5 Pro con los tokens que informa Vertex AI; no es el monto facturado.
-            «Evaluación» son las corridas de la evaluación de la tesis, que se registran aparte del uso normal.
-          </p>
         </div>
       )}
     </div>

@@ -205,7 +205,7 @@ export default function ConsultarPage() {
           </div>
         </div>
         <div className="flex items-center justify-between gap-4 border-t border-line bg-surface px-4 py-2.5">
-          <p className="text-[12px] text-ink-3">Cada generación consulta al modelo Gemini y tiene costo.</p>
+          <p className="text-[12px] text-ink-3">{isTechnical ? 'Cada generación tiene un costo de procesamiento.' : ''}</p>
           <Button variant="primary" onClick={handleGenerate} disabled={generating || !selected || !question.trim()}>
             {generating ? 'Generando…' : 'Generar SQL'}
           </Button>
@@ -236,8 +236,7 @@ export default function ConsultarPage() {
             <>
               <pre className="overflow-x-auto bg-surface px-4 py-3 font-mono text-[13px] leading-relaxed">{pending.sql}</pre>
               <p className="border-t border-line px-4 py-2 text-[12px] text-ink-3">
-                Las consultas del historial no se editan. Para modificarla, guárdela con un nombre: queda en Guardadas y se
-                puede editar aquí mismo.
+                Para modificar esta consulta, guárdela primero.
               </p>
             </>
           ) : (

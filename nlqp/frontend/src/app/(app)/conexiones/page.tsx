@@ -110,7 +110,7 @@ export default function ConexionesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Conexiones"
-        description="Bases de datos registradas, estado de la conexión y ocupación de su pool. Las contraseñas se guardan en Secret Manager y nunca se muestran."
+        description="Bases de datos registradas, estado de la conexión y uso del pool."
         actions={
           <>
             <Button onClick={recheck} disabled={checking}>
@@ -236,12 +236,6 @@ export default function ConexionesPage() {
         )}
       </Panel>
 
-      <p className="max-w-[80ch] text-[12px] leading-relaxed text-ink-3">
-        Cada conexión mantiene un pool de hasta {status?.pools[0]?.max ?? 5} conexiones reutilizables. «En uso» son
-        conexiones ejecutando una consulta en este momento; «Libres», conexiones abiertas a la espera; «En espera», pedidos
-        que aguardan una conexión porque el pool está completo. Un pool sin iniciar se abre con la primera consulta, y
-        editar o eliminar la conexión lo cierra.
-      </p>
     </div>
   );
 }

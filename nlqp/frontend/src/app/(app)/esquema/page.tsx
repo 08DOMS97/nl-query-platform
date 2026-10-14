@@ -80,7 +80,7 @@ function TableDetail({ table }: { table: TableInfo }) {
             </tbody>
           </table>
         ) : (
-          <p className="px-4 py-3 text-[13px] text-ink-3">Sin índices secundarios (la clave primaria no se lista).</p>
+          <p className="px-4 py-3 text-[13px] text-ink-3">Sin índices secundarios.</p>
         )}
       </Panel>
     </div>
@@ -125,7 +125,7 @@ export default function EsquemaPage() {
     <div className="space-y-6">
       <PageHeader
         title="Esquema"
-        description="Tablas, columnas, claves e índices de cada base de datos, tal como los recibe el modelo al generar SQL."
+        description="Tablas, columnas, claves e índices de cada base de datos."
         actions={
           connections &&
           connection && (

@@ -247,12 +247,11 @@ export default function HistorialPage() {
 
       {tab === 'changes' && isTechnical && (
         <Panel
-          title="Sentencias editadas"
-          meta="Cada edición que se ejecutó o se guardó: qué se reemplazó, quién, cuándo y en qué base."
+          title="Sentencias modificadas"
         >
           {edits.length === 0 ? (
             <EmptyState title={loading ? 'Cargando…' : 'Todavía no hay sentencias editadas.'}>
-              {!loading && 'Se registran al ejecutar o guardar una sentencia generada o guardada que se modificó.'}
+              {!loading && 'Aquí aparecerán las sentencias SQL modificadas.'}
             </EmptyState>
           ) : (
             <SqlEditList edits={edits} />

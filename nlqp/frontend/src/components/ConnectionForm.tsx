@@ -125,7 +125,7 @@ export function ConnectionForm({
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-x-4 gap-y-4 p-4">
           <div className="col-span-2">
-            <Field id="conn-name" label="Nombre" hint="Lo ven todos los usuarios">
+            <Field id="conn-name" label="Nombre" hint="Visible para todos los usuarios">
               <input
                 id="conn-name"
                 value={name}
@@ -139,7 +139,7 @@ export function ConnectionForm({
           </div>
 
           <div className="col-span-2">
-            <FieldLabel hint={editing ? 'No se puede cambiar: el historial depende del dialecto' : undefined}>Motor</FieldLabel>
+            <FieldLabel hint={editing ? 'No se puede cambiar' : undefined}>Motor</FieldLabel>
             <div role="radiogroup" aria-label="Motor" className="inline-flex rounded border border-line-strong bg-canvas p-0.5">
               {DB_ENGINES.map((e) => {
                 const active = e === engine;
@@ -190,7 +190,7 @@ export function ConnectionForm({
           <Field
             id="conn-password"
             label="Contraseña"
-            hint={editing ? 'Vacía: se conserva la actual' : 'Se guarda en Secret Manager y no se vuelve a mostrar'}
+            hint={editing ? 'Déjela vacía para conservar la actual' : 'No se volverá a mostrar'}
           >
             <input
               id="conn-password"
@@ -219,7 +219,7 @@ export function ConnectionForm({
         )}
 
         <div className="flex items-center justify-between gap-4 border-t border-line bg-surface px-4 py-2.5">
-          <p className="text-[12px] text-ink-3">Al guardar se prueba la conexión: si no responde, no se registra.</p>
+          <p className="text-[12px] text-ink-3">La conexión se verifica antes de guardarla.</p>
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={onCancel} disabled={busy === 'save'}>
               Cancelar
