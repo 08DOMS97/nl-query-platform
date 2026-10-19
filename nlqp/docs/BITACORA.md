@@ -6,6 +6,21 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-18 (3) — Cierre del día
+
+- Hecho hoy: cambio a Gemini 3.8 Flash (`bde255e`) y usuarios exclusivos para las
+  pruebas con el historial de la demo limpio (`db8d141`). Gasto del día: $0.0012 (1
+  llamada); total en Gemini ≈ $0.023.
+- Auditoría de lo que falta sin costo (pedido de David): textos para el Word (cambio de
+  modelo en caps. 1–5, 6.3.2, 6.7.1, 3.3.1.2, limitaciones), figuras del Cap. 5 (0 %),
+  capturas de las Figuras 9 y 11, banco de volumen alto (recomendado: después de la
+  corrida o como limitación) y la encuesta de 35 participantes, que sigue sin coordinar.
+- Sin respuesta de David todavía: ¿se hizo la presentación del 14/10? (tarea 35 en 0 %,
+  sin entrada en la bitácora), ¿el equipo de 3.8 es el suyo?, ¿referencia de Spider 2.0
+  de 2025?
+- Sigue: piloto con paráfrasis (40 llamadas, ~$0.10–0.16, tope $0.25), con confirmación;
+  propuesto a más tardar el 21/10, y la corrida completa el 22/10.
+
 ## 2026-10-18 (2) — Historial de prueba limpio y usuarios exclusivos para las pruebas
 
 - Pedido de David (13/10, "dale" el 18/10). Antes: 161 consultas de prueba en el
