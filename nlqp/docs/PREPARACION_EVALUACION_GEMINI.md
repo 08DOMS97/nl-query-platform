@@ -1,13 +1,15 @@
-# Preparación de la evaluación con Gemini (2026-10-02, actualizada 2026-10-10)
+# Preparación de la evaluación con Gemini (2026-10-02, actualizada 2026-10-18)
 
 Trabajo previo a correr las 50 consultas de prueba **generando el SQL con Gemini**
 (hasta ahora se habían corrido con el SQL de referencia escrito a mano). Objetivo:
 que la corrida mida al modelo y al sistema, y no fallas de configuración o de las
 propias referencias — y no pagar dos veces la misma corrida por errores evitables.
 
-Estado (10/10/2026): **runner listo y probado gratis; el piloto y la corrida
-completa todavía no se ejecutaron.** Única llamada pagada hasta ahora: 1 (09/10,
-$0.01188, §8 punto 2b).
+Estado (18/10/2026): **runner listo y probado gratis; el piloto y la corrida
+completa todavía no se ejecutaron.** Modelo: **`gemini-3.8-flash`** en `global`
+desde el 18/10 (Gemini 2.5 Pro se retira el 20/10, §8 punto 2c). Llamadas pagadas
+para verificar la integración: 09/10 con 2.5 Pro ($0.01188) y 18/10 con 3.8 Flash
+($0.0012), ambas S10 en Postgres.
 
 ## 1. Qué se mide
 
@@ -192,19 +194,21 @@ pruning comparando el prompt podado con el del esquema completo.
 
 ## 6. Costo estimado de la corrida
 
-Con el presupuesto de razonamiento de Gemini 2.5 Pro (`THINKING_BUDGET_TOKENS =
-1024`), cada llamada cuesta hasta ~$0.011 (el razonamiento se factura como salida a
-$10/M). La estimación anterior de ~$0.05 para toda la corrida era incorrecta: no
-contaba el razonamiento.
+**Actualizado 18/10 (Gemini 3.8 Flash, razonamiento `LOW`):** precio de lista
+$1.50/M entrada y $7.50/M salida + razonamiento. S10 costó **$0.0012** (621
+entrada / 39 salida / 0 razonamiento, 2,9 s). Las consultas complejas pueden razonar
+algo y tener prompts más largos: se estima ~$0.002–0.004 por llamada. El runner usa
+$0.004 para el tope.
 
-| Corrida | Llamadas | Costo estimado |
-|---|---|---|
-| Piloto (5 consultas × 4 motores) | 20 | ~$0.25 (~$0.50 con sus paráfrasis) |
-| 50 consultas × 4 motores | 200 | ~$2.40 |
-| + 50 paráfrasis × 4 motores | 400 en total | ~$4.75 |
+| Corrida | Llamadas | Costo estimado | Tope por defecto |
+|---|---|---|---|
+| Piloto (5 consultas × 4 motores, con paráfrasis) | 40 | ~$0.10–0.16 | $0.25 |
+| 50 consultas + 50 paráfrasis × 4 motores | 400 en total | ~$0.80–1.60 | $2.50 |
 
-Actualizado 10/10 con la llamada real del 09/10 (~$0.012 por llamada, casi todo
-razonamiento). El piloto se reutiliza en la corrida completa: no se paga dos veces.
+El piloto se reutiliza en la corrida completa: no se paga dos veces.
+
+Antes (Gemini 2.5 Pro, presupuesto de razonamiento de 1024 tokens): ~$0.012 por
+llamada, casi todo razonamiento; 400 llamadas ≈ $4,75.
 
 Se confirma con David antes de cada corrida pagada.
 
@@ -239,8 +243,29 @@ Se confirma con David antes de cada corrida pagada.
    Reemplazo oficial: `@google/genai` (modo Vertex AI), que además tipa de forma
    nativa `thinkingConfig` y `thoughtsTokenCount`. Conviene migrar antes de la
    corrida pagada.
-2c. **Riesgo nuevo (verificado 02/10/2026): retiro del modelo `gemini-2.5-pro` en
-   Vertex AI.** La página oficial de versiones de modelos de Vertex AI indica
+2c. ~~Retiro de `gemini-2.5-pro`~~ — **resuelto 18/10/2026: cambio a
+   `gemini-3.8-flash`.** La página oficial ("Model versions and lifecycle") da el
+   **20/10/2026** como retiro de 2.5 Pro (ya no provisoria) y propone 3.8 Flash o 3.5
+   Flash. Se eligió `gemini-3.8-flash`: GA desde el 02/09/2026, retiro **no antes del
+   02/09/2027** ("may be extended, won't be moved to an earlier date"). Descartados:
+   `gemini-3.1-pro-preview` (preview, solo `global`) y `gemini-4-argon` (modelo de
+   frontera, ignora temperatura/top_p y es más caro). Cambios:
+   - `VERTEX_AI_MODEL=gemini-3.8-flash` y `GCP_LOCATION=global` (3.8 Flash no está en
+     `us-central1`; solo `global`, `us`, `eu`). Mismos valores por defecto en
+     `vertexAI.service.ts`.
+   - Razonamiento: `thinkingLevel: LOW` en vez de `thinkingBudget: 1024` (3.8 Flash
+     ya no acepta presupuesto en tokens; `MINIMAL` da error). Salida máxima 4096, igual.
+   - Temperatura: ya no se envía (3.8 Flash la ignora).
+   - Precios en `vertexAiPricing.service.ts`: $1.50 / $7.50 (SKUs "Gemini 3.8 Flash
+     Global Text Input/Output - Predictions" del catálogo de Cloud Billing, 18/10).
+   - Runner: `COSTO_ESTIMADO_POR_LLAMADA` 0.004 y topes $0.25 (piloto) / $2.50.
+   - Prompt sin cambios. Verificado: `countTokens` (gratis), seguridad 57/57 +
+     200/200, API 38/38 · 23/23 · 32/32 · 25/25, y S10 real con resultado 104 =
+     referencia, $0.0012.
+   - La evaluación se corre con 3.8 Flash y el resumen registra el modelo.
+
+   Historial del riesgo (02–08/10): retiro del modelo `gemini-2.5-pro` en
+   Vertex AI. La página oficial de versiones de modelos de Vertex AI indica
    "Not before October 16, 2026" como fecha de retiro; fuentes externas reportan que
    la página nueva de ciclo de vida ya muestra el 20/10/2026, y en la Gemini API la
    fecha del 16/10 se retiró sin aviso. La fecha se está moviendo, pero en cualquier
@@ -373,5 +398,5 @@ Se confirma con David antes de cada corrida pagada.
    Windows `node --watch` se reinicia sin motivo y puede cortar una llamada ya
    cobrada):
    `npm run eval:gemini -- --modo piloto --parafrasis --confirmar` (40 llamadas,
-   ~$0.50, tope automático $0.60) y luego
+   ~$0.10–0.16 con 3.8 Flash, tope automático $0.25) y luego
    `npm run eval:gemini -- --modo completa --parafrasis --confirmar`.

@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Indicador de Next.js que solo aparece con `npm run dev` (no en producción). A la
-  // derecha: a la izquierda tapa el pie de la barra lateral y su menú no se abre bien.
-  devIndicators: {
-    position: 'bottom-right',
-  },
+  // Sin el indicador flotante de Next.js (solo aparece con `npm run dev`). Los errores
+  // de compilación o de ejecución se siguen mostrando.
+  devIndicators: false,
 };
 
 export default nextConfig;

@@ -1,7 +1,7 @@
 # NLQP — NL-Query-Platform
 
 Tesis de David Monterroso (UMG, PG2): plataforma que convierte preguntas en español a
-SQL con **Gemini 2.5 Pro (Vertex AI)** sobre **4 motores** (PostgreSQL, MySQL, MariaDB,
+SQL con **Gemini 3.8 Flash (Vertex AI)** sobre **4 motores** (PostgreSQL, MySQL, MariaDB,
 SQL Server). Solo permite `SELECT`: el **Query Safety Engine** es la garantía central
 (RF-07). Backend Node 22 + TS (Cloud Functions 2nd gen, se presenta **en local**),
 Firebase Auth + Firestore, frontend Next.js. Módulos de la tesis: M1 conexiones, M2
@@ -16,27 +16,27 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 |---|---|
 | 12–13/10/2026 | Integración de módulos y pruebas |
 | **14/10/2026** | **Presentación del prototipo funcional** |
-| 15–16/10/2026 | Conclusiones y revisión final del documento |
-| **17/10/2026** | **Entrega PG2** |
-| ~20/10/2026 | Retiro más temprano de `gemini-2.5-pro` (provisorio, verificado 08/10) |
+| 15–30/10/2026 | Conclusiones y revisión final del documento |
+| **31/10/2026** | **Entrega PG2** (la universidad la corrió del 17/10; en el plan se movieron solo las tareas 37 y 38) |
+| 20/10/2026 | Retiro de `gemini-2.5-pro`: ya no afecta, se cambió a `gemini-3.8-flash` el 18/10 (vigente hasta el 02/09/2027 o más) |
 
-## Estado por área (actualizado 2026-10-13, con conexiones de M1 y auditoría de ediciones)
+## Estado por área (actualizado 2026-10-18, cambio a Gemini 3.8 Flash)
 
 | Área | Estado |
 |---|---|
-| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 38/38, UI 27/27. `engine` sigue como alias de `connectionId` |
+| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. Modelo (18/10): `gemini-3.8-flash` en `global`, razonamiento `LOW` (S10 real: correcto, $0.0012, 2,9 s). M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 38/38, UI 27/27. `engine` sigue como alias de `connectionId` |
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
-| Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas. **Falta: piloto y corrida completa** |
+| Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
 | Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 23/23 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 11) y pasar 6.6 al Word |
-| Texto de tesis | 🟡 24 pendientes + 1 por verificar + 54 aplicados (13/10: 6.1 por el registro de conexiones; 6.5 y 6.6 por la edición del SQL y su auditoría. M4 y M5: 6.4 reescrita, 6.5 y 6.6 nuevas, integración → 6.7; capturas en `Claude outputs/capturas 10-10-2026/`). Word revisado entregado el 10/10 (segunda versión: sin marcadores, referencias enlazadas, 6.3.2 y 6.3.4 al día; integración = 6.5) → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
-| Gasto en Gemini | ≈ **$0.022** (3 llamadas sueltas). Cada llamada ~$0.012, sin crédito de prueba |
+| Texto de tesis | 🟡 20 pendientes + 1 por verificar + 63 aplicados (18/10: +3 por el cambio de modelo, incl. reemplazar "Gemini 2.5 Pro" en caps. 1–5). Word del 17/10 (`PG2-2026 capítulo 6 revisado 17-10-2026.docx`): Cap. 6 completo con M1, M4, M5 e integración = 6.7. Faltan: evaluación con Gemini (6.3.6), capturas de las Figuras 9–11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Gasto en Gemini | ≈ **$0.023** (4 llamadas sueltas). Con 3.8 Flash ~$0.001–0.004 por llamada (con 2.5 Pro era ~$0.012), sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 13/10) | Plan 97 % · real 95 % · **−2,1 puntos: atrasados** (pruebas de generación 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 18/10) | Plan 92 % · real 93 % · **+0,9 puntos** (entrega movida al 31/10; pruebas de generación siguen en 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-13)
+## Próximo paso (actualizado 2026-10-18)
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
@@ -46,15 +46,15 @@ David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha lí
    pantalla y no se entienden. Proponer en 3–5 líneas cómo resolverlo (p. ej., usuarios
    exclusivos para las pruebas o que las pruebas borren lo que dejan en el historial) y,
    con el "dale", limpiar también lo que ya quedó.
-2. **Piloto con paráfrasis**: **a más tardar el 14/10**. 40 llamadas, ~$0.50, tope
-   automático $0.60. **Pedir confirmación a David antes.** Requiere Docker y el
+2. **Piloto con paráfrasis** (Gemini 3.8 Flash): propuesto **a más tardar el 21/10**.
+   40 llamadas, ~$0.10–0.16, tope automático $0.25. **Pedir confirmación a David antes.** Requiere Docker y el
    backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
    reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
    `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-3. **Corrida completa con paráfrasis**: **a más tardar el 15/10** (~$4.25 más; lo
-   del piloto no se repite). **Confirmación aparte.** Después: revisar a mano "Para
-   revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y cargar las cifras
-   en el resumen para la tesis (6.3.5) el 16/10.
+3. **Corrida completa con paráfrasis**: propuesto **a más tardar el 22/10** (~$0.80–1.60
+   en total, tope $2.50; lo del piloto no se repite). **Confirmación aparte.** Después:
+   revisar a mano "Para revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y
+   cargar las cifras en la tesis (6.3.6, 1.6.3 y conclusiones) con margen antes del 30/10.
 4. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
    (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba, y las de las
    figuras 9 y 10 ya no muestran la interfaz actual: selector de conexiones y
@@ -144,7 +144,7 @@ contraseñas, en `scripts/get_test_token.mjs` y en la bitácora del 10/10.
   cuentas de prueba, pero si el repo es público convendría cambiarlas y leerlas solo
   del `.env`, como las pruebas nuevas (detectado 13/10).
 
-- Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.012 por intento).
+- Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.001–0.004 por intento con 3.8 Flash).
 - Banco de volumen alto para medir eficiencia con `EXPLAIN`.
 - Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.
 - Hallazgos de seguridad 4–6 (`SEGURIDAD.md`): documentados, no corregidos a propósito.

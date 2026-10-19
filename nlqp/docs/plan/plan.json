@@ -7,7 +7,7 @@
       "nivel": 0,
       "padre": null,
       "inicio": "2026-06-01",
-      "fin": "2026-10-17"
+      "fin": "2026-10-31"
     },
     {
       "no": 2,
@@ -272,7 +272,7 @@
       "inicio": "2026-09-24",
       "fin": "2026-09-28",
       "real": 1.0,
-      "comentario": "Probado en vivo: pregunta en español, SQL de Gemini, validación y ejecución en PostgreSQL. 09/10: SDK migrado (tarea 43) y llamada real verificada: SQL correcto y eficiente, $0.012, 14,5 s."
+      "comentario": "Probado en vivo: pregunta en español, SQL de Gemini, validación y ejecución en PostgreSQL. 09/10: SDK migrado (tarea 43) y llamada real verificada: SQL correcto y eficiente, $0.012, 14,5 s. 18/10: cambio a Gemini 3.8 Flash (tarea 46): S10 correcto, $0.0012, 2,9 s."
     },
     {
       "no": 43,
@@ -320,7 +320,7 @@
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
       "real": 0.7,
-      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado gratis 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates, M20 corregidos), 50 paráfrasis aprobadas. Falta: piloto (~$0.50), corrida completa con Gemini (~$4.25) y análisis de resultados; antes del retiro del modelo (~20/10)."
+      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado gratis 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates, M20 corregidos), 50 paráfrasis aprobadas. Falta: piloto (~$0.50), corrida completa con Gemini (~$4.25) y análisis de resultados; antes del retiro del modelo (~20/10). 18/10: sigue en 70 %. El modelo pasó a Gemini 3.8 Flash (tarea 46): el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60; ya no hay apuro por el retiro."
     },
     {
       "no": 40,
@@ -367,8 +367,8 @@
       "padre": 21,
       "inicio": "2026-10-05",
       "fin": "2026-10-07",
-      "real": 0.9,
-      "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado 23/23 API + 12/12 UI. Falta pasarlo al Word con su captura."
+      "real": 1.0,
+      "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado 23/23 API + 12/12 UI. Falta pasarlo al Word con su captura. 17/10: 100 %. Documentado en el Word (sección 6.5), con la Figura 10."
     },
     {
       "no": 45,
@@ -385,14 +385,28 @@
       }
     },
     {
+      "no": 46,
+      "tarea": "Cambio de modelo a Gemini 3.8 Flash por el retiro de Gemini 2.5 Pro",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-18",
+      "fin": "2026-10-18",
+      "real": 1.0,
+      "comentario": "Tarea nueva, implementada 18/10 a pedido de David: Gemini 2.5 Pro se retira de Vertex AI el 20/10. gemini-3.8-flash en global (GA, hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s).",
+      "nueva": {
+        "agregada": "2026-10-18",
+        "implementada": "2026-10-18"
+      }
+    },
+    {
       "no": 33,
       "tarea": "Módulo 5: Historial y gestión de consultas guardadas",
       "nivel": 2,
       "padre": 21,
       "inicio": "2026-10-08",
       "fin": "2026-10-09",
-      "real": 0.9,
-      "comentario": "Versión mínima hecha el 10/10 (plan 08–09/10): historial automático y consultas guardadas por el usuario, reusar sin llamar a Gemini. Verificado 32/32 API + 10/10 UI. Falta la captura y pasarlo al Word; fuera: búsqueda, carpetas, compartir."
+      "real": 1.0,
+      "comentario": "Versión mínima hecha el 10/10 (plan 08–09/10): historial automático y consultas guardadas por el usuario, reusar sin llamar a Gemini. Verificado 32/32 API + 10/10 UI. Falta la captura y pasarlo al Word; fuera: búsqueda, carpetas, compartir. 17/10: 100 %. Documentado en el Word (sección 6.6)."
     },
     {
       "no": 34,
@@ -401,7 +415,8 @@
       "padre": 21,
       "inicio": "2026-10-12",
       "fin": "2026-10-13",
-      "real": 0.0
+      "real": 0.8,
+      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz."
     },
     {
       "no": 35,
@@ -418,7 +433,7 @@
       "nivel": 1,
       "padre": 1,
       "inicio": "2026-10-15",
-      "fin": "2026-10-17"
+      "fin": "2026-10-31"
     },
     {
       "no": 37,
@@ -426,17 +441,17 @@
       "nivel": 2,
       "padre": 36,
       "inicio": "2026-10-15",
-      "fin": "2026-10-16",
-      "real": 0.3,
-      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar."
+      "fin": "2026-10-30",
+      "real": 0.5,
+      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10."
     },
     {
       "no": 38,
       "tarea": "Entrega PG2",
       "nivel": 2,
       "padre": 36,
-      "inicio": "2026-10-17",
-      "fin": "2026-10-17",
+      "inicio": "2026-10-31",
+      "fin": "2026-10-31",
       "real": 0.0
     }
   ]

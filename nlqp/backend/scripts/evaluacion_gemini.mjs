@@ -12,7 +12,7 @@
  *   npm run eval:gemini -- --resumen                    solo regenera resumen.md, sin llamadas
  *
  * Opciones: --parafrasis (agrega las de parafrasis_50.json; exige "estado": "revisada"),
- * --ids S10,M03, --motores postgres,mssql, --max-costo 6, --reintentar-fallidas,
+ * --ids S10,M03, --motores postgres,mssql, --max-costo 2.5, --reintentar-fallidas,
  * --url http://localhost:8080.
  *
  * Nunca repite una llamada pagada: cada resultado se agrega a
@@ -37,7 +37,9 @@ const OUT_DIR = path.join(DOCS, 'evaluacion_gemini');
 
 const MOTORES = ['postgres', 'mysql', 'mariadb', 'mssql'];
 const PILOTO = ['S10', 'S13', 'M03', 'M05', 'C02'];
-const COSTO_ESTIMADO_POR_LLAMADA = 0.012;
+// Gemini 3.8 Flash: $0.0012 medido en S10 (18/10/2026); 0.004 deja margen para
+// las consultas complejas, que razonan más. Con Gemini 2.5 Pro era 0.012.
+const COSTO_ESTIMADO_POR_LLAMADA = 0.004;
 const TOKEN_VIDA_MS = 50 * 60 * 1000; // el ID token de Firebase dura 1 h
 const ESPERAS_REINTENTO_MS = [5_000, 15_000, 45_000, 90_000];
 
@@ -59,7 +61,7 @@ if (!soloResumen && !['prueba', 'piloto', 'completa'].includes(modo)) {
 const pagado = modo === 'piloto' || modo === 'completa';
 const conParafrasis = flag('parafrasis');
 const BASE_URL = opt('url', `http://localhost:${process.env.PORT ?? 8080}`);
-const maxCosto = Number(opt('max-costo', modo === 'piloto' ? 0.6 : 6));
+const maxCosto = Number(opt('max-costo', modo === 'piloto' ? 0.25 : 2.5));
 const motores = opt('motores', MOTORES.join(',')).split(',');
 const archivo = path.join(OUT_DIR, modo === 'prueba' ? 'resultados_prueba.jsonl' : 'resultados.jsonl');
 

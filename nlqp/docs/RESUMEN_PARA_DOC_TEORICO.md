@@ -24,10 +24,17 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-13, con el registro de conexiones del Módulo 1)
+## Contador (actualizado 2026-10-18, cambio a Gemini 3.8 Flash)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
+| Preliminares y 1–4 | 7 | 1 | 20 |
+| 5 | 1 | 0 | 4 |
+| 6 | 5 | 0 | 39 |
+| Conclusiones / limitaciones | 7 | 0 | 0 |
+| **Total** | **20** | **1** | **63** |
+
+---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 20 |
 | 5 | 1 | 0 | 4 |
 | 6 | 10 | 0 | 30 |
@@ -38,12 +45,25 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Preliminares y capítulos 1 a 4
 
+- [ ] (18/10) **Cambio de modelo en todo el documento**: Gemini 2.5 Pro se retira de
+  Vertex AI el 20/10/2026 y la plataforma pasó a **Gemini 3.8 Flash** (`gemini-3.8-flash`,
+  ubicación `global`, GA, soporte hasta el 02/09/2027 o más). Reemplazar "Gemini 2.5 Pro"
+  / "Gemini Pro" por "Gemini 3.8 Flash" en resumen, objetivos, alcance, 2.x (marco
+  tecnológico, incl. 2.5), 4.x (requerimientos) y 5.x (arquitectura y diagramas), salvo
+  donde se cuenta la historia del desarrollo (ahí: "se desarrolló con Gemini 2.5 Pro y se
+  cambió a Gemini 3.8 Flash antes de su retiro"). Si el marco teórico justifica elegir un
+  modelo "Pro" por capacidad de razonamiento, ajustar: 3.8 Flash es el reemplazo que
+  recomienda Google y razona internamente (nivel configurable). Fuente: `CAPITULO_6.md`
+  6.3.2, `BITACORA.md` 18/10.
+
 - [ ] (10/10) **1.6.3 — recalcular costos, ROI y VAN con el costo medido**. La Tabla 4
   supone ≈ $0.0087 por consulta ($91.88 / 10,500); la única medición real (09/10, con la
   poda vieja) dio $0.01188, casi todo razonamiento del modelo. **Decisión:** recalcular
   una sola vez con el **costo promedio por consulta de la corrida completa** (200
   llamadas, en vez de una sola), tablas 4, 5 y 6, "Q712" de 2.10 y Conclusiones; si el
-  13/10 todavía no hay corrida, usar $0.012. Al recalcular se corrigen también los
+  13/10 todavía no hay corrida, usar $0.012. **Actualización 18/10:** la corrida se
+  hace con Gemini 3.8 Flash (S10 costó $0.0012, la décima parte); usar su costo
+  promedio, no los $0.012 de 2.5 Pro. Al recalcular se corrigen también los
   errores de la entrada siguiente y se usa VAN = −inversión inicial + Σ flujos netos de
   los años 1 a 3 descontados al 10 %.
 - [ ] (25/09) **1.6.3 — errores de cálculo actuales** (se corrigen al recalcular,
@@ -209,13 +229,12 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Capítulo 6 — Desarrollo de la aplicación
 
-Texto base en `CAPITULO_6.md`. **Estructura en el Word (10/10, segunda versión):** 6.1–6.3.5
-· 6.4 Frontend · **6.5 Integración y pruebas** (6.5.1 uso y costos, 6.5.2 seguridad, 6.5.3
-tiempos). Sin títulos de secciones pendientes (pedido de David). Cuando se escriban, la
-evaluación con Gemini entra como 6.3.6 y los Módulos 4 y 5 como 6.5 y 6.6; la integración
-vuelve a 6.7 y la presentación sería 6.8. Las referencias son hipervínculos a los títulos:
-al renumerar solo cambia el número escrito. **Tablas:** 14 (6.3.4), 15 (6.3.5), 16 (uso y
-costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la 16.
+Texto base en `CAPITULO_6.md`. **Estructura en el Word (16/10):** 6.1–6.3.5 · 6.4
+Frontend · 6.5 Módulo 4 · 6.6 Módulo 5 · **6.7 Integración y pruebas** (6.7.1 uso y
+costos, 6.7.2 seguridad, 6.7.3 tiempos). La evaluación con Gemini entra como 6.3.6 cuando
+haya resultados y la presentación como 6.8. **Tablas (17/10, pedido del asesor: menos tablas):** solo 14 (hallazgos) y 15
+(latencias); el resto del capítulo va en texto. **Figuras:** 9 (6.4, captura vieja) y
+una sola nueva (10) pendiente.
 
 ### Introducción
 - [x] (25/09) **Reemplazar el segundo párrafo** por el de `CAPITULO_6.md`: el Word
@@ -224,7 +243,7 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   versión limpia, sin control de cambios.
 
 ### 6.1 y 6.2 — Conexiones y esquema
-- [ ] (13/10) **Actualizar 6.1** con el texto de `CAPITULO_6.md`: (1) en "Arquitectura
+- [x] (13/10) **Actualizar 6.1** con el texto de `CAPITULO_6.md`: (1) en "Arquitectura
   de conexión", el pool es **por conexión registrada** (no por motor) y la contraseña
   se lee de Secret Manager **al abrir el pool** y queda en la memoria del backend
   mientras el pool está activo: reemplaza la frase "se descarta al finalizar la
@@ -236,7 +255,7 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   o eliminar, el no técnico ve solo nombre, motor y base. (3) En "Verificación",
   párrafo nuevo con **38/38** (API) y **27/27** (interfaz); nombre de conexión único en
   todo el sistema (las conexiones son compartidas). Sale de `BITACORA.md`
-  (13/10).
+  (13/10). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`. Ajuste: el párrafo del registro quedó sin la frase repetida de la contraseña y la verificación en dos párrafos (API e interfaz).
 - [x] (10/10) **Unificar los títulos**: 6.2 → "6.2 Módulo 2 — Extracción e
   interpretación de esquema" y 6.3 → "6.3 Módulo 3 — Generación NL2SQL y Query Safety
   Engine", como 6.1 y como dice el índice. **Aplicado el 10/10** en `PG2-2026 capítulo 6
@@ -259,7 +278,14 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   control de cambios.
 - [x] (25/09) Texto pegado en el Word (versión con la poda vieja).
 
-### 6.3.2 — Integración con Vertex AI Gemini Pro
+### 6.3.2 — Integración con Vertex AI Gemini Pro (pasa a "Integración con Gemini en Vertex AI")
+- [ ] (18/10) **Actualizar por el cambio de modelo**: título → "Integración con Gemini en
+  Vertex AI"; modelo por defecto `gemini-3.8-flash` en `global` (no `gemini-2.5-pro` en
+  `us-central1`); párrafo nuevo sobre el retiro de 2.5 Pro (20/10/2026) y el cambio sin
+  tocar arquitectura ni prompt; temperatura: 3.8 Flash la ignora, el determinismo se
+  controla con el nivel de razonamiento; razonamiento en nivel bajo (`LOW`) en vez del
+  presupuesto de 1,024 tokens; verificación con S10 en ambos modelos (Flash: 621 / 39 / 0
+  tokens, 2.9 s, USD 0.0012, 104 = referencia). Texto en `CAPITULO_6.md`.
 - [x] (10/10) **Actualizar** (no redactar: el Word ya tiene el texto del 25/09). Estaba en
   espera desde el 03/10; David pidió el 10/10 aplicar los cambios del proyecto. Cambios: SDK `@google/genai`
   (migrado el 09/10 desde `@google-cloud/vertexai`, deprecado); salida máxima **4096**
@@ -350,15 +376,15 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
 - [x] (25/09) Sección pegada en el Word, con la captura de la pantalla principal como
   Figura 9.
 
-### Módulos 4 y 5 (6.5 y 6.6)
-- [ ] (13/10) **Edición del SQL y auditoría** en 6.5 y 6.6, con el texto actual de
+### 6.5 y 6.6 — Módulos 4 y 5
+- [x] (13/10) **Edición del SQL y auditoría** en 6.5 y 6.6, con el texto actual de
   `CAPITULO_6.md`: el técnico edita la sentencia generada y las guardadas, no las del
   historial (se guardan antes); «Guardar cambios»; auditoría de cada edición ejecutada o
   guardada (lo reemplazado, quién, fecha y hora, base, origen), sin duplicados y con el
   original tomado del backend; fila nueva **"Auditoría de cambios"** en la Tabla 16;
   verificación **23/23** (interfaz) + **25/25** (API); en 6.6, cómo se reusa cada una.
-  Sale de `BITACORA.md` (13/10, 4).
-- [ ] (10/10) **Agregar 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos**
+  Sale de `BITACORA.md` (13/10, 4). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
+- [x] (10/10) **Agregar 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos**
   (sección nueva, después de 6.4) con el texto de `CAPITULO_6.md`: roles técnico y no
   técnico como custom claim que solo asigna el backend, control en el backend (403);
   Tabla 16 (edición del SQL, conexiones y pool, esquema, uso y costos); SQL editado
@@ -368,15 +394,15 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   **13/10:** la fila "Conexiones" de la Tabla 16 y el párrafo del pool cambiaron (lista
   de conexiones registradas con formulario para agregarlas, probarlas, editarlas y
   eliminarlas): tomar el texto actual de `CAPITULO_6.md`. La captura del 10/10 ya no
-  sirve para la Figura 10: hay que retomarla.
-- [ ] (10/10) **Agregar 6.6 Módulo 5 — Historial y gestión de consultas guardadas**
+  sirve para la Figura 10: hay que retomarla. **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`. Sin la Figura 10 (ver entrada de capturas); la limitación del SQL no firmado ya no remite a 6.7.2, que no la trata.
+- [x] (10/10) **Agregar 6.6 Módulo 5 — Historial y gestión de consultas guardadas**
   (sección nueva, después de 6.5) con el texto de `CAPITULO_6.md`: historial
   automático y consultas guardadas por decisión del usuario, en colecciones separadas
   de Firestore por usuario; Tabla 17 (datos de cada registro); reutilizar sin llamar al
   modelo y con nueva validación del Query Safety Engine; verificación 32/32 (API, 4
   motores) + 10/10 (interfaz) + regresión 57/57 y 200/200; lo que queda fuera. Lleva la
-  Figura 11 (captura de Historial; en la misma carpeta).
-- [ ] (10/10) **Reemplazar 6.4** por el texto de `CAPITULO_6.md`: pantallas por módulo
+  Figura 11 (captura de Historial; en la misma carpeta). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`. Sin la Figura 11 (ver entrada de capturas). En la Tabla 17 dice "conexión (nombre y motor)" en vez de "motor": el historial y las guardadas guardan el nombre de la conexión.
+- [x] (10/10) **Reemplazar 6.4** por el texto de `CAPITULO_6.md`: pantallas por módulo
   con barra lateral y menú según el rol, criterio visual (blanco, neutros cálidos,
   acento naranja claro, IBM Plex), SQL plegado para el no técnico y editable para el
   técnico (cubre RF-09), la consulta se conserva al cambiar de pantalla, y el párrafo
@@ -385,16 +411,20 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
   base de datos entre las conexiones registradas (no el motor) y el párrafo de alcance
   ya no dice que falta administrar conexiones: tomar el texto actual. La captura del
   10/10 muestra el selector de motores viejo: hay que retomarla.
-
-### 6.5 — Integración y pruebas del sistema (6.7 cuando entren M4 y M5)
-- [ ] (10/10) **Renumerar la integración a 6.7** (6.7.1 uso y costos, 6.7.2 seguridad,
+ **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`. La Figura 9 sigue siendo la captura vieja hasta tener la nueva (ver entrada de capturas).
+### 6.7 — Integración y pruebas del sistema
+- [ ] (18/10) **6.7.1 — precios y razonamiento del modelo nuevo**: precio de lista de
+  Gemini 3.8 Flash (global): USD 1.50 / M entrada y USD 7.50 / M salida y razonamiento
+  (catálogo de Cloud Billing, 18/10); razonamiento en el nivel más bajo; ~USD 0.001 por
+  consulta simple (con 2.5 Pro, ~USD 0.012). Texto en `CAPITULO_6.md`.
+- [x] (10/10) **Renumerar la integración a 6.7** (6.7.1 uso y costos, 6.7.2 seguridad,
   6.7.3 tiempos) al entrar 6.5 (M4) y 6.6 (M5); las referencias son hipervínculos, solo
-  cambia el número escrito. Las tablas 16–18 pasan a 18–20 (numeración automática).
-- [ ] (10/10) **6.7.1**: reemplazar el párrafo "Dos limitaciones: el panel visual… no
+  cambia el número escrito. Las tablas 16–18 pasan a 18–20 (numeración automática). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
+- [x] (10/10) **6.7.1**: reemplazar el párrafo "Dos limitaciones: el panel visual… no
   define un rol de administrador" por el de `CAPITULO_6.md` (las estadísticas están en
-  la pantalla Uso y costos, solo rol técnico).
-- [ ] (10/10) **6.7.2**: agregar a la tabla de hallazgos la fila "Funciones técnicas
-  accesibles a cualquier usuario autenticado | Media | Corregido" (`SEGURIDAD.md` §12).
+  la pantalla Uso y costos, solo rol técnico). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
+- [x] (10/10) **6.7.2**: agregar a la tabla de hallazgos la fila "Funciones técnicas
+  accesibles a cualquier usuario autenticado | Media | Corregido" (`SEGURIDAD.md` §12). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
 - [x] (10/10) **Renumerar a 6.5** al quitar los marcadores de 6.5 y 6.6: 6.5 Integración,
   6.5.1 Registro de uso y costos, 6.5.2 Revisión de seguridad, 6.5.3 Tiempos de ejecución;
   referencias de 6.3.2, 6.3.5 y 6.4 actualizadas. **Aplicado el 10/10** (segunda versión del Word, sin marcadores y con referencias enlazadas).
@@ -423,6 +453,17 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
 - [x] (25/09) Integración y pruebas pegado (como 6.6), con los hallazgos 1 a 6 y las
   latencias.
 
+- [x] (16/10) **6.7.2 — hallazgo 13** (`SEGURIDAD.md` §13: contraseñas leídas del `.env`
+  y no de Secret Manager, media, corregido el 13/10 con el registro de conexiones): no
+  estaba en esta lista. Se agregó como fila de la Tabla 19 y con un párrafo para los dos
+  hallazgos medios (roles y contraseñas); "Los tres últimos" pasa a "Los tres
+  siguientes". **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
+- [ ] (16/10) **Capturas de las Figuras 9, 10 y 11**: las de `Claude outputs/capturas
+  10-10-2026/` tienen datos de prueba (`SELECT 1 AS x`, "prueba M5…") y la interfaz del
+  10/10 (selector de motores, Conexiones sin formulario). En el Word sigue la Figura 9
+  vieja (primera versión del frontend) y no hay Figuras 10 ni 11. Falta tomarlas con
+  preguntas reales (David elige si las toma él o Claude con el navegador del app).
+
 ### Presentación del prototipo (6.8 cuando se escriba)
 - [ ] Redactar después del 14/10.
 
@@ -446,9 +487,13 @@ costos), 17 (hallazgos), 18 (latencias); las de la evaluación irán antes de la
 - [ ] (02/10) **Limitación**: el banco de pruebas es chico (200 clientes, 300 pedidos);
   la eficiencia con mucho volumen se evaluará con `EXPLAIN` sobre un banco grande o
   queda como trabajo futuro.
-- [ ] (08/10) **Limitación / riesgo**: dependencia de un modelo con fecha de retiro
-  (`gemini-2.5-pro`, no antes del 20/10/2026); cambiar de modelo obliga a revisar el
-  prompt y repetir la evaluación.
+- [ ] (08/10) **Limitación / riesgo**: dependencia de un modelo con fecha de retiro.
+  **Actualizado 18/10:** ya pasó una vez (`gemini-2.5-pro`, retirado el 20/10/2026) y se
+  resolvió cambiando a `gemini-3.8-flash` por configuración, antes de la evaluación; el
+  modelo nuevo también tiene fecha (no antes del 02/09/2027). Los resultados medidos
+  quedan atados al modelo con que se corrieron.
 - [ ] (09/10) **Dato para la discusión**: el costo por consulta (~$0.012) y la latencia
   (~14 s) están dominados por el razonamiento del modelo, no por el tamaño del prompt:
-  la poda reduce poco el costo total (~$0.0007 por consulta).
+  la poda reduce poco el costo total (~$0.0007 por consulta). **Actualizado 18/10:** con
+  Gemini 3.8 Flash en nivel bajo, S10 no razonó (0 tokens), costó $0.0012 y tardó 2.9 s;
+  usar las cifras de la corrida.

@@ -27,7 +27,7 @@ con esta forma (`UsageEvent`, ver `src/services/usageTracking.service.ts`):
 | `latencyMs` | `number` | Siempre |
 | `errorReason` | `string` | Solo si `success: false` |
 | `tokensInput` / `tokensOutput` / `tokensTotal` | `number` | Solo en `generateSQL` exitoso |
-| `tokensThinking` | `number` | Solo en `generateSQL` exitoso — razonamiento interno de Gemini 2.5 Pro, no visible pero facturado como salida |
+| `tokensThinking` | `number` | Solo en `generateSQL` exitoso — razonamiento interno de Gemini (3.8 Flash desde el 18/10/2026; antes 2.5 Pro), no visible pero facturado como salida |
 | `costUsd` | `number` | Solo en `generateSQL` exitoso (entrada + salida visible + razonamiento) |
 | `safe` | `boolean` | Solo en `generateSQL` exitoso (resultado del Query Safety Engine) |
 | `timestamp` | fecha | Siempre, asignada por el backend al escribir |
@@ -41,7 +41,9 @@ módulo.
 `src/services/vertexAiPricing.service.ts` calcula `costUsd` multiplicando los
 tokens reales que devuelve Vertex AI (`usageMetadata` de la respuesta de
 Gemini) por un precio de lista fijo en el código (documentado con la fecha en
-que se verificó). **Es una estimación, no el monto real de la factura** — no
+que se verificó). Desde el 18/10/2026, Gemini 3.8 Flash en `global`: USD 1.50 por
+millón de tokens de entrada y USD 7.50 por millón de salida + razonamiento (catálogo
+de Cloud Billing). Hasta esa fecha, Gemini 2.5 Pro: USD 1.25 / 10. **Es una estimación, no el monto real de la factura** — no
 sustituye la consola de facturación de Google Cloud si se necesita el gasto
 exacto. Los precios se pueden ajustar sin tocar código vía
 `VERTEX_AI_PRICE_INPUT_PER_1M_USD` / `VERTEX_AI_PRICE_OUTPUT_PER_1M_USD` en

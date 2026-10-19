@@ -160,8 +160,8 @@ de inyección SQL). También debe dar **403**.
 ### 5. Generate SQL (NL2SQL)
 `POST /generateSQL` con `{"engine": "postgres", "naturalLanguageQuery": "..."}`.
 Llama a Gemini (Vertex AI, proyecto `proyectog-340d3`) y devuelve `sql`, `safety`
-y `metrics` (tokens, costo, latencia, tablas enviadas). **Cada envío cuesta ~$0.012**
-y tarda ~15 s. El SQL devuelto se ejecuta copiándolo en el endpoint 3 (Execute
+y `metrics` (tokens, costo, latencia, tablas enviadas). **Cada envío cuesta ~$0.001–0.004**
+(Gemini 3.8 Flash) y tarda unos segundos. El SQL devuelto se ejecuta copiándolo en el endpoint 3 (Execute
 Query).
 
 ---

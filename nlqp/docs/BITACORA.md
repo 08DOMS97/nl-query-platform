@@ -6,6 +6,102 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-18 — Cambio de modelo: Gemini 3.8 Flash (Gemini 2.5 Pro se retira el 20/10)
+
+- Verificado en la página oficial de Vertex AI ("Model versions and lifecycle"): el
+  retiro de `gemini-2.5-pro` es el **20/10/2026** (ya no figura como provisorio). Lo
+  resuelto el 09/10 era el SDK deprecado, no el modelo.
+- **Decisión de David:** cambiar ya a un modelo que no se venza pronto, con todo lo que
+  conlleva (código, docs, tesis), en vez de correr la evaluación con 2.5 Pro.
+- Elegido **`gemini-3.8-flash`** (GA 02/09/2026, retiro no antes del 02/09/2027; Google
+  lo propone como reemplazo). Descartados `gemini-3.1-pro-preview` (preview) y
+  `gemini-4-argon` (ignora temperatura y es más caro).
+- Cambios: `.env`/`.env.example` (`VERTEX_AI_MODEL=gemini-3.8-flash`,
+  `GCP_LOCATION=global`, porque el modelo no está en `us-central1`);
+  `vertexAI.service.ts` (`thinkingLevel: LOW` en vez de `thinkingBudget: 1024`, sin
+  temperatura porque el modelo la ignora, valores por defecto nuevos);
+  `vertexAiPricing.service.ts` ($1.50 / $7.50 por millón, del catálogo de Cloud
+  Billing); runner (`COSTO_ESTIMADO_POR_LLAMADA` 0.004, topes $0.25 / $2.50). Prompt
+  sin cambios.
+- Verificado: `tsc` sin errores; `countTokens` con el modelo nuevo (gratis, 507);
+  `test:seguridad` 57/57 + 200/200; `test:api` 38/38 · 23/23 · 32/32 · 25/25.
+- **1 llamada pagada autorizada por David** (S10, Postgres): mismo SQL que con 2.5 Pro
+  (rango de fechas), aprobado por el Query Safety Engine, resultado 104 = referencia.
+  621 / 39 / **0** tokens de razonamiento, 1/8 tablas, **$0.001224**, 2,9 s (con 2.5
+  Pro: $0.01188, 14,5 s). Gasto total en Gemini ≈ $0.023.
+- Nueva proyección de la evaluación: piloto (40) ~$0.10–0.16, completa (400)
+  ~$0.80–1.60.
+- Docs: `CAPITULO_6.md` (6.3.2 y 6.7.1), `RESUMEN_PARA_DOC_TEORICO.md` (+3 pendientes:
+  cambio de modelo en caps. 1–5, 6.3.2, 6.7.1; actualizadas 1.6.3 y limitaciones),
+  `PREPARACION_EVALUACION_GEMINI.md` (§6 y §8 2c), `USO_Y_COSTOS.md`,
+  `MANUAL_POSTMAN.md`, `PLAN_DE_TRABAJO.md` (riesgo cerrado), plan: tarea nueva 46 y
+  corte 18/10 (plan 92 %, real 93 %, +0,9 puntos).
+- Sigue: piloto con paráfrasis (con confirmación), luego corrida completa.
+
+## 2026-10-17 (4) — Plan: ajuste de David al corte 17/10
+
+- David quitó el comentario de la tarea 38 (Entrega PG2) en el Excel. Se quitó también de
+  `plan.json` para que no vuelva a salir en los próximos cortes. Fechas y porcentajes sin
+  cambios. Sin commit.
+
+## 2026-10-17 (3) — Plan: corte 17/10 y entrega movida al 31/10
+
+- La universidad corrió la entrega al 31/10. Por pedido de David se cambiaron solo dos
+  fechas del plan: tarea 37 (conclusiones y revisión final) termina el 30/10 y la 38
+  (entrega PG2) pasa al 31/10; el grupo "Cierre y entrega" y el proyecto terminan el
+  31/10. La presentación del prototipo (35) queda el 14/10, en 0 %.
+- Avance real: M4 y M5 100 % (documentados en el Word), integración 80 % (falta
+  "Generar SQL" con Gemini desde la interfaz), conclusiones y revisión final 50 %.
+- Corte 17/10: plan 91 %, real 93 %, **+1,5 puntos**. Excel en `Claude
+  outputs/Plan_de_Trabajo_PG2 17-10-2026.xlsx`. Sin commit.
+
+## 2026-10-17 (2) — Correcciones de David, formato general y Figura 10
+
+- David corrigió el Word: títulos sin "Módulo N —" (6.1, 6.2, 6.3, 6.5, 6.6), subtítulos
+  como títulos numerados (6.1.1–6.1.5, 6.2.3, 6.5.1, 6.6.1) y rayas por paréntesis en tres
+  párrafos. Se toma su versión como base; `CAPITULO_6.md` sincronizado.
+- Formato pedido: interlineado 1,5 y 2 pt antes y después en todo el documento (desde el
+  índice; portada y celdas de tablas sin cambio); títulos de todo nivel en 12 pt, negrita,
+  sin cursiva (el estilo de nivel 4 era cursiva y azul); nivel 3 en adelante con sangría.
+- Figura 10: captura de Conexiones en 6.5, recortada y sin `localhost`. La Figura 9
+  sigue siendo la vieja (falta captura con pregunta real).
+- Índices regenerados; capítulos en página impar; Cap. 6 p. 93–118. Entregado como
+  `PG2-2026 capítulo 6 revisado 17-10-2026 v2.docx`. Sin commit.
+
+## 2026-10-17 — Word con los cambios acordados (`PG2-2026 capítulo 6 revisado 17-10-2026.docx`)
+
+- David aprobó la lista (ahora toda modificación al Word se acuerda antes). Pedido del
+  asesor: menos tablas y pocas figuras nuevas (1–2), sin quitar las existentes.
+- Aplicado lo del 16/10 (6.1, 6.4, 6.5 M4, 6.6 M5, integración = 6.7, 6.7.1, dos
+  hallazgos en 6.7.2), pero M4 y M5 **sin tablas**, y las tablas de 6.3.4, 6.3.5 y 6.7.1
+  pasadas a texto. El Cap. 6 queda con 2 tablas: hallazgos (14) y latencias (15).
+- Figuras sin cambios: la Figura 9 vieja sigue; falta la captura de Consultar con una
+  pregunta real y elegir la Figura 10 (Historial, previa limpieza, o Conexiones sin
+  `localhost`). Las capturas nuevas del 16/10 tienen datos de prueba.
+- Verificado: validación OK, índices regenerados, capítulos en página impar, ningún
+  párrafo pasa de 12 líneas; Cap. 6 de la p. 93 a la 117. Sin commit.
+
+## 2026-10-16 — Word con M1, M4 y M5 (`PG2-2026 capítulo 6 revisado 16-10-2026.docx`)
+
+- Aplicado al Word todo lo pendiente del Cap. 6 que ya tenía texto en `CAPITULO_6.md`:
+  6.1 (pool por conexión, Secret Manager al abrir el pool, subsección "Registro de
+  conexiones", verificación 38/38 y 27/27); 6.4 reescrita; 6.5 Módulo 4 (Tabla 16) y 6.6
+  Módulo 5 (Tabla 17) nuevas; integración renumerada a 6.7 (tablas 18–20); 6.7.1 sin
+  "Dos limitaciones…"; 6.7.2 con dos filas nuevas.
+- Ajustes al texto al pasarlo: frase repetida de la contraseña en 6.1; párrafos de
+  verificación divididos para no pasar de 12 líneas; Tabla 17 dice "conexión (nombre y
+  motor)" (el historial guarda el nombre de la conexión); la limitación del SQL no
+  firmado ya no remite a 6.7.2 (no la trata); se agregó el **hallazgo 13** de
+  `SEGURIDAD.md` (contraseñas en `.env`, media, corregido 13/10), que faltaba en la
+  tabla, con un párrafo para los dos hallazgos medios.
+- Capturas: las de `Claude outputs/capturas 10-10-2026/` no sirven (datos de prueba,
+  interfaz del 10/10). La Figura 9 vieja sigue en el Word; Figuras 10 y 11 sin poner.
+- Verificado: validación OK, referencias enlazadas (56 nuevas), índices regenerados,
+  ningún párrafo pasa de 12 líneas, capítulos en página impar; Cap. 6 de la p. 93 a la
+  118 (26 páginas). Resumen: 17 pendientes, 1 por verificar, 63 aplicados. Sin commit.
+- Ojo: el piloto y la corrida con Gemini (límites 14 y 15/10) no se hicieron; la entrega
+  es el 17/10.
+
 ## 2026-10-13 (6) — Cierre del día
 
 - David notó en Historial consultas como `SELECT 40 + 2 AS ui166705`: las dejan las

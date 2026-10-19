@@ -1,4 +1,4 @@
-import { FinishReason, GoogleGenAI, type GenerateContentConfig } from '@google/genai';
+import { FinishReason, GoogleGenAI, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
 import type { DbEngine, SchemaInfo } from '../types/index.js';
 import { DOMAIN_RULES } from './domainRules.service.js';
 
@@ -98,17 +98,22 @@ function stripMarkdownFences(text: string): string {
 }
 
 /**
- * Límites de generación. Gemini 2.5 Pro razona internamente ("thinking") antes
- * de responder, ese razonamiento no se puede desactivar en este modelo (solo
- * acotar), se factura como salida y cuenta dentro de `maxOutputTokens`. Con un
- * único tope (antes 1024) el razonamiento podía agotarlo y dejar el SQL
- * truncado o vacío — un fallo de configuración que se contaría como error de
- * precisión del modelo. Por eso son dos límites separados:
- * - THINKING_BUDGET_TOKENS acota el razonamiento, y con él el costo por llamada.
+ * Límites de generación. Gemini 3.8 Flash razona internamente ("thinking")
+ * antes de responder; ese razonamiento no se puede desactivar (el nivel
+ * MINIMAL no existe en este modelo), se factura como salida y cuenta dentro de
+ * `maxOutputTokens`. Por eso son dos controles separados:
+ * - THINKING_LEVEL acota el razonamiento, y con él el costo por llamada. Este
+ *   modelo ya no acepta un presupuesto en tokens (`thinkingBudget`, que se usaba
+ *   con Gemini 2.5 Pro hasta el 18/10/2026), solo LOW, MEDIUM (por defecto) o
+ *   HIGH. LOW alcanza para traducir una pregunta a una sola sentencia.
  * - MAX_OUTPUT_TOKENS lo supera con holgura para que siempre quede espacio para
  *   el SQL (las consultas más complejas de la batería rondan 100–200 tokens).
+ *   Si el razonamiento lo agotara, el SQL saldría truncado o vacío — un fallo
+ *   de configuración que se contaría como error de precisión del modelo.
+ * La temperatura no se envía: Gemini 3.8 Flash la ignora (el determinismo se
+ * controla con el nivel de razonamiento).
  */
-const THINKING_BUDGET_TOKENS = 1024;
+const THINKING_LEVEL = ThinkingLevel.LOW;
 const MAX_OUTPUT_TOKENS = 4096;
 
 /**
@@ -117,13 +122,16 @@ const MAX_OUTPUT_TOKENS = 4096;
  * 24/06/2026 (migrado el 08/10/2026). Autenticación: Application Default
  * Credentials, igual que antes (`gcloud auth application-default login`).
  * `@google/genai` tipa de forma nativa `thinkingConfig` y `thoughtsTokenCount`.
+ * Modelo y ubicación por defecto desde el 18/10/2026: `gemini-3.8-flash` en
+ * `global` (Gemini 2.5 Pro se retiró de Vertex AI el 20/10/2026, y 3.8 Flash no
+ * se ofrece en regiones como `us-central1`, solo en `global`, `us` y `eu`).
  */
 let client: GoogleGenAI | null = null;
 
 function getClient(): { ai: GoogleGenAI; model: string } {
   const projectId = process.env.GCP_PROJECT_ID;
-  const location = process.env.GCP_LOCATION ?? 'us-central1';
-  const model = process.env.VERTEX_AI_MODEL ?? 'gemini-2.5-pro';
+  const location = process.env.GCP_LOCATION ?? 'global';
+  const model = process.env.VERTEX_AI_MODEL ?? 'gemini-3.8-flash';
 
   if (!projectId) {
     throw new Error(
@@ -163,7 +171,7 @@ export interface GenerateSqlResult {
 }
 
 /**
- * Genera SQL a partir de lenguaje natural usando Vertex AI Gemini Pro.
+ * Genera SQL a partir de lenguaje natural usando Gemini en Vertex AI.
  * El resultado NUNCA debe ejecutarse sin pasar antes por
  * `querySafety.service.ts` — este servicio no valida seguridad, solo genera.
  * Devuelve además los tokens consumidos (`usageMetadata` de la respuesta),
@@ -175,9 +183,8 @@ export async function generateSql(
   naturalLanguageQuery: string,
 ): Promise<GenerateSqlResult> {
   const config: GenerateContentConfig = {
-    temperature: 0,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
-    thinkingConfig: { thinkingBudget: THINKING_BUDGET_TOKENS },
+    thinkingConfig: { thinkingLevel: THINKING_LEVEL },
   };
   const { ai, model } = getClient();
 

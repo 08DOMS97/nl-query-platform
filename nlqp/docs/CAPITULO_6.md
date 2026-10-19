@@ -6,7 +6,7 @@ qué falta corregir o agregar (en este capítulo y en los demás) está en
 documenta en el Word: las secciones que faltan (evaluación con Gemini, Módulos 4 y 5,
 presentación del prototipo) no llevan título ni marcador hasta tener texto.
 
-**Versión (sincronizado con el Word el 10/10):** cada sección tiene el texto más
+**Versión (sincronizado con el Word el 16/10):** cada sección tiene el texto más
 reciente redactado. Si difiere de lo que ya está pegado en el Word,
 `RESUMEN_PARA_DOC_TEORICO.md` dice qué cambiar. Parte de este texto se redactó en el
 chat de Cowork (25/09 y 02/10).
@@ -38,13 +38,13 @@ desarrollo, en lugar de posponer la validación multimotor a la fase de pruebas.
 
 ---
 
-## 6.1 Módulo 1 — Gestión segura de conexiones
+## 6.1 Gestión segura de conexiones
 
 El módulo de gestión de conexiones resuelve el establecimiento y la administración de
 conexiones hacia los cuatro motores soportados, manteniendo la restricción arquitectónica
 de que las credenciales nunca sean accesibles desde el cliente (RNF-05 y RNF-07).
 
-### Arquitectura de conexión
+### 6.1.1 Arquitectura de conexión
 
 Se implementó un administrador de conexiones que mantiene un conjunto de conexiones
 reutilizables (pool) por cada conexión registrada, empleando los controladores oficiales
@@ -64,22 +64,23 @@ ese pool está activo y nunca se devuelve al cliente ni se registra en las traza
 ejecución. Leer el secreto al abrir el pool, y no en cada consulta, mantiene el uso de
 Secret Manager dentro de su cuota gratuita.
 
-### Registro de conexiones
+### 6.1.2 Registro de conexiones
 
 El usuario técnico registra, edita y elimina conexiones desde la pantalla de Conexiones;
 el usuario no técnico solo ve el nombre de cada conexión, su motor y su base de datos,
 sin servidor, puerto ni usuario, al elegir dónde consultar. El formulario permite probar
-los datos antes de guardarlos, y la contraseña se escribe una sola vez: no se vuelve a
-mostrar y, al editar, dejarla vacía conserva la guardada. Antes de guardar una conexión nueva o editada, el backend la prueba:
-una conexión que no responde no se registra. Al editar, la contraseña puede omitirse para
-conservar la actual, y el motor no se puede cambiar, porque el historial y las consultas
-guardadas dependen del dialecto. Editar o eliminar una conexión cierra su pool, de modo
-que el siguiente uso se hace con los datos nuevos. Como las conexiones son compartidas
-por todos los usuarios, su nombre es único en todo el sistema, sin distinguir mayúsculas
-ni espacios repetidos. El historial guarda el nombre de la
-conexión al momento de ejecutar, por si después se renombra o se elimina.
+los datos antes de guardarlos, y el backend vuelve a probar la conexión antes de
+registrarla: una conexión que no responde no se guarda. La contraseña se escribe una
+sola vez y no se vuelve a mostrar; al editar, dejarla vacía conserva la guardada.
 
-### Prueba de conexión y diagnóstico
+Al editar, el motor no se puede cambiar, porque el historial y las consultas guardadas
+dependen del dialecto, y editar o eliminar una conexión cierra su pool, de modo que el
+siguiente uso se hace con los datos nuevos. Como las conexiones son compartidas por
+todos los usuarios, su nombre es único en todo el sistema, sin distinguir mayúsculas ni
+espacios repetidos. El historial guarda el nombre de la conexión al momento de ejecutar,
+por si después se renombra o se elimina.
+
+### 6.1.3 Prueba de conexión y diagnóstico
 
 El módulo expone una operación de prueba de conectividad que permite al usuario técnico
 verificar una conexión antes de utilizarla. La operación distingue entre las distintas
@@ -87,7 +88,7 @@ causas de fallo —credenciales inválidas, servidor inaccesible, puerto incorre
 de espera agotado y error de autenticación— de modo que el mensaje presentado al usuario
 sea accionable sin exponer información interna del sistema (RNF-04).
 
-### Verificación
+### 6.1.4 Verificación
 
 La conexión se estableció correctamente contra los cuatro motores del banco de pruebas,
 utilizando en todos los casos cuentas configuradas con permisos exclusivamente de lectura,
@@ -98,19 +99,20 @@ El registro de conexiones se verificó con 38 de 38 casos sobre la API: el usuar
 técnico recibe la lista sin datos de acceso y recibe 403 al crear, editar, probar o
 eliminar; ninguna respuesta incluye la contraseña ni el nombre del secreto; se rechazan
 el puerto, el motor y el nombre inválidos; se rechaza un nombre ya usado por otra
-conexión, al crear y al editar, aunque cambien las mayúsculas o los espacios, y se avisa
-antes de probar la conexión; una conexión con contraseña
-incorrecta no se registra (422); una conexión nueva se usa para ejecutar, leer el
-esquema, guardar consultas y aparecer en el historial con su nombre; editarla cierra su
-pool; y una conexión eliminada responde 404. En la interfaz, 27 de 27 comprobaciones
-fueron correctas: con una contraseña incorrecta la prueba avisa y la conexión no se
-registra; con un nombre repetido, al crear o al editar, se avisa y no se guarda; con los datos correctos se registra, aparece conectada, sin mostrar la
-contraseña, y se puede elegir en Consultar y en Esquema (donde muestra sus ocho
-tablas); al editarla el motor queda bloqueado y la contraseña vacía; al eliminarla
-desaparece de la lista y de los selectores; y el usuario no técnico ve las conexiones
+conexión, al crear y al editar, aunque cambien las mayúsculas o los espacios; una
+conexión con contraseña incorrecta no se registra (422); una conexión nueva se usa para
+ejecutar, leer el esquema, guardar consultas y aparecer en el historial con su nombre;
+editarla cierra su pool, y una conexión eliminada responde 404.
+
+En la interfaz, 27 de 27 comprobaciones fueron correctas: con una contraseña incorrecta
+la prueba avisa y la conexión no se registra; con un nombre repetido, al crear o al
+editar, se avisa y no se guarda; con los datos correctos se registra, aparece conectada
+sin mostrar la contraseña y se puede elegir en Consultar y en Esquema, donde muestra sus
+ocho tablas; al editarla, el motor queda bloqueado y la contraseña vacía; al eliminarla
+desaparece de la lista y de los selectores, y el usuario no técnico ve las conexiones
 por nombre, pero no la pantalla de Conexiones.
 
-### Corrección de seguridad aplicada
+### 6.1.5 Corrección de seguridad aplicada
 
 Durante la revisión del módulo se identificó que la validación del certificado del
 servidor de SQL Server se encontraba deshabilitada de forma fija en el código. Esta
@@ -125,7 +127,7 @@ lugar de vulnerable.
 
 ---
 
-## 6.2 Módulo 2 — Extracción e interpretación de esquema
+## 6.2 Extracción e interpretación de esquema
 
 El módulo de extracción de esquema obtiene, mediante inspección de las tablas de sistema
 de cada motor, una representación estructurada de la base de datos conectada, que
@@ -165,7 +167,7 @@ columnas con tipo de dato y condición de nulidad, su clave primaria, sus relaci
 clave foránea y sus índices. Los tipos de datos específicos de cada motor se mapean a un
 conjunto común, de modo que la representación resultante sea comparable entre motores.
 
-### Verificación
+### 6.2.3 Verificación
 
 La extracción se ejecutó contra los cuatro motores del banco de pruebas, produciendo en
 todos los casos una representación de ocho tablas con sus ocho relaciones de clave foránea
@@ -174,7 +176,7 @@ motores verifica el funcionamiento de la capa de abstracción.
 
 ---
 
-## 6.3 Módulo 3 — Generación NL2SQL y Query Safety Engine
+## 6.3 Generación NL2SQL y Query Safety Engine
 
 Este módulo concentra el flujo central del sistema: recibe la consulta en lenguaje
 natural, selecciona el subconjunto relevante del esquema, construye el contexto enviado al
@@ -227,15 +229,23 @@ parafraseada de cada pregunta, y en 2 de las 50 dejó fuera una tabla necesaria.
 diccionario no se ajustó a esas paráfrasis, para no adaptar el sistema a las preguntas
 con que se evalúa.
 
-### 6.3.2 Integración con Vertex AI Gemini Pro
+### 6.3.2 Integración con Gemini en Vertex AI
 
 La generación se implementó como un servicio del backend que invoca el modelo mediante
 `@google/genai`, el SDK oficial de Google para Node.js, configurado para operar sobre
 Vertex AI. Este SDK reemplazó a la biblioteca que se usó al inicio,
 `@google-cloud/vertexai`, que Google declaró obsoleta y con fecha de retiro anunciada;
 la migración conservó la misma configuración de generación y se verificó con una llamada
-real antes de continuar. Por defecto usa `gemini-2.5-pro` en la región `us-central1`;
+real antes de continuar. Por defecto usa `gemini-3.8-flash` en la ubicación `global`;
 ambos valores se cambian por configuración sin tocar el código.
+
+El prototipo se desarrolló con Gemini 2.5 Pro, que Google retiró de Vertex AI el 20 de
+octubre de 2026. Antes de esa fecha se cambió a Gemini 3.8 Flash, el reemplazo que
+recomienda Google, disponible de forma general y con soporte garantizado al menos hasta
+septiembre de 2027. El cambio no tocó la arquitectura ni el prompt: se ajustaron el
+nombre del modelo, la ubicación, la forma de acotar el razonamiento y los precios usados
+para estimar el costo. Que bastara con eso confirma que la plataforma no depende de un
+modelo en particular.
 
 El prompt tiene seis partes. La primera es el rol: generador experto de SQL que debe
 traducir la solicitud a una única sentencia de solo lectura para el motor indicado. La
@@ -270,12 +280,15 @@ producidos por una unión, y limitar filas solo cuando la pregunta pide una cant
 máximo. Esta última regla aplica el principio de no recortar resultados de la sección
 6.3.5. En conjunto, estas reglas corresponden al requerimiento RNF-13 de la sección 4.5.
 
-La temperatura se fijó en cero, porque, como se vio en la sección 2.4, en una tarea
-donde la corrección del SQL es crítica conviene la salida más determinística. Gemini 2.5
-Pro razona internamente antes de responder, y ese razonamiento consume tokens que se
-facturan como salida; por eso se separaron dos límites. El presupuesto de razonamiento
-se fijó en 1,024 tokens, lo que acota el costo de cada llamada, y el tope de salida en
-4,096 tokens, holgado para que siempre quede espacio para la sentencia. Si la respuesta
+Como se vio en la sección 2.4, en una tarea donde la corrección del SQL es crítica
+conviene la salida más determinística. Con Gemini 2.5 Pro eso se lograba fijando la
+temperatura en cero; Gemini 3.8 Flash ignora ese parámetro, y el determinismo se
+controla con el nivel de razonamiento. El modelo razona internamente antes de responder,
+y ese razonamiento consume tokens que se facturan como salida; por eso se separaron dos
+límites. El razonamiento se fijó en el nivel bajo, el menor que admite el modelo, que
+alcanza para traducir una pregunta a una sola sentencia y acota el costo de cada
+llamada, y el tope de salida en 4,096 tokens, holgado para que siempre quede espacio
+para la sentencia. Si la respuesta
 se corta al alcanzar ese tope, el servicio reporta un error explícito en lugar de
 entregar una sentencia incompleta, que de otro modo se contaría como un error de
 precisión del modelo cuando en realidad es un fallo de configuración.
@@ -291,15 +304,18 @@ poda, invoca al modelo y devuelve la sentencia junto con un resultado informativ
 validación, sin ejecutar nada. La autorización real ocurre en `executeQuery`, como se
 describe en la sección 6.3.3.
 
-La integración se verificó, después de la migración del SDK, con una llamada real que
-formuló la pregunta “¿Cuántos pedidos se hicieron en 2025?” sobre el banco de pruebas en
-PostgreSQL. Gemini devolvió una sentencia correcta que filtra por un rango de fechas,
-como pide la regla de rendimiento; el Query Safety Engine la aprobó y su resultado
-coincidió con el de la sentencia de referencia. La llamada usó 1,208 tokens de entrada,
-39 de salida y 998 de razonamiento, tardó 14.5 segundos y tuvo un costo estimado de USD
-0.01188, casi todo por el razonamiento y no por el tamaño del prompt. Esta prueba
-confirma que el flujo funciona de extremo a extremo, pero no mide la precisión de la
-generación; esa medición corresponde a la evaluación con el conjunto de 50 consultas.
+La integración se verificó con una llamada real que formuló la pregunta “¿Cuántos
+pedidos se hicieron en 2025?” sobre el banco de pruebas en PostgreSQL, primero después
+de la migración del SDK y luego después del cambio de modelo. En ambos casos Gemini
+devolvió la misma sentencia correcta, que filtra por un rango de fechas como pide la
+regla de rendimiento; el Query Safety Engine la aprobó y su resultado coincidió con el
+de la sentencia de referencia. Con Gemini 2.5 Pro la llamada usó 1,208 tokens de
+entrada, 39 de salida y 998 de razonamiento, tardó 14.5 segundos y costó USD 0.01188,
+casi todo por el razonamiento. Con Gemini 3.8 Flash usó 621 tokens de entrada (la poda
+envió una sola tabla de ocho), 39 de salida y ninguno de razonamiento, tardó 2.9 segundos
+y costó USD 0.0012, la décima parte. Esta prueba confirma que el flujo funciona de
+extremo a extremo, pero no mide la precisión de la generación; esa medición corresponde
+a la evaluación con el conjunto de 50 consultas, que se realiza con Gemini 3.8 Flash.
 
 ### 6.3.3 Implementación del Query Safety Engine
 
@@ -354,10 +370,10 @@ no una deficiencia general del componente.
 
 La corrección sustituyó la búsqueda del separador por un recorrido del texto de la
 sentencia que mantiene la profundidad de anidamiento entre paréntesis y el estado de
-pertenencia a literales de cadena, y que admite una segunda sentencia de lectura de nivel
-superior únicamente cuando esta se encuentra precedida por un operador de conjunto —unión,
-intersección o diferencia—, que constituye la única forma sintácticamente legítima de que
-una consulta contenga más de una sentencia de lectura de primer nivel.
+pertenencia a literales de cadena, y que admite una segunda sentencia de lectura de
+nivel superior únicamente cuando esta se encuentra precedida por un operador de conjunto
+(unión, intersección o diferencia), que constituye la única forma sintácticamente
+legítima de que una consulta contenga más de una sentencia de lectura de primer nivel.
 
 Tras la corrección se verificó el bloqueo del caso original y que las consultas que
 emplean operadores de conjunto de forma legítima continúan ejecutándose. Se repitió asimismo la totalidad de la batería de seguridad y el conjunto de
@@ -395,11 +411,11 @@ comportamiento estricto original. La batería incluye un caso de intento de evas
 cada una de estas construcciones.
 
 La corrección de la segunda limitación incorpora una lista de funciones prohibidas que
-comprende las de acceso a archivos del servidor, las que ejecutan sentencias recibidas como
-texto —cuyo bloqueo se vuelve imprescindible una vez que el contenido de los literales deja
-de inspeccionarse—, y las que alteran el estado del servidor o retienen recursos. Tras ambas
-correcciones se repitió la batería completa y el conjunto de consultas de prueba en los
-cuatro motores, sin degradación de los resultados.
+comprende las de acceso a archivos del servidor, las que ejecutan sentencias recibidas
+como texto (cuyo bloqueo se vuelve imprescindible una vez que el contenido de los
+literales deja de inspeccionarse) y las que alteran el estado del servidor o retienen
+recursos. Tras ambas correcciones se repitió la batería completa y el conjunto de
+consultas de prueba en los cuatro motores, sin degradación de los resultados.
 
 ### 6.3.4 Pruebas de ejecución controlada en los cuatro motores
 
@@ -583,7 +599,7 @@ describe en las secciones 6.1 y 6.5.
 
 ---
 
-## 6.5 Módulo 4 — Herramientas de apoyo para usuarios técnicos
+## 6.5 Herramientas de apoyo para usuarios técnicos
 
 El sistema distingue los dos actores de la sección 4.2. El usuario no técnico pregunta,
 obtiene resultados y gestiona su historial; el usuario técnico tiene, además,
@@ -616,7 +632,7 @@ bloqueada con el motivo y no se puede ejecutar hasta que se corrija.
 El técnico puede editar la sentencia recién generada y las consultas guardadas, pero no
 las del historial: una consulta del historial se reutiliza tal como se ejecutó, y para
 modificarla primero se guarda con un nombre. Así, toda sentencia editada parte de una
-versión identificable —la que produjo el modelo o la que el usuario decidió conservar—.
+versión identificable (la que produjo el modelo o la que el usuario decidió conservar).
 Al editar una guardada, la interfaz ofrece «Guardar cambios», que la actualiza, o
 guardarla como una consulta nueva. El backend aplica la misma regla: rechaza una
 sentencia del historial que llegue editada y responde 403 si quien edita no es técnico.
@@ -637,7 +653,7 @@ conexiones nuevas; una conexión que todavía no se usó aparece como no iniciad
 
 *[Figura 10. Pantalla de Conexiones del rol técnico. Fuente: Elaboración propia. — captura pendiente.]*
 
-### Verificación
+### 6.5.1 Verificación
 
 Con un usuario de cada rol, contra el backend, 23 de 23 comprobaciones fueron
 correctas: las cuatro funciones técnicas responden 403 al usuario no técnico, 200 al
@@ -657,12 +673,11 @@ Queda una limitación: la interfaz no permite editar el SQL al usuario no técni
 con su token podría enviar una sentencia propia directamente a `executeQuery`. El Query
 Safety Engine la sigue validando, así que no puede modificar datos, pero sí consultar
 tablas por su cuenta. Cerrarlo requiere que el backend firme el SQL que genera y acepte
-de un usuario no técnico solo sentencias firmadas; queda como trabajo futuro (sección
-6.7.2).
+de un usuario no técnico solo sentencias firmadas; queda como trabajo futuro.
 
 ---
 
-## 6.6 Módulo 5 — Historial y gestión de consultas guardadas
+## 6.6 Historial y gestión de consultas guardadas
 
 El módulo distingue dos registros con propósitos distintos. El **historial** es
 automático: cada consulta que el usuario ejecuta queda registrada sin que tenga que hacer
@@ -680,8 +695,8 @@ historial de otro.
 
 | Registro | Cuándo se crea | Qué guarda |
 |---|---|---|
-| Historial | Al ejecutar una consulta (`executeQuery`), con éxito o con error | Pregunta en lenguaje natural, motor, sentencia SQL, si se ejecutó con éxito, total de filas o motivo del error, y fecha |
-| Consulta guardada | Cuando el usuario pulsa «Guardar» y le asigna un nombre (hasta 100 caracteres) | Nombre, pregunta, motor, sentencia SQL y fecha |
+| Historial | Al ejecutar una consulta (`executeQuery`), con éxito o con error | Pregunta en lenguaje natural, conexión (nombre y motor), sentencia SQL, si se ejecutó con éxito, total de filas o motivo del error, y fecha |
+| Consulta guardada | Cuando el usuario pulsa «Guardar» y le asigna un nombre (hasta 100 caracteres) | Nombre, pregunta, conexión (nombre y motor), sentencia SQL y fecha |
 
 No entran al historial las sentencias que el Query Safety Engine bloquea, porque nunca
 llegan a ejecutarse, ni las ejecuciones de la evaluación con Gemini, que se identifican
@@ -699,7 +714,7 @@ el Query Safety Engine la valida al guardarla y de nuevo cada vez que se ejecuta
 
 *[Figura 11. Pantalla de Historial. Fuente: Elaboración propia. — captura pendiente.]*
 
-### Verificación
+### 6.6.1 Verificación
 
 Contra el backend y los cuatro motores del banco de pruebas, 32 de 32 comprobaciones
 fueron correctas: el registro de la ejecución en el historial en PostgreSQL, MySQL,
@@ -743,13 +758,14 @@ eventos, porque son llamadas de diagnóstico y no uso del sistema.
 | Motivo del error | Solo si la llamada falló |
 | Tokens de entrada, salida, razonamiento y total; costo estimado; resultado del Query Safety Engine | Solo en `generateSQL` exitoso |
 
-Gemini 2.5 Pro razona internamente antes de responder. Ese razonamiento no se ve en la
-respuesta, pero se factura como salida, así que se limitó a 1,024 tokens por llamada y
-se registra aparte. El costo se estima multiplicando los tokens reales que informa
-Vertex AI por el precio de lista de Gemini 2.5 Pro para contextos de hasta 200,000
-tokens: USD 1.25 por millón de tokens de entrada, y USD 10 por millón de salida y
-razonamiento (verificados el 21-sep-2026). Con este límite, cada llamada cuesta
-alrededor de USD 0.012, casi todo por el razonamiento. Es una estimación y no sustituye
+Gemini razona internamente antes de responder. Ese razonamiento no se ve en la
+respuesta, pero se factura como salida, así que se limitó al nivel más bajo que admite
+el modelo y se registra aparte. El costo se estima multiplicando los tokens reales que
+informa Vertex AI por el precio de lista de Gemini 3.8 Flash en la ubicación global: USD
+1.50 por millón de tokens de entrada, y USD 7.50 por millón de salida y razonamiento
+(verificados el 18-oct-2026 en el catálogo de facturación de Google Cloud). Una consulta
+simple cuesta alrededor de USD 0.001; con Gemini 2.5 Pro, que se usó hasta esa fecha,
+costaba alrededor de USD 0.012, casi todo por el razonamiento. Es una estimación y no sustituye
 la factura de Google Cloud; los precios se pueden ajustar por configuración. Además de
 guardarse en Firestore, estos datos se devuelven en cada respuesta de `generateSQL`,
 junto con el número de tablas enviadas al modelo frente al total del esquema, para medir
@@ -791,6 +807,7 @@ en lugar de deducirlo solo de leer el código.
 | Funciones de lectura de archivos del servidor no bloqueadas por el validador | Baja | Corregido |
 | Batería de pruebas de seguridad no versionada | Baja | Corregido |
 | Funciones técnicas accesibles a cualquier usuario autenticado | Media | Corregido |
+| Contraseñas de las bases leídas del archivo de configuración y no de Secret Manager | Media | Corregido |
 
 El primer hallazgo se describe en la sección 6.3.3, el tercero en la sección 6.1 y el de
 la caída del backend en la sección 6.3.5. El segundo merece mención. La verificación del token se
@@ -807,10 +824,17 @@ del que mitiga; quedan como trabajo previo a un despliegue en producción. El en
 descarga no usa el token de Firebase porque una descarga del navegador no puede
 enviarlo; se mitigó con un token de un solo uso que vence a los dos minutos (sección
 6.3.5), y el riesgo que queda es que, si el enlace se filtra antes de usarse, alguien
-podría descargar ese resultado una vez. Los tres últimos se corrigieron: los dos
+podría descargar ese resultado una vez. Los tres siguientes se corrigieron: los dos
 primeros se describen en la segunda revisión del Query Safety Engine (sección 6.3.3), y
 la batería de pruebas de seguridad, que antes no estaba guardada junto al código, quedó
 versionada y se ejecuta con un solo comando.
+
+Los dos últimos, de severidad media, se corrigieron con los cambios de los Módulos 1 y
+4. Las funciones técnicas solo verificaban que hubiera sesión, de modo que cualquier
+cuenta creada desde el registro podía ver la estructura completa de las bases y el gasto
+en Vertex AI; ahora el backend exige el rol técnico (sección 6.5). Las contraseñas de
+las bases, que el backend todavía leía del archivo de configuración, pasaron a Secret
+Manager con el registro de conexiones (sección 6.1).
 
 ### 6.7.3 Tiempos de ejecución sobre el motor
 
