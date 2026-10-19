@@ -33,7 +33,7 @@ let lista = await edits();
 let e = lista[0];
 check('auditoría: un registro', lista.length === 1, JSON.stringify(lista.length));
 check('auditoría: reemplazó 1 por 2', JSON.stringify(e?.changes) === JSON.stringify([{ removed: '1', added: '2' }]), JSON.stringify(e?.changes));
-check('auditoría: quién, origen, base y acción', e?.email === 'nlqp-test@example.com' && e.origin === 'generada' && e.connectionId === 'postgres' && JSON.stringify(e.actions) === '["ejecutada"]');
+check('auditoría: quién, origen, base y acción', e?.email === (process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com') && e.origin === 'generada' && e.connectionId === 'postgres' && JSON.stringify(e.actions) === '["ejecutada"]');
 check('auditoría: fecha y hora', !Number.isNaN(Date.parse(e?.createdAt)) && Date.now() - Date.parse(e.createdAt) < 120000);
 check('auditoría: sentencias original y editada', e?.originalSql === g1 && e.editedSql === g2);
 await exec(tec, g2, { origin: 'generada', originalSql: g1 });

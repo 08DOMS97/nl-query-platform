@@ -12,6 +12,9 @@ const check = (n, c, x = '') => { if (c) { ok++; console.log(`OK   ${n}`); } els
 // Contraseñas de los usuarios de prueba: en el .env del backend (no se commitean).
 const TEC_PASSWORD = process.env.NLQP_TEST_USER_PASSWORD;
 const USR_PASSWORD = process.env.NLQP_USUARIO_PASSWORD;
+// Usuarios exclusivos de las pruebas (no los de la demo): lo que dejan se borra al terminar.
+const TEC_EMAIL = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com';
+const USR_EMAIL = process.env.NLQP_USUARIO_EMAIL ?? 'nlqp-ci-usuario@example.com';
 if (!TEC_PASSWORD || !USR_PASSWORD) {
   console.error('Faltan NLQP_TEST_USER_PASSWORD y NLQP_USUARIO_PASSWORD en nlqp/backend/.env.');
   process.exit(1);
@@ -44,7 +47,7 @@ const conectados = (page) => page.getByText('Conectado', { exact: true }).count(
 const fila = (page, n) => page.locator('tbody tr', { hasText: n });
 
 // --- Técnico ---
-let page = await login('nlqp-test@example.com', TEC_PASSWORD);
+let page = await login(TEC_EMAIL, TEC_PASSWORD);
 await page.waitForSelector('[role=radio]', { timeout: 15000 }).catch(() => undefined);
 check('Consultar: 4 conexiones en el selector', (await page.getByRole('radio').count()) === 4, String(await page.getByRole('radio').count()));
 await page.click('nav >> text=Conexiones');
@@ -121,7 +124,7 @@ await page.waitForSelector('[role=radio]', { timeout: 15000 }).catch(() => undef
 check('Consultar: la eliminada ya no aparece y queda elegida otra', (await page.getByRole('radio').count()) === 4 && (await page.locator('[role=radio][aria-checked=true]').count()) === 1);
 
 // --- No técnico ---
-page = await login('nlqp-usuario@example.com', USR_PASSWORD);
+page = await login(USR_EMAIL, USR_PASSWORD);
 await page.waitForSelector('[role=radio]', { timeout: 15000 }).catch(() => undefined);
 check('Usuario: ve las 4 conexiones por nombre', (await page.getByRole('radio').count()) === 4 && (await page.getByRole('radio', { name: /Tienda · Servidor A/ }).count()) === 1);
 check('Usuario: sin menú Conexiones', (await page.locator('nav >> text=Conexiones').count()) === 0);

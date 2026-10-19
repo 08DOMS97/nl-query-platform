@@ -416,7 +416,7 @@
       "inicio": "2026-10-12",
       "fin": "2026-10-13",
       "real": 0.8,
-      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz."
+      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27."
     },
     {
       "no": 35,

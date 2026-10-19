@@ -5,13 +5,17 @@ import admin from 'firebase-admin';
  * Authentication y devuelve un ID token real, para probar los endpoints
  * protegidos por `auth.middleware.ts` (Postman, curl) mientras no exista el
  * frontend (Módulo 8). El token expira a la hora — volver a correr el script
- * para renovarlo.
+ * para renovarlo. Por defecto es el usuario técnico de las pruebas automáticas
+ * (no el de la demo); la contraseña solo se lee del .env.
  */
 
-const TEST_EMAIL = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-test@example.com';
-const TEST_PASSWORD = process.env.NLQP_TEST_USER_PASSWORD ?? 'NlqpTest_2026!';
+const TEST_EMAIL = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com';
+const TEST_PASSWORD = process.env.NLQP_TEST_USER_PASSWORD;
 const apiKey = process.env.FIREBASE_WEB_API_KEY;
 
+if (!TEST_PASSWORD) {
+  throw new Error('Falta NLQP_TEST_USER_PASSWORD en .env (contraseña del usuario de prueba).');
+}
 if (!apiKey) {
   throw new Error(
     'Falta FIREBASE_WEB_API_KEY en .env (Firebase Console → Configuración del proyecto → ' +

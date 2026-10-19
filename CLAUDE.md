@@ -28,7 +28,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 23/23 + 27/27. Falta probar "Generar SQL" con Gemini real desde la UI |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 24/24 + 27/27 (18/10, con usuarios exclusivos de las pruebas; historial de la demo limpio). Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 11) y pasar 6.6 al Word |
 | Texto de tesis | 🟡 20 pendientes + 1 por verificar + 63 aplicados (18/10: +3 por el cambio de modelo, incl. reemplazar "Gemini 2.5 Pro" en caps. 1–5). Word del 17/10 (`PG2-2026 capítulo 6 revisado 17-10-2026.docx`): Cap. 6 completo con M1, M4, M5 e integración = 6.7. Faltan: evaluación con Gemini (6.3.6), capturas de las Figuras 9–11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
@@ -40,25 +40,22 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
-1. **Limpiar el historial de prueba** ← **SIGUIENTE** (pedido de David, 13/10; sin
-   costo): el historial de los usuarios de prueba está lleno de consultas de las pruebas
-   automáticas (`SELECT 40 + 2 AS ui166705`, `SELECT 1 AS x`, etc.), que se ven en la
-   pantalla y no se entienden. Proponer en 3–5 líneas cómo resolverlo (p. ej., usuarios
-   exclusivos para las pruebas o que las pruebas borren lo que dejan en el historial) y,
-   con el "dale", limpiar también lo que ya quedó.
-2. **Piloto con paráfrasis** (Gemini 3.8 Flash): propuesto **a más tardar el 21/10**.
+1. **Piloto con paráfrasis** ← **SIGUIENTE** (Gemini 3.8 Flash): propuesto **a más tardar el 21/10**.
    40 llamadas, ~$0.10–0.16, tope automático $0.25. **Pedir confirmación a David antes.** Requiere Docker y el
    backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
    reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
    `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-3. **Corrida completa con paráfrasis**: propuesto **a más tardar el 22/10** (~$0.80–1.60
+2. **Corrida completa con paráfrasis**: propuesto **a más tardar el 22/10** (~$0.80–1.60
    en total, tope $2.50; lo del piloto no se repite). **Confirmación aparte.** Después:
    revisar a mano "Para revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y
    cargar las cifras en la tesis (6.3.6, 1.6.3 y conclusiones) con margen antes del 30/10.
-4. Después del piloto: retomar las capturas de las figuras 9–11 con preguntas reales
-   (las de `Claude outputs/capturas 10-10-2026/` tienen datos de prueba, y las de las
-   figuras 9 y 10 ya no muestran la interfaz actual: selector de conexiones y
-   formulario de Conexiones, 13/10).
+3. Después del piloto: capturas de las figuras 9 (Consultar con una pregunta real; la
+   generación cuesta ~$0.002) y 11 con los usuarios de la demo, que ya tienen el
+   historial limpio (18/10). La Figura 10 (Conexiones) ya está en el Word (17/10).
+4. **Sin costo, en paralelo:** textos para el Word (cambio de modelo en caps. 1–5,
+   3.3.1.2, limitaciones) y respuestas de David: ¿se hizo la presentación del 14/10
+   (plan en 0 %)?, ¿el equipo de 3.8 es el suyo?, ¿referencia de Spider 2.0 de 2025?
+   La encuesta de 35 participantes sigue sin coordinar.
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 
@@ -131,18 +128,16 @@ Docker Desktop en esta máquina: `C:\Users\david\AppData\Local\Programs\DockerDe
 Token de prueba (dura 1 h): `npm run test:token` en `nlqp/backend`.
 Pruebas sin costo (con todo levantado): `npm run test:seguridad` y `npm run test:api` en
 `nlqp/backend`; `npm run test:ui` en `nlqp/frontend` (la primera vez, `npm install
---no-save playwright-core@1.64.0`). Leen las contraseñas de los usuarios de prueba de
-`nlqp/backend/.env` (`NLQP_TEST_USER_PASSWORD`, `NLQP_USUARIO_PASSWORD`).
-Roles: `npm run set:role -- <correo> <tecnico|no_tecnico>`. Usuarios de prueba:
-`nlqp-test@example.com` (técnico) y `nlqp-usuario@example.com` (no técnico); las
-contraseñas, en `scripts/get_test_token.mjs` y en la bitácora del 10/10.
+--no-save playwright-core@1.64.0`). Usan usuarios **exclusivos de las pruebas**
+(`nlqp-ci-tecnico@example.com`, `nlqp-ci-usuario@example.com`) y al terminar borran lo
+que dejaron en Firestore (`npm run limpiar:pruebas`, 18/10).
+Roles: `npm run set:role -- <correo> <tecnico|no_tecnico>`. Usuarios de la demo (para
+entrar desde la interfaz; ninguna prueba los usa): `nlqp-test@example.com` (técnico) y
+`nlqp-usuario@example.com` (no técnico). Todas las contraseñas están **solo** en
+`nlqp/backend/.env` (`NLQP_TEST_USER_*`, `NLQP_USUARIO_*`, `NLQP_DEMO_*`); las que
+estaban commiteadas se cambiaron el 18/10.
 
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
-
-- Las contraseñas de los usuarios de prueba de Firebase están escritas en archivos ya
-  commiteados (`get_test_token.mjs`, `evaluacion_gemini.mjs`, bitácora del 10/10). Son
-  cuentas de prueba, pero si el repo es público convendría cambiarlas y leerlas solo
-  del `.env`, como las pruebas nuevas (detectado 13/10).
 
 - Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.001–0.004 por intento con 3.8 Flash).
 - Banco de volumen alto para medir eficiencia con `EXPLAIN`.

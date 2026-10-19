@@ -461,7 +461,9 @@ una sola nueva (10) pendiente.
 - [ ] (16/10) **Capturas de las Figuras 9, 10 y 11**: las de `Claude outputs/capturas
   10-10-2026/` tienen datos de prueba (`SELECT 1 AS x`, "prueba M5…") y la interfaz del
   10/10 (selector de motores, Conexiones sin formulario). En el Word sigue la Figura 9
-  vieja (primera versión del frontend) y no hay Figuras 10 ni 11. Falta tomarlas con
+  vieja (primera versión del frontend). **17/10:** la Figura 10 (Conexiones) ya está.
+  **18/10:** el historial de los usuarios de la demo quedó limpio, así que ya se pueden
+  tomar la 9 y la 11. Falta tomarlas con
   preguntas reales (David elige si las toma él o Claude con el navegador del app).
 
 ### Presentación del prototipo (6.8 cuando se escriba)

@@ -4,10 +4,11 @@
  *   npm run test:api
  *
  * Requiere Docker con los 4 motores y el backend corriendo en http://localhost:8080.
- * Pide un token para cada usuario de prueba (técnico y no técnico; la contraseña del no
- * técnico va en NLQP_USUARIO_PASSWORD del .env) y corre, en
+ * Pide un token para cada usuario de las pruebas (técnico y no técnico, exclusivos de las
+ * pruebas: NLQP_TEST_USER_* y NLQP_USUARIO_* del .env) y corre, en
  * orden, las pruebas de `scripts/pruebas/`: conexiones (M1), roles (M4), historial
  * y guardadas (M5) y edición del SQL con su auditoría. La de conexiones crea una conexión temporal y la elimina.
+ * Al terminar borra lo que las pruebas dejaron en Firestore (`limpiar_pruebas.mjs`).
  */
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -36,11 +37,12 @@ const tmp = mkdtempSync(path.join(os.tmpdir(), 'nlqp-tokens-'));
 const tec = path.join(tmp, 'tecnico.txt');
 const usr = path.join(tmp, 'usuario.txt');
 writeFileSync(tec, token());
+const USUARIO_EMAIL = process.env.NLQP_USUARIO_EMAIL ?? 'nlqp-ci-usuario@example.com';
 if (!process.env.NLQP_USUARIO_PASSWORD) {
-  console.error('Falta NLQP_USUARIO_PASSWORD en .env (contraseña de nlqp-usuario@example.com).');
+  console.error(`Falta NLQP_USUARIO_PASSWORD en .env (contraseña de ${USUARIO_EMAIL}).`);
   process.exit(1);
 }
-writeFileSync(usr, token('nlqp-usuario@example.com', process.env.NLQP_USUARIO_PASSWORD));
+writeFileSync(usr, token(USUARIO_EMAIL, process.env.NLQP_USUARIO_PASSWORD));
 
 const PRUEBAS = [
   ['Conexiones (M1)', 'api_conexiones.mjs', [tec, usr]],
@@ -59,6 +61,10 @@ for (const [nombre, archivo, args] of PRUEBAS) {
   resumen.push([nombre, total ? `${total[1]}/${total[2]}` : 'sin resultado', r.status === 0]);
 }
 rmSync(tmp, { recursive: true, force: true });
+
+const limpieza = spawnSync(process.execPath, [path.join(DIR, 'limpiar_pruebas.mjs')], { env: process.env, encoding: 'utf8' });
+console.log(`\n=== Limpieza\n${limpieza.stdout.trim()}`);
+process.stderr.write(limpieza.stderr);
 
 console.log('\n=== Resumen');
 for (const [nombre, total, ok] of resumen) console.log(`${ok ? 'OK  ' : 'FAIL'} ${nombre}: ${total}`);

@@ -112,8 +112,9 @@ let token = null;
 let tokenObtenidoEn = 0;
 
 async function renovarToken() {
-  const email = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-test@example.com';
-  const password = process.env.NLQP_TEST_USER_PASSWORD ?? 'NlqpTest_2026!';
+  const email = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com';
+  const password = process.env.NLQP_TEST_USER_PASSWORD;
+  if (!password) throw new Error('Falta NLQP_TEST_USER_PASSWORD en .env.');
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`,
     {

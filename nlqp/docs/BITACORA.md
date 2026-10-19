@@ -6,6 +6,33 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-18 (2) — Historial de prueba limpio y usuarios exclusivos para las pruebas
+
+- Pedido de David (13/10, "dale" el 18/10). Antes: 161 consultas de prueba en el
+  historial de los usuarios de la demo y 1408 ejecuciones de prueba en `usageEvents`.
+- **Usuarios exclusivos de las pruebas:** `nlqp-ci-tecnico@example.com` (técnico) y
+  `nlqp-ci-usuario@example.com` (no técnico). `test:api`, `test:ui`, `test:token` y
+  `eval:gemini` los usan por defecto; los de la demo (`nlqp-test`, `nlqp-usuario`)
+  quedan solo para entrar desde la interfaz.
+- **`npm run limpiar:pruebas`** (`scripts/limpiar_pruebas.mjs`): borra de esos usuarios
+  historial, guardadas, auditoría y eventos de ejecución; nunca los de `generateSQL`
+  (llamadas reales con costo). Solo acepta correos `@example.com`. `test:api` y
+  `test:ui` lo corren solos al terminar.
+- **Contraseñas:** el repo es público (verificado: la API de GitHub responde sin
+  autenticar) y las de la demo estaban commiteadas. Se cambiaron las cuatro (aleatorias,
+  solo en `.env`: `NLQP_TEST_USER_*`, `NLQP_USUARIO_*`, `NLQP_DEMO_*`), se revocaron las
+  sesiones y se quitaron del código (`get_test_token.mjs`, `evaluacion_gemini.mjs`) y de
+  esta bitácora. La vieja ya no entra (400). Quedan en el historial de git, pero ya no
+  sirven.
+- Limpieza de lo que quedó (una vez, usuarios de la demo): historial 67 + 94, uso 1304 +
+  104. Quedan las 3 llamadas reales a Gemini.
+- `ui_general.mjs`: el usuario de las pruebas empieza con el historial vacío, así que
+  primero ejecuta una consulta por la API (+1 verificación).
+- Verificado: `test:api` 38/38 · 23/23 · 32/32 · 25/25; `test:ui` 24/24 + 27/27;
+  después de cada corrida Firestore queda sin nada de las pruebas (solo las 3 llamadas a
+  Gemini); los usuarios de la demo entran con las contraseñas nuevas (200).
+- Sigue: piloto con paráfrasis (con confirmación).
+
 ## 2026-10-18 — Cambio de modelo: Gemini 3.8 Flash (Gemini 2.5 Pro se retira el 20/10)
 
 - Verificado en la página oficial de Vertex AI ("Model versions and lifecycle"): el
@@ -252,7 +279,7 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
   `/getUsageStats` y `/poolStatus` (nuevo: abiertas, libres, en uso y en espera por
   motor, sin abrir conexiones). `npm run set:role -- <correo> <tecnico|no_tecnico>`.
   Usuarios de prueba: `nlqp-test@example.com` técnico, `nlqp-usuario@example.com`
-  (`NlqpUsuario_2026!`) no técnico.
+  no técnico (contraseñas en `.env`; las de esta fecha se cambiaron el 18/10).
 - Frontend: route group `(app)` con barra lateral según el rol; pantallas Consultar,
   Historial, Conexiones, Esquema y Uso y costos. Paleta blanca con neutros cálidos y
   acento naranja claro; IBM Plex Sans y Mono servidas por `next/font`. Técnico: SQL

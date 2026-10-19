@@ -9,7 +9,8 @@
  * `npx playwright-core install chromium` (o indicar otro Chromium en NLQP_CHROMIUM).
  * Las capturas quedan en NLQP_CAPTURAS (por defecto, <temp>/nlqp-capturas).
  * Lee de `../backend/.env` los datos de la conexión de prueba y las contraseñas de los
- * usuarios de prueba (NLQP_TEST_USER_PASSWORD, NLQP_USUARIO_PASSWORD).
+ * usuarios exclusivos de las pruebas (NLQP_TEST_USER_PASSWORD, NLQP_USUARIO_PASSWORD).
+ * Al terminar borra lo que las pruebas dejaron en Firestore (`limpiar_pruebas.mjs`).
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -56,6 +57,14 @@ for (const [nombre, archivo] of PRUEBAS) {
   const total = r.stdout.match(/(\d+)\/(\d+) OK/);
   resumen.push([nombre, total ? `${total[1]}/${total[2]}` : 'sin resultado', r.status === 0]);
 }
+
+const limpieza = spawnSync(
+  process.execPath,
+  [`--env-file=${ENV_FILE}`, path.join(DIR, '..', '..', 'backend', 'scripts', 'limpiar_pruebas.mjs')],
+  { env: process.env, encoding: 'utf8' },
+);
+console.log(`\n=== Limpieza\n${limpieza.stdout.trim()}`);
+process.stderr.write(limpieza.stderr);
 
 console.log('\n=== Resumen');
 for (const [nombre, total, ok] of resumen) console.log(`${ok ? 'OK  ' : 'FAIL'} ${nombre}: ${total}`);

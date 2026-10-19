@@ -12,6 +12,9 @@ const check = (n, c, x = '') => { if (c) { ok++; console.log(`OK   ${n}`); } els
 // Contraseñas de los usuarios de prueba: en el .env del backend (no se commitean).
 const TEC_PASSWORD = process.env.NLQP_TEST_USER_PASSWORD;
 const USR_PASSWORD = process.env.NLQP_USUARIO_PASSWORD;
+// Usuarios exclusivos de las pruebas (no los de la demo): lo que dejan se borra al terminar.
+const TEC_EMAIL = process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com';
+const USR_EMAIL = process.env.NLQP_USUARIO_EMAIL ?? 'nlqp-ci-usuario@example.com';
 if (!TEC_PASSWORD || !USR_PASSWORD) {
   console.error('Faltan NLQP_TEST_USER_PASSWORD y NLQP_USUARIO_PASSWORD en nlqp/backend/.env.');
   process.exit(1);
@@ -32,12 +35,26 @@ async function login(email, password) {
 const savedCount = async (page) => Number((await page.getByRole('tab', { name: /Guardadas/ }).textContent()).match(/\d+/)[0]);
 
 // --- Técnico: reutilizar, editar SQL, ejecutar ---
-let page = await login('nlqp-test@example.com', TEC_PASSWORD);
+let page = await login(TEC_EMAIL, TEC_PASSWORD);
 await page.click('nav >> text=Conexiones');
 await page.waitForSelector('text=Conectado', { timeout: 30000 }).catch(() => undefined);
 check('técnico: Conexiones muestra las 4 conectadas', (await page.getByText('Conectado', { exact: true }).count()) === 4, String(await page.getByText('Conectado', { exact: true }).count()));
 await page.screenshot({ path: path.join(OUT, '0_conexiones.png'), fullPage: true });
-// Del historial: se reutiliza tal cual, sin editar
+// Del historial: se reutiliza tal cual, sin editar. El usuario de las pruebas empieza con
+// el historial vacío (se limpia al terminar), así que primero se ejecuta una por la API.
+{
+  const auth = await (await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: TEC_EMAIL, password: TEC_PASSWORD, returnSecureToken: true }),
+  })).json();
+  const r = await fetch('http://localhost:8080/executeQuery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.idToken}` },
+    body: JSON.stringify({ connectionId: 'postgres', sql: 'SELECT 1 AS x', question: 'prueba de interfaz' }),
+  });
+  check('historial: consulta previa por la API', r.status === 200, String(r.status));
+}
 await page.click('nav >> text=Historial');
 await page.waitForSelector('table');
 await page.locator('tr', { hasText: /[0-9] fila/ }).first().getByRole('button', { name: 'Reutilizar' }).click();
@@ -89,7 +106,7 @@ check('guardada aparece con su nombre y la sentencia nueva', (await fila.count()
 await page.getByRole('tab', { name: /Cambios/ }).click();
 const cambio = page.locator('li', { hasText: `«${nombre}»` }).filter({ hasText: 'Reemplazó' }).first();
 check('cambios: registro con lo reemplazado', (await cambio.count()) === 1);
-check('cambios: quién y acciones', (await cambio.textContent()).includes('nlqp-test@example.com') && (await cambio.getByText('Ejecutada', { exact: true }).count()) === 1 && (await cambio.getByText('Guardada', { exact: true }).count()) === 1);
+check('cambios: quién y acciones', (await cambio.textContent()).includes(TEC_EMAIL) && (await cambio.getByText('Ejecutada', { exact: true }).count()) === 1 && (await cambio.getByText('Guardada', { exact: true }).count()) === 1);
 check('cambios: fecha y hora', /\d{1,2} \w+ \d{4}, \d{2}:\d{2}/.test(await cambio.textContent()));
 await cambio.getByText('Ver la sentencia completa con los cambios').click();
 check('cambios: sentencia con lo agregado', (await cambio.locator('pre').textContent()).includes(marca));
@@ -113,7 +130,7 @@ const snap = await getFirestore().collection('sqlEdits').get();
 await Promise.all(snap.docs.filter((d) => String(d.data().editedSql).includes(marca)).map((d) => d.ref.delete()));
 
 // --- Usuario: sin SQL editable, sin menú técnico, sin acceso directo ---
-page = await login('nlqp-usuario@example.com', USR_PASSWORD);
+page = await login(USR_EMAIL, USR_PASSWORD);
 await page.click('nav >> text=Historial');
 await page.waitForSelector('[role=tab]');
 check('usuario: sin pestaña Cambios', (await page.getByRole('tab', { name: /Cambios/ }).count()) === 0);
