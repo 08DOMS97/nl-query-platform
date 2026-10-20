@@ -24,6 +24,17 @@ import {
 
 const COLLECTION = 'connections';
 
+/**
+ * Tiempo máximo de ejecución de cada conexión, en segundos. Lo fija el técnico al
+ * registrarla o editarla; las conexiones sin valor propio usan el de defecto
+ * (`NLQP_QUERY_TIMEOUT_MS`, 8 minutos: el tiempo que la tesis acepta para reportes
+ * complejos, RNF-01). Siempre hay un tope: sin él, una consulta descontrolada
+ * ocuparía la base indefinidamente.
+ */
+export const DEFAULT_QUERY_TIMEOUT_SEC = Math.round(Number(process.env.NLQP_QUERY_TIMEOUT_MS ?? 480_000) / 1000);
+export const MIN_QUERY_TIMEOUT_SEC = 10;
+export const MAX_QUERY_TIMEOUT_SEC = 3600;
+
 export function secretNameFor(connectionId: string): string {
   return `nlqp-conn-${connectionId}`;
 }
@@ -36,6 +47,8 @@ interface StoredConnection {
   database: string;
   user: string;
   secretName: string;
+  /** Ausente en las conexiones registradas antes del 19/10/2026: usan el de defecto. */
+  queryTimeoutSec?: number;
   createdAt: Date;
   updatedAt: Date;
   createdBy: string | null;
@@ -63,6 +76,7 @@ function toDetail(id: string, data: StoredConnection): ConnectionDetail & { secr
     database: data.database,
     user: data.user,
     secretName: data.secretName,
+    queryTimeoutSec: data.queryTimeoutSec ?? DEFAULT_QUERY_TIMEOUT_SEC,
     createdAt: toIso(data.createdAt),
     updatedAt: toIso(data.updatedAt),
   };
@@ -105,12 +119,13 @@ export async function getConnection(id: string): Promise<ConnectionDetail> {
 /** Datos completos para abrir el pool, con la contraseña leída de Secret Manager. */
 export async function resolveConnectionConfig(
   id: string,
-): Promise<{ engine: DbEngine; config: EngineConnectionConfig }> {
+): Promise<{ engine: DbEngine; config: EngineConnectionConfig; timeoutMs: number }> {
   const c = await getStored(id);
   const password = await getSecret(c.secretName);
   return {
     engine: c.engine,
     config: { host: c.host, port: c.port, database: c.database, user: c.user, password },
+    timeoutMs: c.queryTimeoutSec * 1000,
   };
 }
 
@@ -161,6 +176,19 @@ export function parseConnectionInput(body: unknown, partial = false): Connection
   const password = typeof b.password === 'string' ? b.password : undefined;
   if (!partial && !password) throw new ConnectionValidationError('El campo "password" es requerido.');
   if (password && password.length > 256) throw new ConnectionValidationError('La contraseña admite hasta 256 caracteres.');
+  let queryTimeoutSec: number | undefined;
+  if (b.queryTimeoutSec !== undefined && b.queryTimeoutSec !== null && b.queryTimeoutSec !== '') {
+    queryTimeoutSec = Number(b.queryTimeoutSec);
+    if (
+      !Number.isInteger(queryTimeoutSec) ||
+      queryTimeoutSec < MIN_QUERY_TIMEOUT_SEC ||
+      queryTimeoutSec > MAX_QUERY_TIMEOUT_SEC
+    ) {
+      throw new ConnectionValidationError(
+        `El tiempo máximo de ejecución debe ser un número entero de segundos entre ${MIN_QUERY_TIMEOUT_SEC} y ${MAX_QUERY_TIMEOUT_SEC} (1 hora).`,
+      );
+    }
+  }
   return {
     // Espacios repetidos dentro del nombre se reducen a uno («Ventas  A» = «Ventas A»).
     name: text(b.name, 'name', 80).replace(/\s+/g, ' '),
@@ -170,6 +198,7 @@ export function parseConnectionInput(body: unknown, partial = false): Connection
     database: text(b.database, 'database', 128),
     user: text(b.user, 'user', 128),
     password,
+    queryTimeoutSec,
   };
 }
 
@@ -207,6 +236,7 @@ export async function createConnection(
     database: input.database,
     user: input.user,
     secretName,
+    queryTimeoutSec: input.queryTimeoutSec ?? DEFAULT_QUERY_TIMEOUT_SEC,
     createdAt: now,
     updatedAt: now,
     createdBy: uid,
@@ -233,6 +263,7 @@ export async function updateConnection(id: string, input: ConnectionInput): Prom
     port: input.port,
     database: input.database,
     user: input.user,
+    ...(input.queryTimeoutSec !== undefined ? { queryTimeoutSec: input.queryTimeoutSec } : {}),
     updatedAt: new Date(),
   };
   await getFirestore().collection(COLLECTION).doc(id).update(patch);

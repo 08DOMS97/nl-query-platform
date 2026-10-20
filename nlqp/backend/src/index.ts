@@ -12,7 +12,8 @@ import {
   exportResultCsvHandler,
   getResultPageHandler,
 } from './functions/resultPages.js';
-import { requireTechnicalRole, verifyFirebaseAuth } from './middleware/auth.middleware.js';
+import { meHandler, usersHandler } from './functions/users.js';
+import { requireSuperadmin, requireTechnicalRole, verifyFirebaseAuth } from './middleware/auth.middleware.js';
 
 /**
  * Servidor local de desarrollo: monta todas las funciones en un único proceso Express
@@ -43,6 +44,10 @@ app.all('/savedQueries', verifyFirebaseAuth, savedQueriesHandler);
 app.get('/sqlEdits', verifyFirebaseAuth, requireTechnicalRole, sqlEditsHandler);
 app.get('/getResultPage', verifyFirebaseAuth, getResultPageHandler);
 app.post('/createResultExport', verifyFirebaseAuth, createResultExportHandler);
+// Rol del usuario de la sesión (la interfaz arma el menú con esto).
+app.get('/me', verifyFirebaseAuth, meHandler);
+// Gestión de usuarios: solo el superadministrador.
+app.all('/users', verifyFirebaseAuth, requireSuperadmin, usersHandler);
 // Sin verifyFirebaseAuth a propósito: lo autoriza el token de un solo uso (ver handler).
 app.get('/exportResultCsv', exportResultCsvHandler);
 

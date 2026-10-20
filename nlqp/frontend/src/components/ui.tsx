@@ -11,6 +11,14 @@ export function formatNumber(n: number): string {
   return n.toLocaleString(LOCALE);
 }
 
+/** "8 min", "1 min 30 s", "45 s". */
+export function formatDuration(totalSec: number): string {
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (!min) return `${sec} s`;
+  return sec ? `${min} min ${sec} s` : `${min} min`;
+}
+
 export function formatUsd(n: number): string {
   // Las llamadas cuestan centavos: con 2 decimales todo se vería como $0.01.
   return `$${n.toLocaleString(LOCALE, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;

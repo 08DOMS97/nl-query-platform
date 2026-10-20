@@ -6,16 +6,20 @@ import { apiFetch, apiRequest } from '@/lib/api';
 import {
   DB_ENGINES,
   DEFAULT_PORTS,
+  DEFAULT_QUERY_TIMEOUT_SEC,
   ENGINE_LABELS,
+  MAX_QUERY_TIMEOUT_SEC,
+  MIN_QUERY_TIMEOUT_SEC,
   type Connection,
   type ConnectionInput,
   type DbEngine,
   type TestConnectionResult,
 } from '@/lib/types';
-import { Button, FieldLabel, Notice, Panel, formatNumber } from './ui';
+import { Button, FieldLabel, Notice, Panel, formatDuration, formatNumber } from './ui';
 
-const INPUT =
-  'block h-8 w-full rounded border border-line-strong bg-canvas px-2.5 text-[13px] placeholder:text-ink-3 focus:border-accent-500 focus:outline-none disabled:bg-sunken disabled:text-ink-3';
+const INPUT_BASE =
+  'block h-8 rounded border border-line-strong bg-canvas px-2.5 text-[13px] placeholder:text-ink-3 focus:border-accent-500 focus:outline-none disabled:bg-sunken disabled:text-ink-3';
+const INPUT = `${INPUT_BASE} w-full`;
 
 function Field({ id, label, hint, children }: { id: string; label: string; hint?: ReactNode; children: ReactNode }) {
   return (
@@ -53,6 +57,9 @@ export function ConnectionForm({
   const [database, setDatabase] = useState(editing?.database ?? '');
   const [dbUser, setDbUser] = useState(editing?.user ?? '');
   const [password, setPassword] = useState('');
+  const initialTimeout = editing?.queryTimeoutSec ?? DEFAULT_QUERY_TIMEOUT_SEC;
+  const [timeoutMin, setTimeoutMin] = useState(String(Math.floor(initialTimeout / 60)));
+  const [timeoutSec, setTimeoutSec] = useState(String(initialTimeout % 60));
   const [busy, setBusy] = useState<'test' | 'save' | null>(null);
   const [test, setTest] = useState<TestConnectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +72,10 @@ export function ConnectionForm({
     database: database.trim(),
     user: dbUser.trim(),
     ...(password ? { password } : {}),
+    queryTimeoutSec: Number(timeoutMin || 0) * 60 + Number(timeoutSec || 0),
   };
+  const timeoutValid =
+    input.queryTimeoutSec >= MIN_QUERY_TIMEOUT_SEC && input.queryTimeoutSec <= MAX_QUERY_TIMEOUT_SEC;
   const complete = !!(input.host && port && input.database && input.user && (editing || password));
 
   function changeEngine(next: DbEngine) {
@@ -102,7 +112,7 @@ export function ConnectionForm({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!input.name || !complete || busy) return;
+    if (!input.name || !complete || !timeoutValid || busy) return;
     setError(null);
     setBusy('save');
     try {
@@ -202,6 +212,42 @@ export function ConnectionForm({
               className={INPUT}
             />
           </Field>
+
+          <div className="col-span-2">
+            <FieldLabel
+              htmlFor="conn-timeout-min"
+              hint={
+                <span className={timeoutValid ? undefined : 'text-bad'}>
+                  Entre {formatDuration(MIN_QUERY_TIMEOUT_SEC)} y {formatDuration(MAX_QUERY_TIMEOUT_SEC)}
+                </span>
+              }
+            >
+              Tiempo máximo de ejecución
+            </FieldLabel>
+            <div className="flex items-center gap-2">
+              <input
+                id="conn-timeout-min"
+                inputMode="numeric"
+                aria-label="Minutos"
+                value={timeoutMin}
+                onChange={(e) => setTimeoutMin(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                className={`${INPUT_BASE} w-16 text-right font-mono`}
+              />
+              <span className="text-[13px] text-ink-2">min</span>
+              <input
+                id="conn-timeout-sec"
+                inputMode="numeric"
+                aria-label="Segundos"
+                value={timeoutSec}
+                onChange={(e) => setTimeoutSec(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                className={`${INPUT_BASE} w-16 text-right font-mono`}
+              />
+              <span className="text-[13px] text-ink-2">s</span>
+              <p className="ml-2 text-[12px] text-ink-3">
+                Si una consulta lo supera, la base de datos la cancela y no se entrega un resultado parcial.
+              </p>
+            </div>
+          </div>
         </div>
 
         {(test || error) && (
@@ -227,7 +273,7 @@ export function ConnectionForm({
             <Button onClick={handleTest} disabled={!complete || !!busy}>
               {busy === 'test' ? 'Probando…' : 'Probar'}
             </Button>
-            <Button type="submit" variant="primary" disabled={!input.name || !complete || !!busy}>
+            <Button type="submit" variant="primary" disabled={!input.name || !complete || !timeoutValid || !!busy}>
               {busy === 'save' ? 'Guardando…' : 'Guardar'}
             </Button>
           </div>

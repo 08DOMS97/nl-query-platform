@@ -24,12 +24,18 @@ export interface ConnectionDetail extends ConnectionSummary {
   host: string;
   port: number;
   user: string;
+  /** Tiempo máximo de ejecución de una consulta en esta conexión, en segundos. */
+  queryTimeoutSec: number;
   /** ISO 8601. */
   createdAt: string;
   updatedAt: string;
 }
 
-/** Datos para crear o editar una conexión; en una edición `password` puede omitirse. */
+/**
+ * Datos para crear o editar una conexión; en una edición `password` puede omitirse.
+ * Sin `queryTimeoutSec`, una conexión nueva usa el tope por defecto y una edición
+ * conserva el actual.
+ */
 export interface ConnectionInput {
   name: string;
   engine: DbEngine;
@@ -38,6 +44,7 @@ export interface ConnectionInput {
   database: string;
   user: string;
   password?: string;
+  queryTimeoutSec?: number;
 }
 
 export interface TestConnectionResult {
@@ -271,3 +278,16 @@ export interface PoolStatus {
  * Firebase (`scripts/set_role.mjs`); sin claim, el usuario es no técnico.
  */
 export type UserRole = 'tecnico' | 'no_tecnico';
+
+/** Usuario tal como lo ve el superadministrador (gestión de usuarios). */
+export interface ManagedUser {
+  uid: string;
+  email: string;
+  /** `null`: cuenta sin rol asignado, sin acceso. */
+  role: UserRole | null;
+  superadmin: boolean;
+  disabled: boolean;
+  /** ISO 8601. */
+  createdAt: string;
+  lastSignInAt: string | null;
+}

@@ -8,6 +8,7 @@
     "start": "node --env-file=.env lib/index.js",
     "test:token": "node --env-file=.env scripts/get_test_token.mjs",
     "set:role": "node --env-file=.env scripts/set_role.mjs",
+    "set:superadmin": "node --env-file=.env scripts/set_superadmin.mjs",
     "limpiar:pruebas": "node --env-file=.env scripts/limpiar_pruebas.mjs",
     "seed:connections": "tsc && node --env-file=.env scripts/seed_connections.mjs",
     "test:seguridad": "tsc && node --env-file=.env scripts/regresion_seguridad.mjs",

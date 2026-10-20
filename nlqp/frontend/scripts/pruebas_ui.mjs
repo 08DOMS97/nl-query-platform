@@ -43,6 +43,7 @@ mkdirSync(process.env.NLQP_CAPTURAS ?? path.join(os.tmpdir(), 'nlqp-capturas'), 
 const PRUEBAS = [
   ['Interfaz general (M4, M5)', 'ui_general.mjs'],
   ['Conexiones (M1)', 'ui_conexiones.mjs'],
+  ['Usuarios (superadmin)', 'ui_usuarios.mjs'],
 ];
 
 const resumen = [];

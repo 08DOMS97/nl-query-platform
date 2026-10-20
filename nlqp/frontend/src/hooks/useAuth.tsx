@@ -3,31 +3,48 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { apiRequest } from '@/lib/api';
 import type { UserRole } from '@/lib/types';
 
 interface AuthState {
   user: User | null;
   /**
-   * Rol leído del token (claim `role`). Solo decide qué se muestra: los permisos
-   * los aplica el backend con el mismo claim.
+   * Rol y permiso de superadministrador de la cuenta, leídos del backend (`/me`) y no
+   * del token, que puede tener hasta una hora: así un cambio hecho por el
+   * superadministrador se ve al recargar. Solo deciden qué se muestra; los permisos
+   * los aplica el backend.
    */
   role: UserRole;
+  superadmin: boolean;
+  /** La cuenta no puede usar el sistema (sin rol asignado, desactivada) o el backend no responde. */
+  accessError: string | null;
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthState>({ user: null, role: 'no_tecnico', loading: true });
+const SIN_SESION: AuthState = { user: null, role: 'no_tecnico', superadmin: false, accessError: null, loading: false };
+
+const AuthContext = createContext<AuthState>({ ...SIN_SESION, loading: true });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, role: 'no_tecnico', loading: true });
+  const [state, setState] = useState<AuthState>({ ...SIN_SESION, loading: true });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        setState({ user: null, role: 'no_tecnico', loading: false });
+        setState(SIN_SESION);
         return;
       }
-      const { claims } = await user.getIdTokenResult();
-      setState({ user, role: claims.role === 'tecnico' ? 'tecnico' : 'no_tecnico', loading: false });
+      setState((s) => ({ ...s, loading: true }));
+      try {
+        const { ok, status, data } = await apiRequest<{ role: UserRole; superadmin: boolean }>('/me', user);
+        if (ok) {
+          setState({ user, role: data.role, superadmin: data.superadmin, accessError: null, loading: false });
+        } else {
+          setState({ ...SIN_SESION, user, accessError: data.error ?? `Error ${status} al leer la cuenta.` });
+        }
+      } catch {
+        setState({ ...SIN_SESION, user, accessError: 'No hay conexión con el servidor de NLQP.' });
+      }
     });
     return unsubscribe;
   }, []);

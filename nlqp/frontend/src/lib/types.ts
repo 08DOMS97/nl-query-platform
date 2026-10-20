@@ -25,6 +25,8 @@ export interface Connection {
   host?: string;
   port?: number;
   user?: string;
+  /** Tiempo máximo de ejecución, en segundos (solo lo recibe el rol técnico). */
+  queryTimeoutSec?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -38,7 +40,13 @@ export interface ConnectionInput {
   database: string;
   user: string;
   password?: string;
+  queryTimeoutSec: number;
 }
+
+/** Tiempo máximo de ejecución de una conexión: por defecto y límites (en segundos). */
+export const DEFAULT_QUERY_TIMEOUT_SEC = 480;
+export const MIN_QUERY_TIMEOUT_SEC = 10;
+export const MAX_QUERY_TIMEOUT_SEC = 3600;
 
 /** Puerto por defecto de cada motor, para precargar el formulario. */
 export const DEFAULT_PORTS: Record<DbEngine, number> = {
@@ -50,6 +58,18 @@ export const DEFAULT_PORTS: Record<DbEngine, number> = {
 
 /** Rol del usuario (custom claim de Firebase que asigna el backend). */
 export type UserRole = 'tecnico' | 'no_tecnico';
+
+/** Usuario en la pantalla Usuarios (solo superadministrador). */
+export interface ManagedUser {
+  uid: string;
+  email: string;
+  /** `null`: cuenta sin rol asignado, sin acceso. */
+  role: UserRole | null;
+  superadmin: boolean;
+  disabled: boolean;
+  createdAt: string;
+  lastSignInAt: string | null;
+}
 
 export interface QuerySafetyResult {
   safe: boolean;

@@ -6,8 +6,7 @@ import { Button, Notice } from './ui';
 const ERRORES_FIREBASE: Record<string, string> = {
   'auth/invalid-credential': 'Correo o contraseña incorrectos.',
   'auth/invalid-email': 'El correo no es válido.',
-  'auth/email-already-in-use': 'Ya existe una cuenta con ese correo.',
-  'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+  'auth/user-disabled': 'Esta cuenta está desactivada. Consulte con el administrador del sistema.',
   'auth/too-many-requests': 'Demasiados intentos. Espere unos minutos e intente de nuevo.',
   'auth/network-request-failed': 'No hay conexión con el servicio de autenticación.',
 };
@@ -19,7 +18,10 @@ function authErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/** Formulario de correo y contraseña compartido por inicio de sesión y registro. */
+/**
+ * Formulario de correo y contraseña del inicio de sesión. No hay registro público: las
+ * cuentas las crea el superadministrador (pantalla Usuarios).
+ */
 export function AuthForm({
   title,
   description,

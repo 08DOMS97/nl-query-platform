@@ -4,7 +4,7 @@ import mysql from 'mysql2/promise';
 import type { Connection as MysqlCoreConnection } from 'mysql2';
 import mssql from 'mssql';
 import type { DbEngine, EngineConnectionConfig, PoolStatus, TestConnectionResult } from '../types/index.js';
-import { listConnections, resolveConnectionConfig } from './connectionStore.service.js';
+import { DEFAULT_QUERY_TIMEOUT_SEC, listConnections, resolveConnectionConfig } from './connectionStore.service.js';
 
 const { Pool: PgPool } = pg;
 
@@ -50,19 +50,30 @@ export function readEngineConfig(engine: DbEngine): EngineConnectionConfig {
 }
 
 /**
- * Tiempo máximo de ejecución de una consulta. Se aplica DEL LADO DEL SERVIDOR en
- * los 4 motores: al vencer, el propio motor cancela la sentencia y libera sus
- * recursos (no basta con que el cliente deje de esperar mientras la consulta
- * sigue consumiendo la base). Es todo o nada: una consulta cancelada devuelve
- * error, nunca un resultado parcial.
+ * Tiempo máximo de ejecución de una consulta: el de cada conexión (`queryTimeoutSec`,
+ * lo fija el técnico; ver connectionStore.service.ts). Se aplica DEL LADO DEL
+ * SERVIDOR en los 4 motores al abrir el pool: al vencer, el propio motor cancela la
+ * sentencia y libera sus recursos (no basta con que el cliente deje de esperar
+ * mientras la consulta sigue consumiendo la base). Es todo o nada: una consulta
+ * cancelada devuelve error, nunca un resultado parcial. Editar la conexión cierra su
+ * pool, así que un tope nuevo rige desde la consulta siguiente.
  */
-export const QUERY_TIMEOUT_MS = Number(process.env.NLQP_QUERY_TIMEOUT_MS ?? 60_000);
+const DEFAULT_TIMEOUT_MS = DEFAULT_QUERY_TIMEOUT_SEC * 1000;
 
-/** La consulta superó `QUERY_TIMEOUT_MS` y el motor la canceló. */
+/** "8 min", "1 min 30 s", "45 s". */
+function formatDuration(ms: number): string {
+  const total = Math.round(ms / 1000);
+  const min = Math.floor(total / 60);
+  const sec = total % 60;
+  if (!min) return `${sec} s`;
+  return sec ? `${min} min ${sec} s` : `${min} min`;
+}
+
+/** La consulta superó el tiempo máximo de su conexión y el motor la canceló. */
 export class QueryTimeoutError extends Error {
-  constructor(engine: DbEngine) {
+  constructor(engine: DbEngine, timeoutMs: number) {
     super(
-      `La consulta superó el tiempo máximo de ${QUERY_TIMEOUT_MS / 1000} s y ${engine} la canceló. ` +
+      `La consulta superó el tiempo máximo de ${formatDuration(timeoutMs)} de esta conexión y ${engine} la canceló. ` +
         'Intenta acotarla (por ejemplo, a un rango de fechas).',
     );
     this.name = 'QueryTimeoutError';
@@ -85,16 +96,17 @@ function isTimeoutError(err: unknown): boolean {
 // la conexión lo cierra.
 const POOL_MAX = 5;
 
-type PoolHandle =
+type PoolHandle = (
   | { engine: 'postgres'; pool: pg.Pool }
   | { engine: 'mysql' | 'mariadb'; pool: mysql.Pool }
-  | { engine: 'mssql'; pool: mssql.ConnectionPool };
+  | { engine: 'mssql'; pool: mssql.ConnectionPool }
+) & { timeoutMs: number };
 
 const pools = new Map<string, Promise<PoolHandle>>();
 /** Pools ya abiertos, para `getPoolStatus` (que no espera ni abre ninguno). */
 const readyPools = new Map<string, PoolHandle>();
 
-function createPgPool(cfg: EngineConnectionConfig): pg.Pool {
+function createPgPool(cfg: EngineConnectionConfig, timeoutMs: number): pg.Pool {
   return new PgPool({
     host: cfg.host,
     port: cfg.port,
@@ -104,11 +116,11 @@ function createPgPool(cfg: EngineConnectionConfig): pg.Pool {
     max: POOL_MAX,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
-    statement_timeout: QUERY_TIMEOUT_MS,
+    statement_timeout: timeoutMs,
   });
 }
 
-function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectionConfig): mysql.Pool {
+function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectionConfig, timeoutMs: number): mysql.Pool {
   const pool = mysql.createPool({
     host: cfg.host,
     port: cfg.port,
@@ -129,14 +141,14 @@ function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectio
     // equivalente es max_statement_time, en segundos.
     conn.query(
       engine === 'mysql'
-        ? `SET SESSION max_execution_time = ${QUERY_TIMEOUT_MS}`
-        : `SET SESSION max_statement_time = ${QUERY_TIMEOUT_MS / 1000}`,
+        ? `SET SESSION max_execution_time = ${timeoutMs}`
+        : `SET SESSION max_statement_time = ${timeoutMs / 1000}`,
     );
   });
   return pool;
 }
 
-function createMssqlPool(cfg: EngineConnectionConfig): Promise<mssql.ConnectionPool> {
+function createMssqlPool(cfg: EngineConnectionConfig, timeoutMs: number): Promise<mssql.ConnectionPool> {
   return new mssql.ConnectionPool({
     server: cfg.host,
     port: cfg.port,
@@ -155,19 +167,19 @@ function createMssqlPool(cfg: EngineConnectionConfig): Promise<mssql.ConnectionP
       trustServerCertificate: process.env.DB_MSSQL_TRUST_SERVER_CERTIFICATE === 'true',
     },
     connectionTimeout: 5_000,
-    requestTimeout: QUERY_TIMEOUT_MS,
+    requestTimeout: timeoutMs,
   }).connect();
 }
 
-async function openPool(engine: DbEngine, cfg: EngineConnectionConfig): Promise<PoolHandle> {
+async function openPool(engine: DbEngine, cfg: EngineConnectionConfig, timeoutMs: number): Promise<PoolHandle> {
   switch (engine) {
     case 'postgres':
-      return { engine, pool: createPgPool(cfg) };
+      return { engine, pool: createPgPool(cfg, timeoutMs), timeoutMs };
     case 'mysql':
     case 'mariadb':
-      return { engine, pool: createMysqlFamilyPool(engine, cfg) };
+      return { engine, pool: createMysqlFamilyPool(engine, cfg, timeoutMs), timeoutMs };
     case 'mssql':
-      return { engine, pool: await createMssqlPool(cfg) };
+      return { engine, pool: await createMssqlPool(cfg, timeoutMs), timeoutMs };
     default: {
       const exhaustive: never = engine;
       throw new Error(`Motor no soportado: ${exhaustive}`);
@@ -183,7 +195,9 @@ async function closeHandle(h: PoolHandle): Promise<void> {
 function getPool(connectionId: string): Promise<PoolHandle> {
   let pending = pools.get(connectionId);
   if (!pending) {
-    pending = resolveConnectionConfig(connectionId).then(({ engine, config }) => openPool(engine, config));
+    pending = resolveConnectionConfig(connectionId).then(({ engine, config, timeoutMs }) =>
+      openPool(engine, config, timeoutMs),
+    );
     pools.set(connectionId, pending);
     pending.then(
       (h) => readyPools.set(connectionId, h),
@@ -212,7 +226,7 @@ async function runQueryOnPool(h: PoolHandle, sql: string): Promise<RawQueryResul
   try {
     return await runQueryOnDriver(h, sql);
   } catch (err) {
-    if (isTimeoutError(err)) throw new QueryTimeoutError(h.engine);
+    if (isTimeoutError(err)) throw new QueryTimeoutError(h.engine, h.timeoutMs);
     throw err;
   }
 }
@@ -255,7 +269,7 @@ const PG_CURSOR_BATCH = 2000;
 /**
  * Ejecuta una consulta entregando las filas una a una, sin cargar el resultado
  * completo en memoria. Además del timeout del motor (que en un cursor aplica a
- * cada lote), se exige un plazo total de QUERY_TIMEOUT_MS desde el inicio: si
+ * cada lote), se exige un plazo total igual al tope de la conexión desde el inicio: si
  * se vence, o si `onRow` lanza, la consulta se cancela en el motor y la promesa
  * se rechaza — nunca se resuelve con un resultado a medias.
  */
@@ -265,13 +279,13 @@ export async function streamQuery(
   handlers: StreamHandlers,
 ): Promise<{ rowCount: number }> {
   const h = await getPool(connectionId);
-  const engine = h.engine;
-  const deadline = Date.now() + QUERY_TIMEOUT_MS;
+  const { engine, timeoutMs } = h;
+  const deadline = Date.now() + timeoutMs;
   let rowCount = 0;
   // Solo devuelve promesa si el consumidor pidió pausa: esperar en cada fila
   // (cientos de miles) cuesta más que leerlas.
   const onRow: RowFn = (row) => {
-    if (Date.now() > deadline) throw new QueryTimeoutError(engine);
+    if (Date.now() > deadline) throw new QueryTimeoutError(engine, timeoutMs);
     rowCount++;
     return handlers.onRow(row);
   };
@@ -290,7 +304,7 @@ export async function streamQuery(
         break;
     }
   } catch (err) {
-    if (isTimeoutError(err)) throw new QueryTimeoutError(engine);
+    if (isTimeoutError(err)) throw new QueryTimeoutError(engine, timeoutMs);
     throw err;
   }
   return { rowCount };
@@ -450,7 +464,7 @@ export async function testConnectionConfig(
   const start = Date.now();
   let h: PoolHandle | undefined;
   try {
-    h = await openPool(engine, config);
+    h = await openPool(engine, config, DEFAULT_TIMEOUT_MS);
     await runQueryOnPool(h, 'SELECT 1 AS ok');
     return { ok: true, latencyMs: Date.now() - start };
   } catch (err) {

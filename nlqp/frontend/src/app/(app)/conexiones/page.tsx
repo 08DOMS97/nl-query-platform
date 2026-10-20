@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConnections } from '@/hooks/useConnections';
 import { apiFetch, apiRequest } from '@/lib/api';
 import { ENGINE_LABELS, type Connection, type PoolStatus, type TestConnectionResult } from '@/lib/types';
-import { Badge, Button, EmptyState, Notice, PageHeader, Panel, formatNumber } from '@/components/ui';
+import { Badge, Button, EmptyState, Notice, PageHeader, Panel, formatDuration, formatNumber } from '@/components/ui';
 import { ConnectionForm } from '@/components/ConnectionForm';
 
 /**
@@ -187,6 +187,9 @@ export default function ConexionesPage() {
                           </>
                         )}
                       </p>
+                      {c.queryTimeoutSec !== undefined && (
+                        <p className="text-[12px] text-ink-3">Tiempo máximo de ejecución: {formatDuration(c.queryTimeoutSec)}</p>
+                      )}
                     </td>
                     <td className={TD}>
                       {!result ? (

@@ -4,10 +4,10 @@
  *   npm run test:api
  *
  * Requiere Docker con los 4 motores y el backend corriendo en http://localhost:8080.
- * Pide un token para cada usuario de las pruebas (técnico y no técnico, exclusivos de las
- * pruebas: NLQP_TEST_USER_* y NLQP_USUARIO_* del .env) y corre, en
+ * Pide un token para cada usuario de las pruebas (superadmin, técnico y no técnico, exclusivos de las
+ * pruebas: NLQP_SUPERADMIN_*, NLQP_TEST_USER_* y NLQP_USUARIO_* del .env) y corre, en
  * orden, las pruebas de `scripts/pruebas/`: conexiones (M1), roles (M4), historial
- * y guardadas (M5) y edición del SQL con su auditoría. La de conexiones crea una conexión temporal y la elimina.
+ * y guardadas (M5), edición del SQL con su auditoría y gestión de usuarios. La de conexiones crea conexiones temporales y la de usuarios cuentas temporales; las dos las eliminan.
  * Al terminar borra lo que las pruebas dejaron en Firestore (`limpiar_pruebas.mjs`).
  */
 import { spawnSync } from 'node:child_process';
@@ -43,12 +43,19 @@ if (!process.env.NLQP_USUARIO_PASSWORD) {
   process.exit(1);
 }
 writeFileSync(usr, token(USUARIO_EMAIL, process.env.NLQP_USUARIO_PASSWORD));
+const sup = path.join(tmp, 'superadmin.txt');
+if (!process.env.NLQP_SUPERADMIN_EMAIL || !process.env.NLQP_SUPERADMIN_PASSWORD) {
+  console.error('Faltan NLQP_SUPERADMIN_EMAIL y NLQP_SUPERADMIN_PASSWORD en .env (superadministrador de las pruebas).');
+  process.exit(1);
+}
+writeFileSync(sup, token(process.env.NLQP_SUPERADMIN_EMAIL, process.env.NLQP_SUPERADMIN_PASSWORD));
 
 const PRUEBAS = [
   ['Conexiones (M1)', 'api_conexiones.mjs', [tec, usr]],
   ['Roles (M4)', 'api_roles.mjs', [tec, usr]],
   ['Historial y guardadas (M5)', 'api_m5.mjs', [usr]],
   ['Edición del SQL y auditoría', 'api_auditoria.mjs', [tec, usr]],
+  ['Gestión de usuarios (superadmin)', 'api_usuarios.mjs', [sup, tec, usr]],
 ];
 
 const resumen = [];

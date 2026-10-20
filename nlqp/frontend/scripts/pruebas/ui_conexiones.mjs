@@ -77,6 +77,16 @@ check('Guardar con nombre repetido: avisa', await page.waitForSelector('text=Ya 
 check('Guardar con nombre repetido: no se registra', (await page.locator('tbody tr').count()) === 4);
 await page.fill('#conn-name', nombre);
 
+// Tiempo máximo: 8 min por defecto; fuera de rango no deja guardar
+check('Alta: tiempo máximo 8 min por defecto', (await page.inputValue('#conn-timeout-min')) === '8' && (await page.inputValue('#conn-timeout-sec')) === '0');
+await page.fill('#conn-timeout-min', '61');
+check('Tiempo máximo de 61 min: Guardar deshabilitado', await page.getByRole('button', { name: 'Guardar', exact: true }).isDisabled());
+await page.fill('#conn-timeout-min', '0');
+await page.fill('#conn-timeout-sec', '5');
+check('Tiempo máximo de 5 s: Guardar deshabilitado', await page.getByRole('button', { name: 'Guardar', exact: true }).isDisabled());
+await page.fill('#conn-timeout-min', '8');
+await page.fill('#conn-timeout-sec', '0');
+
 // Alta correcta
 await page.getByRole('button', { name: 'Probar', exact: true }).click();
 check('Probar con datos correctos: correcta', await page.waitForSelector('text=Conexión correcta', { timeout: 15000 }).then(() => true, () => false));
@@ -86,6 +96,7 @@ check('Guardar: registrada', await page.waitForSelector(`text=Conexión «${nomb
 await page.waitForFunction(() => document.querySelectorAll('tbody tr').length === 5 && !document.querySelector('tbody.opacity-50'), null, { timeout: 30000 });
 check('Lista: 5 conexiones, todas conectadas', (await conectados(page)) === 5);
 check('Lista: muestra servidor y base', (await fila(page, nombre).textContent()).includes(`${pg.host}:${pg.port}/${pg.db}`));
+check('Lista: muestra el tiempo máximo', (await fila(page, nombre).textContent()).includes('Tiempo máximo de ejecución: 8 min'));
 check('Nunca se muestra la contraseña', !(await page.content()).includes(pg.password));
 await page.screenshot({ path: path.join(OUT, '2_conexiones_5.png'), fullPage: true });
 
@@ -109,10 +120,18 @@ await page.getByRole('button', { name: 'Guardar', exact: true }).click();
 check('Editar con el nombre de otra: avisa', await page.waitForSelector('text=Ya existe una conexión llamada', { timeout: 15000 }).then(() => true, () => false));
 check('Editar con el nombre de otra: no cambia', (await fila(page, nombre).count()) === 1);
 await page.fill('#conn-name', editado);
+await page.fill('#conn-timeout-min', '2');
+await page.fill('#conn-timeout-sec', '30');
 await page.getByRole('button', { name: 'Guardar', exact: true }).click();
 check('Editar: actualizada', await page.waitForSelector(`text=Conexión «${editado}» actualizada.`, { timeout: 15000 }).then(() => true, () => false));
+// El aviso sale antes de recargar la lista: se espera la fila con el nombre nuevo.
+await page.waitForSelector(`tbody tr:has-text("${editado}")`, { timeout: 15000 }).catch(() => undefined);
 await page.waitForFunction(() => !document.querySelector('tbody.opacity-50'), null, { timeout: 30000 });
 check('Editar: nombre nuevo en la lista y sigue conectada', (await fila(page, editado).getByText('Conectado', { exact: true }).count()) === 1);
+check('Editar: tiempo máximo nuevo en la lista', (await fila(page, editado).textContent()).includes('Tiempo máximo de ejecución: 2 min 30 s'));
+await fila(page, editado).getByRole('button', { name: 'Editar' }).click();
+check('Editar de nuevo: el formulario trae el tiempo guardado', (await page.inputValue('#conn-timeout-min')) === '2' && (await page.inputValue('#conn-timeout-sec')) === '30');
+await page.getByRole('button', { name: 'Cancelar' }).click();
 
 // Baja
 await fila(page, editado).getByRole('button', { name: 'Eliminar' }).click();

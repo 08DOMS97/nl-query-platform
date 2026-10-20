@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -19,14 +18,7 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
         router.push('/');
       }}
-      footer={
-        <>
-          ¿No tiene cuenta?{' '}
-          <Link href="/signup" className="text-accent-700 underline underline-offset-2">
-            Crear una cuenta
-          </Link>
-        </>
-      }
+      footer="¿No tiene cuenta? Pídala al administrador del sistema."
     />
   );
 }

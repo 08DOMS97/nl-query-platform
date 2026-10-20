@@ -1,5 +1,6 @@
-// Registro de conexiones (M1): permisos, validaciones, alta, uso, edición y baja.
-// Crea una conexión temporal (y su secreto) y la elimina al final. No llama a /generateSQL.
+// Registro de conexiones (M1): permisos, validaciones, alta, uso, edición y baja, y el
+// tiempo máximo de ejecución de cada conexión (que la cancelación ocurra en los 4 motores).
+// Crea conexiones temporales (y sus secretos) y las elimina al final. No llama a /generateSQL.
 // Se corre con `npm run test:api` (scripts/pruebas_api.mjs), que pasa los tokens.
 import { readFileSync } from 'node:fs';
 
@@ -35,6 +36,7 @@ check('usuario: sin servidor ni usuario', lu.json.connections.every((c) => !('ho
 const lt = await call(tec, 'GET', '/connections');
 check('técnico: con servidor, puerto y usuario', lt.json.connections.every((c) => c.host && c.port && c.user));
 check('nadie recibe contraseña ni secreto', JSON.stringify([lu.json, lt.json]).match(/password|secret/i) === null);
+check('técnico: recibe el tiempo máximo; usuario: no', lt.json.connections.every((c) => Number.isInteger(c.queryTimeoutSec)) && lu.json.connections.every((c) => !('queryTimeoutSec' in c)));
 
 // Permisos
 check('usuario: crear 403', (await call(usr, 'POST', '/connections', { ...pg, name: 'x' })).status === 403);
@@ -48,6 +50,9 @@ check('nombre repetido 400', (await call(tec, 'POST', '/connections', { ...pg, n
 const rep = await call(tec, 'POST', '/connections', { ...pg, name: '  tienda  ·  SERVIDOR a ' });
 check('nombre repetido con otras mayúsculas y espacios 400', rep.status === 400 && /Ya existe/.test(rep.json?.error), JSON.stringify(rep.json));
 check('nombre repetido se avisa antes de probar (400, no 422)', (await call(tec, 'POST', '/connections', { ...pg, name: 'Tienda · Servidor A', password: 'incorrecta' })).status === 400);
+for (const t of [9, 3601, 10.5, 'abc']) {
+  check(`tiempo máximo ${JSON.stringify(t)} 400`, (await call(tec, 'POST', '/connections', { ...pg, name: 'x', queryTimeoutSec: t })).status === 400);
+}
 
 // Probar sin guardar
 const t1 = await call(tec, 'POST', '/testConnectionConfig', pg);
@@ -64,6 +69,7 @@ const nombre = `Prueba alta ${Date.now() % 100000}`;
 const c = await call(tec, 'POST', '/connections', { ...pg, name: nombre });
 check('crear 201', c.status === 201 && c.json.id && c.json.name === nombre && !('password' in c.json), JSON.stringify(c.json));
 const id = c.json.id;
+check('sin tiempo máximo: 8 min por defecto', c.json.queryTimeoutSec === 480, JSON.stringify(c.json));
 check('aparece en la lista del usuario', (await call(usr, 'GET', '/connections')).json.connections.some((x) => x.id === id));
 
 // Uso
@@ -95,6 +101,11 @@ check('espacios repetidos se guardan como uno', esp.status === 200 && esp.json.n
 check('editar con contraseña incorrecta 422', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: 'incorrecta' })).status === 422);
 check('editar con contraseña correcta 200', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre })).status === 200);
 check('usuario: editar 403', (await call(usr, 'PUT', `/connections?id=${id}`, { ...pg, name: 'x' })).status === 403);
+const et = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: undefined, queryTimeoutSec: 90 });
+check('editar el tiempo máximo 200', et.status === 200 && et.json.queryTimeoutSec === 90, JSON.stringify(et.json));
+const ec = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: undefined });
+check('editar sin tiempo máximo lo conserva', ec.status === 200 && ec.json.queryTimeoutSec === 90, JSON.stringify(ec.json));
+check('editar con tiempo máximo inválido 400', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: undefined, queryTimeoutSec: 4000 })).status === 400);
 
 // Baja
 check('usuario: eliminar 403', (await call(usr, 'DELETE', `/connections?id=${id}`)).status === 403);
@@ -103,6 +114,42 @@ check('ya no aparece', !(await call(tec, 'GET', '/connections')).json.connection
 check('ejecutar en conexión eliminada 404', (await call(usr, 'POST', '/executeQuery', { connectionId: id, sql: 'SELECT 1' })).status === 404);
 check('eliminar de nuevo 404', (await call(tec, 'DELETE', `/connections?id=${id}`)).status === 404);
 check('sin conexión 400', (await call(usr, 'POST', '/executeQuery', { sql: 'SELECT 1' })).status === 400);
+
+// Tiempo máximo por conexión, en los 4 motores: una conexión temporal con 10 s y una
+// consulta que tarda minutos (suma sobre un producto cartesiano de 9 000 millones de
+// filas). El propio motor tiene que cancelarla a los ~10 s: 504, nunca un resultado.
+// Con COUNT(*) no sirve: MySQL y SQL Server lo resuelven multiplicando los conteos de
+// cada tabla, sin recorrer las filas (0,4 s y 6 s).
+const SUMA = 'c1.customer_id + o.order_id + p.product_id + p2.product_id + k.category_id';
+const ENGINES = [
+  ['postgres', 'DB_POSTGRES', `SUM(${SUMA})`],
+  ['mysql', 'DB_MYSQL', `SUM(${SUMA})`],
+  ['mariadb', 'DB_MARIADB', `SUM(${SUMA})`],
+  // En SQL Server la suma de int se desbordaría: se convierte a bigint.
+  ['mssql', 'DB_MSSQL', `SUM(CAST(${SUMA} AS BIGINT))`],
+];
+for (const [engine, p, count] of ENGINES) {
+  const cfg = {
+    engine,
+    host: process.env[`${p}_HOST`],
+    port: Number(process.env[`${p}_PORT`]),
+    database: process.env[`${p}_DATABASE`],
+    user: process.env[`${p}_USER`],
+    password: process.env[`${p}_PASSWORD`],
+  };
+  const tc = await call(tec, 'POST', '/connections', { ...cfg, name: `Prueba tope ${engine} ${Date.now() % 100000}`, queryTimeoutSec: 10 });
+  check(`${engine}: crear con tiempo máximo de 10 s`, tc.status === 201 && tc.json.queryTimeoutSec === 10, JSON.stringify(tc.json));
+  if (tc.status !== 201) continue;
+  const t0 = Date.now();
+  const q = await call(usr, 'POST', '/executeQuery', {
+    connectionId: tc.json.id,
+    sql: `SELECT ${count} AS n FROM customers c1 CROSS JOIN orders o CROSS JOIN products p CROSS JOIN products p2 CROSS JOIN categories k`,
+  });
+  const s = (Date.now() - t0) / 1000;
+  check(`${engine}: la base la cancela a los ~10 s (504, ${s.toFixed(1)} s)`, q.status === 504 && s >= 9 && s < 30 && /10 s/.test(q.json?.error ?? '') && !q.json?.rows, JSON.stringify(q.json));
+  check(`${engine}: la conexión sigue sana`, (await call(usr, 'POST', '/executeQuery', { connectionId: tc.json.id, sql: 'SELECT 1 AS x' })).status === 200);
+  await call(tec, 'DELETE', `/connections?id=${tc.json.id}`);
+}
 
 console.log(`\n${ok}/${ok + fail} OK`);
 process.exit(fail ? 1 : 0);

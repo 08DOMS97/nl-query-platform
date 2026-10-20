@@ -26,6 +26,11 @@ const NAV_TECNICO: NavItem[] = [
 
 export const TECHNICAL_PATHS = NAV_TECNICO.map((item) => item.href);
 
+/** Solo el superadministrador ve (y el backend solo le permite) la gestión de usuarios. */
+const NAV_ADMIN: NavItem[] = [{ href: '/usuarios', label: 'Usuarios' }];
+
+export const SUPERADMIN_PATHS = NAV_ADMIN.map((item) => item.href);
+
 function NavGroup({ title, items, pathname }: { title: string; items: NavItem[]; pathname: string }) {
   return (
     <div>
@@ -54,7 +59,17 @@ function NavGroup({ title, items, pathname }: { title: string; items: NavItem[];
   );
 }
 
-export function AppShell({ user, role, children }: { user: User; role: UserRole; children: ReactNode }) {
+export function AppShell({
+  user,
+  role,
+  superadmin,
+  children,
+}: {
+  user: User;
+  role: UserRole;
+  superadmin: boolean;
+  children: ReactNode;
+}) {
   const pathname = usePathname();
 
   return (
@@ -68,6 +83,7 @@ export function AppShell({ user, role, children }: { user: User; role: UserRole;
         <nav className="flex-1 space-y-6 px-2">
           <NavGroup title="Consultas" items={NAV_CONSULTAS} pathname={pathname} />
           {role === 'tecnico' && <NavGroup title="Herramientas técnicas" items={NAV_TECNICO} pathname={pathname} />}
+          {superadmin && <NavGroup title="Administración" items={NAV_ADMIN} pathname={pathname} />}
         </nav>
 
         <div className="border-t border-line px-5 py-4">
@@ -75,7 +91,9 @@ export function AppShell({ user, role, children }: { user: User; role: UserRole;
             {user.email}
           </p>
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-[12px] text-ink-3">{role === 'tecnico' ? 'Rol técnico' : 'Rol usuario'}</span>
+            <span className="text-[12px] text-ink-3">
+              {superadmin ? 'Superadministrador' : role === 'tecnico' ? 'Rol técnico' : 'Rol usuario'}
+            </span>
             <button onClick={() => signOut(auth)} className="text-[12px] text-ink-2 underline-offset-2 hover:text-ink hover:underline">
               Cerrar sesión
             </button>

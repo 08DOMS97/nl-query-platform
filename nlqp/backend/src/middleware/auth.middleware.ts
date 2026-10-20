@@ -2,11 +2,20 @@ import type { NextFunction, Request, Response } from 'express';
 import { getFirebaseAdmin } from '../services/firebaseAdmin.service.js';
 import type { UserRole } from '../types/index.js';
 
-export type AuthedRequest = Request & { uid?: string; email?: string; role?: UserRole };
+export type AuthedRequest = Request & { uid?: string; email?: string; role?: UserRole; superadmin?: boolean };
 
-/** Solo un claim `role: 'tecnico'` explícito da el rol técnico; cualquier otra cosa, no técnico. */
-export function roleFromClaims(claims: Record<string, unknown>): UserRole {
-  return claims.role === 'tecnico' ? 'tecnico' : 'no_tecnico';
+/**
+ * Rol del claim `role`. Desde el 19/10/2026 las cuentas las crea el superadministrador
+ * con un rol asignado (no hay registro público): una cuenta sin rol (`null`) no tiene
+ * acceso, por ejemplo una creada llamando directamente a la API de Firebase.
+ */
+export function roleFromClaims(claims: Record<string, unknown>): UserRole | null {
+  return claims.role === 'tecnico' || claims.role === 'no_tecnico' ? claims.role : null;
+}
+
+/** El superadministrador gestiona los usuarios; siempre es también técnico. */
+export function superadminFromClaims(claims: Record<string, unknown>): boolean {
+  return claims.superadmin === true && claims.role === 'tecnico';
 }
 
 /**
@@ -49,15 +58,48 @@ export async function verifyFirebaseAuth(
 
   const idToken = header.slice('Bearer '.length);
 
+  let uid: string;
+  let email: string | undefined;
+  let claims: Record<string, unknown>;
   try {
-    const decoded = await getFirebaseAdmin().auth().verifyIdToken(idToken);
-    (req as AuthedRequest).uid = decoded.uid;
-    (req as AuthedRequest).email = decoded.email;
-    (req as AuthedRequest).role = roleFromClaims(decoded);
-    next();
+    const auth = getFirebaseAdmin().auth();
+    const decoded = await auth.verifyIdToken(idToken);
+    // El rol y el estado se leen de la cuenta, no del token: el token conserva hasta una
+    // hora los claims con que se emitió, y así un cambio de rol o una desactivación del
+    // superadministrador rige en la solicitud siguiente. (Revocar la sesión no sirve: el
+    // SDK marca la revocación con el reloj local, y con el reloj del servidor adelantado
+    // rechaza también los inicios de sesión de los segundos siguientes.)
+    const account = await auth.getUser(decoded.uid);
+    if (account.disabled) {
+      res.status(401).json({ error: 'Esta cuenta está desactivada.', code: 'auth/user-disabled' });
+      return;
+    }
+    uid = account.uid;
+    email = account.email;
+    claims = account.customClaims ?? {};
   } catch (err) {
     res.status(401).json({ error: 'Token inválido o expirado.', detail: err instanceof Error ? err.message : String(err) });
+    return;
   }
+  const role = roleFromClaims(claims);
+  if (!role) {
+    res.status(403).json({ error: 'Esta cuenta no tiene un rol asignado. Pida acceso al administrador.', code: 'nlqp/no-role' });
+    return;
+  }
+  (req as AuthedRequest).uid = uid;
+  (req as AuthedRequest).email = email;
+  (req as AuthedRequest).role = role;
+  (req as AuthedRequest).superadmin = superadminFromClaims(claims);
+  next();
+}
+
+/** Restringe una ruta al superadministrador (gestión de usuarios). Va después de `verifyFirebaseAuth`. */
+export function requireSuperadmin(req: Request, res: Response, next: NextFunction): void {
+  if (!(req as AuthedRequest).superadmin) {
+    res.status(403).json({ error: 'Esta función es solo para el superadministrador.' });
+    return;
+  }
+  next();
 }
 
 /**

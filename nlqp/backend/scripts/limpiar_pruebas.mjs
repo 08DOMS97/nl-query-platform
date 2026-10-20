@@ -11,7 +11,8 @@ import admin from 'firebase-admin';
  * sus registros de auditoría (`sqlEdits`) y sus eventos de ejecución (`executeQuery`) en
  * `usageEvents`. Nunca borra eventos de `generateSQL`: son llamadas reales a Gemini, con
  * costo (las corridas de evaluación también se registran así). Solo acepta correos
- * `@example.com`, para no tocar usuarios reales por error. `test:api` y `test:ui` lo
+ * `@example.com`, para no tocar usuarios reales por error. También borra las cuentas
+ * temporales nlqp-ci-tmp-*@example.com de las pruebas de usuarios. `test:api` y `test:ui` lo
  * corren solos al terminar.
  */
 
@@ -25,6 +26,7 @@ const emails = (
   [
     process.env.NLQP_TEST_USER_EMAIL ?? 'nlqp-ci-tecnico@example.com',
     process.env.NLQP_USUARIO_EMAIL ?? 'nlqp-ci-usuario@example.com',
+    process.env.NLQP_SUPERADMIN_EMAIL ?? 'nlqp-ci-superadmin@example.com',
   ].join(',')
 ).split(',');
 
@@ -67,3 +69,16 @@ for (const email of emails) {
   const uso = await borrar(eventos);
   console.log(`${email}: historial ${historial}, guardadas ${guardadas}, auditoría ${auditoria}, uso ${uso}`);
 }
+
+// Cuentas temporales que crean las pruebas de gestión de usuarios (api_usuarios.mjs,
+// ui_usuarios.mjs). Cada prueba borra las suyas; esto cubre las que quedaron si una
+// prueba se cortó a la mitad. Solo el patrón nlqp-ci-tmp-*@example.com.
+const temporales = [];
+let pageToken;
+do {
+  const page = await admin.auth().listUsers(1000, pageToken);
+  temporales.push(...page.users.filter((u) => /^nlqp-ci-tmp-.*@example\.com$/.test(u.email ?? '')));
+  pageToken = page.pageToken;
+} while (pageToken);
+for (const u of temporales) await admin.auth().deleteUser(u.uid);
+console.log(`cuentas temporales borradas: ${temporales.length}`);
