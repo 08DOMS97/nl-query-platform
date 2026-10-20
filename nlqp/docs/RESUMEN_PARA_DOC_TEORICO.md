@@ -24,26 +24,35 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-18, cambio a Gemini 3.8 Flash)
+## Contador (actualizado 2026-10-19, despliegue on-premises)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
-| Preliminares y 1–4 | 7 | 1 | 20 |
-| 5 | 1 | 0 | 4 |
-| 6 | 5 | 0 | 39 |
-| Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **20** | **1** | **63** |
+| Preliminares y 1–4 | 8 | 1 | 20 |
+| 5 | 2 | 0 | 4 |
+| 6 | 6 | 0 | 39 |
+| Conclusiones / limitaciones | 8 | 0 | 0 |
+| **Total** | **24** | **1** | **63** |
 
----|---|---|---|
-| Preliminares y 1–4 | 6 | 1 | 20 |
-| 5 | 1 | 0 | 4 |
-| 6 | 10 | 0 | 30 |
-| Conclusiones / limitaciones | 7 | 0 | 0 |
-| **Total** | **24** | **1** | **54** |
+> **19/10 — Despliegue on-premises, tope por conexión y gestión de usuarios.** Las 4
+> entradas nuevas (una por capítulo, marcadas "(19/10) On-premises") remiten a
+> **`CAMBIO_ON_PREMISES.md`**. Ese archivo tiene las instrucciones paso a paso, con el
+> texto exacto a reemplazar, agregar o eliminar:
+> - `OP-01`…`OP-41` y `OD-01`…`OD-10`;
+> - Parte 6, `US-01`…`US-08`: tope por conexión y superadministrador. Las tildes de avance se llevan allá; acá se marca `[x]`
+> cuando esté aplicado todo lo de ese capítulo.
 
 ---
 
 ## Preliminares y capítulos 1 a 4
+
+- [ ] (19/10) **On-premises — caps. 1 a 4**: `CAMBIO_ON_PREMISES.md` OP-09 a OP-32
+  (Introducción, 1.3, 1.5, Tabla 1, 1.6.3 con Tabla 4, 1.7, 2.5–2.8, 2.10, 3.2.1,
+  3.3.1.4, 3.8 con Tabla 8, 3.9, 4.1, 4.3.3, RNF-11) y OD-04 (registro de cambios y
+  RF-13 en 1.5, 1.7 y 4.4). La Tabla 4 se recalcula junto con la entrada de 1.6.3 de
+  abajo. Decisión de David del 19/10. **También US-01** (superadministrador como permiso
+  del técnico, 4.2) **y US-02** (RF-14 sin registro público, RF-15 tope por conexión y
+  RF-16 gestión de usuarios).
 
 - [ ] (18/10) **Cambio de modelo en todo el documento**: Gemini 2.5 Pro se retira de
   Vertex AI el 20/10/2026 y la plataforma pasó a **Gemini 3.8 Flash** (`gemini-3.8-flash`,
@@ -203,6 +212,17 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Capítulo 5 — Diseño de la aplicación
 
+- [ ] (19/10) **On-premises — Cap. 5**: `CAMBIO_ON_PREMISES.md` OP-01 a OP-08. Incluye:
+  - reemplazar el párrafo de 5.3;
+  - **5.3.1 Justificación del despliegue local** y **5.3.2 Escalamiento a la
+    arquitectura sin servidor** (nuevas);
+  - **redibujar la Figura 8** ("Diagrama de despliegue de NLQP");
+  - cambiar rótulos de las Figuras 3 y 4;
+  - una nota sobre `AdaptadorMotor` en 5.1.6;
+  - el párrafo nuevo de 5.2 sobre las colecciones reales;
+  - **US-03**: casos de uso "Gestionar usuarios" y "Configurar tiempo máximo de
+    ejecución" en la Figura 1.
+
 - [ ] (plan 28–29/09) **Correcciones de figuras, rótulos y numeración** del capítulo
   (actividad del plan, en 0 %).
 - [x] (09/10) **5.1.5 — reducción del 71 % sobre 42 tablas** (irreproducible: el banco
@@ -235,6 +255,20 @@ costos, 6.7.2 seguridad, 6.7.3 tiempos). La evaluación con Gemini entra como 6.
 haya resultados y la presentación como 6.8. **Tablas (17/10, pedido del asesor: menos tablas):** solo 14 (hallazgos) y 15
 (latencias); el resto del capítulo va en texto. **Figuras:** 9 (6.4, captura vieja) y
 una sola nueva (10) pendiente.
+
+- [ ] (19/10) **On-premises — Cap. 6**: `CAMBIO_ON_PREMISES.md`:
+  - **OD-01**: 6.1.4 dice "cuentas con permisos exclusivamente de lectura", pero
+    `testuser` tiene permisos amplios a propósito. **Dato incorrecto.**
+  - OD-02: tope de 60 s frente a los 8 min; hay que verificarlo antes.
+  - OP-33: 6.3.5.
+  - OP-34: 6.7.1.
+  - OP-35: Tabla 14 y su párrafo.
+  - **OP-36**: 6.7.4 nueva, "Instalación en la red de la organización". Se escribe
+    **después** de verificar el acceso desde otro equipo de la red.
+  - **US-04 a US-07**: tope en el formulario de conexiones (6.1.2 y 6.1.4, 59/59 y
+    33/33); 6.4 sin `/signup`; 6.5 con la gestión de usuarios (35/35 y 20/20); y
+    hallazgo nuevo en la Tabla 14. **OD-02** ahora describe el tope por conexión
+    (8 min por defecto).
 
 ### Introducción
 - [x] (25/09) **Reemplazar el segundo párrafo** por el de `CAPITULO_6.md`: el Word
@@ -470,6 +504,16 @@ una sola nueva (10) pendiente.
 - [ ] Redactar después del 14/10.
 
 ## Conclusiones y limitaciones
+
+- [ ] (19/10) **On-premises — Conclusiones, recomendaciones, glosario y bibliografía**:
+  `CAMBIO_ON_PREMISES.md` OP-37 a OP-41 y la recomendación de OD-04:
+  - tres frases de las Conclusiones (se aplican también si se reescriben);
+  - dos recomendaciones nuevas: instalación segura y migración a serverless;
+  - glosario: Cloud Firestore, Cloud Functions y GCP, más Despliegue híbrido,
+    On-premises y VPN;
+  - referencia de Microsoft (on-premises data gateway), que hay que verificar;
+  - índice;
+  - **US-08**: "Superadministrador" en el glosario.
 
 - [ ] (25/09) **Reescribir las Conclusiones actuales**: afirman resultados que todavía
   no se midieron (mejora de precisión por la poda, Q712 al mes, ROI de 39,2 %).

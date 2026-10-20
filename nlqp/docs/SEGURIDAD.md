@@ -1,4 +1,4 @@
-# Revisión de seguridad — backend NLQP (2026-09-17, actualizada 2026-10-08)
+# Revisión de seguridad — backend NLQP (2026-09-17, actualizada 2026-10-19)
 
 Revisión manual del backend construido hasta el momento (módulos 1, 2, 3, 5 y 6:
 ConnectionManager, SchemaExtractor, SchemaPruning, Query Safety Engine,
@@ -32,6 +32,7 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 11 | La batería de 17 casos no estaba versionada en el repo (08/10) | Baja | Corregido (08/10): `npm run test:seguridad` |
 | 12 | Sin control por rol: todo usuario autenticado veía conexiones, esquema y costos (10/10) | Media | Corregido (10/10); queda un riesgo aceptado, ver §12 |
 | 13 | Contraseñas de las bases en `.env` en vez de Secret Manager, contra lo que dice RNF-05 y el texto de 6.1 (13/10) | Media | Corregido (10/10, documentado el 13/10) |
+| 14 | Registro público abierto: cualquiera podía crearse una cuenta y consultar las bases; rol leído del token, con hasta 1 h de atraso (19/10) | Media | Corregido (19/10) |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -536,6 +537,61 @@ lo demás: roles 23/23, M5 32/32, interfaz 13/13, `npm run test:seguridad` 57/57
 la contraseña no aparece en la página después de guardar y que el no técnico no ve la
 pantalla. Las pruebas de API e interfaz quedaron en el repo: `npm run test:api`
 (backend) y `npm run test:ui` (frontend).
+
+---
+
+## 14. Registro público abierto y rol leído del token — MEDIA (corregido, 19/10/2026)
+
+### El problema
+
+- `/signup` dejaba a cualquiera crearse una cuenta, que quedaba como no técnica. Con esa
+  cuenta se podían hacer consultas sobre todas las bases registradas. En una
+  instalación on-premises (decisión del 19/10), la empresa no controlaba quién entraba.
+- Aun sin la pantalla, la API de Firebase Auth permite crear cuentas directamente con
+  la clave web del proyecto.
+- El backend leía el rol del token, que conserva por hasta una hora los claims con que
+  se emitió. Un cambio de rol o una cuenta desactivada seguían valiendo hasta que el
+  token venciera.
+
+### La corrección (19/10/2026)
+
+- **Sin registro público.** Se eliminó `/signup`. Las cuentas las crea el
+  superadministrador en la pantalla Usuarios (`POST /users`), siempre con rol.
+- **El rol es obligatorio.** `auth.middleware.ts` responde 403 (`nlqp/no-role`) a toda
+  cuenta sin `role` válido, por ejemplo una creada directo contra Firebase.
+- **El rol y el estado se leen de la cuenta en cada solicitud** (`auth.getUser`), no
+  del token. Un cambio de rol rige en la solicitud siguiente, y una cuenta desactivada
+  recibe 401 (`auth/user-disabled`) aunque su token siga vigente.
+  - Costo: unos 150 ms por solicitud, una llamada a Firebase Auth.
+  - Se probó primero revocar las sesiones (`revokeRefreshTokens` +
+    `verifyIdToken(…, true)`) y se descartó: el SDK marca la revocación con el reloj
+    local, y con el reloj de esta PC unos 3 s adelantado respecto de Google rechazaba
+    también los inicios de sesión de esos segundos (fallaba de forma intermitente).
+- **Permiso de superadministrador** (`superadmin: true`, siempre junto con el rol
+  técnico): solo se asigna con `npm run set:superadmin -- <correo> [--crear]`, nunca
+  desde la interfaz. `/users` exige ese permiso (`requireSuperadmin`).
+  - El superadministrador no puede desactivarse ni quitarse el rol técnico a sí mismo.
+  - Las cuentas no se borran desde la interfaz, se desactivan, para conservar su
+    historial y su auditoría.
+
+### Verificación (19/10)
+
+- `api_usuarios.mjs` **35/35**, cinco veces seguidas:
+  - el técnico, el no técnico y una llamada sin sesión no acceden a `/users`;
+  - validaciones de correo, contraseña y rol; correo repetido da 409;
+  - el cambio de rol rige con la misma sesión;
+  - una cuenta desactivada es rechazada al instante y no puede iniciar sesión;
+  - la propia cuenta del superadmin está protegida;
+  - una cuenta sin rol recibe 403.
+- `ui_usuarios.mjs` **20/20** (8 de 9 corridas; la que no dio resultado no se repitió
+  en 6 intentos más): sin enlace de registro, `/signup` responde 404, y el aviso de
+  cuenta desactivada aparece.
+- Sin cambios en lo demás: API 59/59 · 23/23 · 32/32 · 25/25, interfaz 24/24 · 33/33,
+  `test:seguridad` 57/57 + 200/200.
+
+**Pendiente:** los handlers registrados con `functions.http(...)` (`users`, `me` y el
+resto) siguen sin el middleware de autenticación. Solo importa si se despliega en Cloud
+Functions (`CAMBIO_ON_PREMISES.md` OP-03).
 
 ---
 

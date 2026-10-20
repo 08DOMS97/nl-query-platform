@@ -6,6 +6,119 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-19 (2) — Tope de ejecución por conexión y superadministrador con gestión de usuarios
+
+Pedidos de David del 19/10 ("dale" a las propuestas). Sin gasto en GCP.
+
+### Tope por conexión
+- `queryTimeoutSec` en cada conexión, de 10 s a 60 min, con 8 min por defecto
+  (`NLQP_QUERY_TIMEOUT_MS`). Lo fija el técnico en el formulario de Conexiones, y la
+  lista lo muestra.
+- Se aplica al abrir el pool, y editar cierra el pool.
+- `QueryTimeoutError` dice el tope de esa conexión.
+- Las 4 conexiones existentes quedan con 8 min.
+- Verificado:
+  - con 10 s, el motor cancela en los 4 (10,4–10,8 s);
+  - la consulta de 186 s completa;
+  - `api_conexiones` 59/59 y `ui_conexiones` 33/33.
+- La consulta lenta de la prueba usa `SUM`, porque MySQL y SQL Server resuelven
+  `COUNT(*)` de un producto cartesiano sin recorrer las filas.
+
+### Superadministrador y gestión de usuarios
+- Claim `superadmin: true` junto con el rol técnico, que solo asigna
+  `npm run set:superadmin -- <correo> [--crear]`. Con `--crear`, el script imprime un
+  enlace para que el dueño elija su contraseña.
+- `GET/POST/PUT /users` (`requireSuperadmin`), `GET /me` y pantalla **Usuarios**: alta
+  con rol, cambio de rol, desactivar y reactivar, sin borrar.
+- El superadmin no puede desactivarse ni quitarse el rol técnico.
+- **Se eliminó `/signup`.** Una cuenta sin rol recibe 403.
+- **El rol y el estado se leen de la cuenta en cada solicitud** (`getUser`), no del
+  token. Los cambios rigen al instante, con un costo de unos 150 ms por solicitud.
+- Se descartó revocar sesiones: el **reloj de esta PC está unos 3 s adelantado**
+  respecto de Google y el SDK marca la revocación con la hora local, así que rechazaba
+  también los inicios de sesión de esos segundos (fallaba de forma intermitente).
+- Usuario de pruebas nuevo: `nlqp-ci-superadmin@example.com`, con la contraseña solo en
+  `.env` (`NLQP_SUPERADMIN_*`).
+- `limpiar:pruebas` borra además las cuentas `nlqp-ci-tmp-*@example.com`.
+- Verificado:
+  - `api_usuarios` 35/35, cinco veces seguidas;
+  - `ui_usuarios` 20/20, en 8 de 9 corridas (la que no dio resultado no se repitió en
+    6 más).
+
+### Resultados de las pruebas y documentación
+- **Pruebas:**
+  - **API 174/174** (59 · 23 · 32 · 25 · 35);
+  - **interfaz 77/77** (24 · 33 · 20);
+  - **seguridad 57/57 + 200/200**.
+- **Prueba ajustada:** en `ui_conexiones`, "Editar: nombre nuevo en la lista" era
+  intermitente, por una carrera de la prueba que ya existía. Ahora espera la fila; dio
+  5/5.
+- **Docs:**
+  - `SEGURIDAD.md` §14 (registro público abierto y rol leído del token; corregido);
+  - `RENDIMIENTO_E_INTEGRIDAD.md` (tope por conexión);
+  - `MANUAL_POSTMAN.md` §6;
+  - `CAMBIO_ON_PREMISES.md` Parte 6 (US-01…US-08) y OD-02 reescrito;
+  - `RESUMEN_PARA_DOC_TEORICO.md` (las 4 entradas del 19/10 incluyen los US);
+  - plan: tareas nuevas 47, 48 y 49; corte del 19/10: plan 87 %, real 88 %, +1,0.
+
+### Entorno
+- Un `node` viejo quedó escuchando en :8080 (el `TaskStop` cerró la terminal pero no
+  el proceso). La primera corrida de pruebas fue contra código viejo y dejó 2
+  conexiones de prueba, que se borraron por la API.
+
+### Sigue
+- Asignar la cuenta de David como superadmin: falta su correo.
+- Piloto (21/10, con confirmación).
+- Pasar `CAMBIO_ON_PREMISES.md` al Word.
+
+---
+
+## 2026-10-19 — Revisión del Word v2 contra el código; decisión: despliegue on-premises
+
+- Se leyó completo `PG2-2026 capítulo 6 revisado 17-10-2026 v2.docx` (caps. 1–6,
+  figuras incluidas) y se comparó con el código.
+- **Coinciden:** Node 22 (22.23.2), Next 16 (16.3.5), TS 5, drivers y Secret Manager.
+- **No coincidía:** el despliegue. La tesis describe Cloud Functions + Firebase Hosting;
+  el sistema corre en local (Express en :8080, `next dev`), sin `firebase.json`.
+- Se debatió desplegar en Firebase/GCP: hace falta una VM para las bases, porque SQL
+  Server necesita 2 GB (unos USD 25–30 al mes), más ajustes de código.
+- **Decisión de David:** quedarse **on-premises**, la opción más rentable y realista
+  para una empresa (bases en su red, acceso por LAN/VPN), y presentar la arquitectura
+  serverless como ruta de escalamiento.
+- Se escribió **`CAMBIO_ON_PREMISES.md`**: instrucciones paso a paso para el Word, 41
+  cambios `OP` y 9 diferencias `OD`, con el texto exacto. Incluye la Figura 8 nueva, las
+  secciones nuevas 5.3.1/5.3.2 y la 6.7.4 (después de verificar).
+- Diferencias encontradas que no dependen del despliegue:
+  - **6.1.4 afirma cuentas de solo lectura, y `testuser` tiene permisos amplios.**
+  - Tope de 60 s frente a los 8 min de RNF-01.
+  - En 2.7: reglas de Firestore y "preferencias" que no existen.
+  - Hay registro de cambios (auditoría del 13/10), y 1.5/1.7/4.4 dicen que no.
+  - RF-13: el no técnico no edita.
+  - Figura 7 distinta de las colecciones reales.
+  - Tabla 4: "35 secretos".
+  - 3.8 sin React/Express/Docker.
+- Encontrado en el código, no tocado (anotado en "Abierto"): los handlers de
+  `functions.http` no verifican el token; `cors()` abierto en el servidor que ahora es
+  el real.
+- `RESUMEN_PARA_DOC_TEORICO.md`: +4 entradas, una por capítulo, que remiten al archivo
+  nuevo (24 pendientes). Sin gasto. Sin cambios de código.
+- **Tope de ejecución: de 60 s a 8 min** (pedido de David: que los reportes que duren
+  hasta los 8 min de RNF-01 se puedan ejecutar).
+  - Cambiado en `connectionManager.service.ts` (valor por defecto) y en `.env.example`;
+    el `.env` no lo define.
+  - No se quitó el límite del todo: sin tope, una consulta mal formada ocuparía la base
+    indefinidamente.
+  - Verificado: `test:seguridad` 57/57 + 200/200, y una consulta de **186,4 s** en
+    PostgreSQL completó por `/executeQuery` (`npm start`) con HTTP 200.
+  - No verificado: más de 60 s en MySQL, MariaDB y SQL Server, ni desde la UI.
+  - Datos de prueba limpiados (`limpiar:pruebas`).
+  - Docs actualizados: `RENDIMIENTO_E_INTEGRIDAD.md`, `MANUAL_POSTMAN.md`,
+    `PREPARACION_EVALUACION_GEMINI.md` y OD-02 en `CAMBIO_ON_PREMISES.md`.
+- Tabla 4, "35 secretos": David cree que salió de los 35 usuarios. Igual se corrige,
+  porque los secretos son uno por conexión (los usuarios usan Firebase Auth).
+- Sigue: el piloto (21/10, con confirmación). En paralelo y sin costo: pasar los cambios
+  al Word y verificar el acceso desde otro equipo de la red (para 6.7.4).
+
 ## 2026-10-18 (3) — Cierre del día
 
 - Hecho hoy: cambio a Gemini 3.8 Flash (`bde255e`) y usuarios exclusivos para las

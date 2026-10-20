@@ -3,9 +3,16 @@
 Tesis de David Monterroso (UMG, PG2): plataforma que convierte preguntas en español a
 SQL con **Gemini 3.8 Flash (Vertex AI)** sobre **4 motores** (PostgreSQL, MySQL, MariaDB,
 SQL Server). Solo permite `SELECT`: el **Query Safety Engine** es la garantía central
-(RF-07). Backend Node 22 + TS (Cloud Functions 2nd gen, se presenta **en local**),
-Firebase Auth + Firestore, frontend Next.js. Módulos de la tesis: M1 conexiones, M2
+(RF-07). Backend Node 22 + TS (servidor Express; las funciones también están
+registradas para Cloud Functions 2nd gen), Firebase Auth + Firestore, frontend Next.js. **Despliegue (decisión de David, 19/10):
+on-premises.** Frontend y backend se instalan en un servidor de la organización, junto a
+sus bases, y se accede por red local o VPN. Vertex AI, Firebase Auth, Firestore y Secret
+Manager siguen en GCP (despliegue híbrido). Cloud Functions + Firebase Hosting quedan
+como la arquitectura a la que el sistema **puede escalar**, no como el despliegue
+actual. No se despliega en Firebase. Módulos de la tesis: M1 conexiones, M2
 esquema, M3 NL→SQL + Query Safety Engine, M4 herramientas técnicas, M5 historial.
+Roles: usuario (no técnico), técnico y **superadministrador** (permiso del técnico que
+gestiona los usuarios; desde el 19/10). No hay registro público.
 
 Este archivo es el **tablero**: alcanza para saber de qué va el proyecto, cómo está y
 qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
@@ -20,23 +27,24 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **31/10/2026** | **Entrega PG2** (la universidad la corrió del 17/10; en el plan se movieron solo las tareas 37 y 38) |
 | 20/10/2026 | Retiro de `gemini-2.5-pro`: ya no afecta, se cambió a `gemini-3.8-flash` el 18/10 (vigente hasta el 02/09/2027 o más) |
 
-## Estado por área (actualizado 2026-10-18, cambio a Gemini 3.8 Flash)
+## Estado por área (actualizado 2026-10-19: on-premises, tope por conexión, superadmin)
 
 | Área | Estado |
 |---|---|
-| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. Modelo (18/10): `gemini-3.8-flash` en `global`, razonamiento `LOW` (S10 real: correcto, $0.0012, 2,9 s). M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. API 38/38, UI 27/27. `engine` sigue como alias de `connectionId` |
-| Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 |
+| Backend M1–M3 | ✅ Completo y verificado en los 4 motores. Modelo (18/10): `gemini-3.8-flash` en `global`, razonamiento `LOW` (S10 real: correcto, $0.0012, 2,9 s). M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. `engine` sigue como alias de `connectionId`. **19/10: tope de ejecución por conexión** (`queryTimeoutSec`, de 10 s a 60 min, 8 min por defecto; lo fija el técnico en el formulario): con 10 s, el motor cancela en los 4 (10,4–10,8 s); una consulta de 186 s completa. API 59/59, UI 33/33 |
+| Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 (repetido el 19/10 tras el tope por conexión y la gestión de usuarios) |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
-| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). `npm run test:ui` 24/24 + 27/27 (18/10, con usuarios exclusivos de las pruebas; historial de la demo limpio). Falta probar "Generar SQL" con Gemini real desde la UI |
+| Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). 19/10: sin `/signup`; el rol sale de `/me`; pantalla Usuarios (solo superadmin); tiempo máximo en el formulario de Conexiones. `npm run test:ui` 24/24 + 33/33 + 20/20 (19/10). Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 11) y pasar 6.6 al Word |
-| Texto de tesis | 🟡 20 pendientes + 1 por verificar + 63 aplicados (18/10: +3 por el cambio de modelo, incl. reemplazar "Gemini 2.5 Pro" en caps. 1–5). Word del 17/10 (`PG2-2026 capítulo 6 revisado 17-10-2026.docx`): Cap. 6 completo con M1, M4, M5 e integración = 6.7. Faltan: evaluación con Gemini (6.3.6), capturas de las Figuras 9–11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Usuarios y superadmin | ✅ 19/10 (pedido de David): `GET/POST/PUT /users` y `/me`; alta con rol, cambio de rol y desactivar/reactivar (sin borrar). El permiso solo se asigna con `npm run set:superadmin -- <correo> [--crear]`. El rol y el estado se leen de la cuenta en cada solicitud (~150 ms; rigen al instante). Una cuenta sin rol recibe 403. API 35/35, UI 20/20. **Falta: la cuenta de David como superadmin** (no dio el correo). `SEGURIDAD.md` §14 |
+| Texto de tesis | 🟡 24 pendientes + 1 por verificar + 63 aplicados. 18/10: +3 por el cambio de modelo, incl. reemplazar "Gemini 2.5 Pro" en caps. 1–5. **19/10: +4** (una entrada por capítulo) por el on-premises, el tope por conexión y los usuarios. Instrucciones paso a paso en `nlqp/docs/CAMBIO_ON_PREMISES.md`: OP-01…OP-41, OD-01…OD-10 y Parte 6 US-01…US-08 (RF-15/16, 6.4 sin /signup, 6.5 con usuarios, Figura 1). Incluye Figura 8 nueva, 5.3.1/5.3.2 nuevas y frases en caps. 1–6. Incluye un **dato incorrecto en 6.1.4**: dice "cuentas de solo lectura", pero `testuser` tiene permisos amplios. Word vigente: `Claude outputs/PG2-2026 capítulo 6 revisado 17-10-2026 v2.docx`. Faltan: evaluación con Gemini (6.3.6), capturas de las Figuras 9–11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Gasto en Gemini | ≈ **$0.023** (4 llamadas sueltas). Con 3.8 Flash ~$0.001–0.004 por llamada (con 2.5 Pro era ~$0.012), sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 18/10) | Plan 92 % · real 93 % · **+0,9 puntos** (entrega movida al 31/10; pruebas de generación siguen en 70 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 19/10) | Plan 87 % · real 88 % · **+1,0 puntos**. Tareas nuevas: 47 (tope por conexión), 48 (usuarios, 90 %: falta la cuenta de David) y 49 (ajuste del documento por el on-premises, 20 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-18)
+## Próximo paso (actualizado 2026-10-19)
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
@@ -52,10 +60,26 @@ David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha lí
 3. Después del piloto: capturas de las figuras 9 (Consultar con una pregunta real; la
    generación cuesta ~$0.002) y 11 con los usuarios de la demo, que ya tienen el
    historial limpio (18/10). La Figura 10 (Conexiones) ya está en el Word (17/10).
-4. **Sin costo, en paralelo:** textos para el Word (cambio de modelo en caps. 1–5,
-   3.3.1.2, limitaciones) y respuestas de David: ¿se hizo la presentación del 14/10
-   (plan en 0 %)?, ¿el equipo de 3.8 es el suyo?, ¿referencia de Spider 2.0 de 2025?
-   La encuesta de 35 participantes sigue sin coordinar.
+4. **Sin costo, en paralelo:**
+   - **Cuenta de David como superadmin**: pedirle el correo y correr
+     `npm run set:superadmin -- <correo> --crear` en `nlqp/backend`. Mejor que lo corra él
+     con `!`: imprime un enlace de un solo uso para elegir la contraseña.
+   - **Pasar al Word los cambios del 19/10** (on-premises, tope por conexión y usuarios).
+     Están en `nlqp/docs/CAMBIO_ON_PREMISES.md`, en el orden que indica el archivo;
+     conviene aplicarlos junto con el cambio de modelo en los mismos párrafos (marcados
+     [M]).
+   - Para OP-36 (6.7.4) hace falta **verificar** antes de escribir, sin costo:
+     1. Backend: `npm run build` + `npm start`.
+     2. Frontend: `NEXT_PUBLIC_BACKEND_URL=http://<IP-LAN>:8080`, `npm run build` +
+        `npm start`.
+     3. Entrar desde otro equipo o teléfono de la misma red.
+   - Otros textos para el Word: 3.3.1.2 y limitaciones.
+   - Respuestas de David:
+     - ¿Se hizo la presentación del 14/10 (plan en 0 %)?
+     - ¿El equipo de 3.8 es el suyo?
+     - ¿La referencia de Spider 2.0 es de 2025?
+     - ¿Qué versión de VS Code usa (para 3.8)?
+   - La encuesta de 35 participantes sigue sin coordinar.
 
 Lo terminado **no se tacha acá**: se borra de esta lista y queda en `BITACORA.md`.
 
@@ -109,6 +133,7 @@ commitear y hacer push cuando David lo pida o lo apruebe.
 | Saber qué pasó y cuándo | `nlqp/docs/BITACORA.md` |
 | Probar la API a mano | `nlqp/docs/MANUAL_POSTMAN.md` |
 | Credenciales y datos del banco de pruebas | `Bases de datos/README.md` |
+| Cambios del Word del 19/10 (on-premises, tope por conexión, usuarios) | `nlqp/docs/CAMBIO_ON_PREMISES.md` |
 | Acceso remoto (no implementado) | `nlqp/docs/ACCESO_REMOTO.md` |
 
 Históricos (no citar como vigentes): `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` (arranque
@@ -120,7 +145,7 @@ commitea, a pedido de David; los datos de cada corte sí, en `nlqp/docs/plan/cor
 
 ```powershell
 cd "Bases de datos"; docker compose up -d; cd ..   # 4 motores
-cd nlqp/backend; npm run dev                          # http://localhost:8080
+cd nlqp/backend; npm run build; npm start             # http://localhost:8080 (dev usa --watch, que reinicia solo)
 cd nlqp/frontend; npm run dev                         # http://localhost:3000
 ```
 
@@ -129,12 +154,19 @@ Token de prueba (dura 1 h): `npm run test:token` en `nlqp/backend`.
 Pruebas sin costo (con todo levantado): `npm run test:seguridad` y `npm run test:api` en
 `nlqp/backend`; `npm run test:ui` en `nlqp/frontend` (la primera vez, `npm install
 --no-save playwright-core@1.64.0`). Usan usuarios **exclusivos de las pruebas**
-(`nlqp-ci-tecnico@example.com`, `nlqp-ci-usuario@example.com`) y al terminar borran lo
-que dejaron en Firestore (`npm run limpiar:pruebas`, 18/10).
-Roles: `npm run set:role -- <correo> <tecnico|no_tecnico>`. Usuarios de la demo (para
+(`nlqp-ci-tecnico@example.com`, `nlqp-ci-usuario@example.com`,
+`nlqp-ci-superadmin@example.com`). Al terminar borran lo que dejaron en Firestore y las
+cuentas temporales `nlqp-ci-tmp-*@example.com` (`npm run limpiar:pruebas`).
+Resultados del 19/10: API 174/174, UI 77/77, seguridad 57/57 + 200/200.
+Si las pruebas dan resultados raros, revisar que no haya un `node` viejo en :8080
+(`Get-NetTCPConnection -LocalPort 8080`): `TaskStop` cierra la terminal pero no el
+proceso.
+Roles: las cuentas se crean desde la pantalla Usuarios (superadmin) o con
+`npm run set:role -- <correo> <tecnico|no_tecnico>`; superadmin:
+`npm run set:superadmin -- <correo> [--crear]`. Usuarios de la demo (para
 entrar desde la interfaz; ninguna prueba los usa): `nlqp-test@example.com` (técnico) y
 `nlqp-usuario@example.com` (no técnico). Todas las contraseñas están **solo** en
-`nlqp/backend/.env` (`NLQP_TEST_USER_*`, `NLQP_USUARIO_*`, `NLQP_DEMO_*`); las que
+`nlqp/backend/.env` (`NLQP_TEST_USER_*`, `NLQP_USUARIO_*`, `NLQP_SUPERADMIN_*`, `NLQP_DEMO_*`); las que
 estaban commiteadas se cambiaron el 18/10.
 
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
@@ -145,6 +177,21 @@ estaban commiteadas se cambiaron el 18/10.
 - Hallazgos de seguridad 4–6 (`SEGURIDAD.md`): documentados, no corregidos a propósito.
 - Firmar en el backend el SQL generado para que un no técnico no pueda mandar SQL
   propio a `/executeQuery` (`SEGURIDAD.md` §12; hoy es riesgo aceptado).
+- (19/10, por el despliegue on-premises) El servidor Express de `backend/src/index.ts`
+  pasa a ser el servidor real:
+  - tiene `cors()` abierto: conviene restringirlo al origen del frontend en la red;
+  - su comentario dice "no se usa en producción".
+- (19/10) Los handlers con `functions.http(...)` no verifican el token. Solo importa si
+  algún día se despliega en Cloud Functions (`CAMBIO_ON_PREMISES.md` OP-03).
+- (19/10) No hay cuenta de BD de solo lectura en el banco de pruebas: `testuser` tiene
+  permisos amplios a propósito y `../db/` no existe.
+- (19/10) El reloj de esta PC está unos 3 s adelantado respecto de Google. Hoy no
+  afecta, porque no se revocan sesiones, pero conviene sincronizarlo (Windows: Hora →
+  Sincronizar ahora). Es una configuración de la máquina de David: pedírselo, no hacerlo.
+- (19/10) Leer la cuenta en cada solicitud suma unos 150 ms. Si molesta, se puede
+  cachear unos segundos, a cambio de que los cambios de rol tarden eso en regir.
+- (19/10) La prueba `ui_usuarios` dio una corrida sin resultado entre 9; no se repitió
+  en 6 más.
 
 ## Reglas que no hay que romper
 
@@ -154,7 +201,8 @@ estaban commiteadas se cambiaron el 18/10.
   `npm run test:seguridad` en verde (Docker levantado). SQL Server no exige `;` entre
   sentencias y ya causó un bypass real (`SEGURIDAD.md` §1).
 - **Nunca truncar resultados en silencio** ni pedirle al modelo `LIMIT`/`TOP` que el
-  usuario no pidió. Los límites son todo o nada (timeout → 504, > 1 GB → 413).
+  usuario no pidió. Los límites son todo o nada (timeout de la conexión → 504, > 1 GB → 413).
+  Siempre hay un tope de tiempo (de 10 s a 60 min por conexión): nunca "sin límite".
 - Las consultas generadas deben ser correctas **y eficientes** con mucho volumen
   (requisito de David, 02/10).
 - No commitear `.env`. No levantar `../db/docker-compose.yml` junto con

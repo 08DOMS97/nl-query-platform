@@ -31,10 +31,27 @@ completo, o recibe un error claro. Nunca un resultado parcial.
 
 ### 1. Tope de tiempo del lado del servidor (`connectionManager.service.ts`)
 
-`NLQP_QUERY_TIMEOUT_MS` (por defecto 60 000 ms) se aplica **dentro del motor**, no
-solo en el cliente: al vencer, el propio motor cancela la sentencia y libera sus
-recursos. Que el cliente deje de esperar no alcanza — la consulta seguiría
-consumiendo la base.
+**Cada conexión tiene su tope** (`queryTimeoutSec` en `connections/{id}`, desde el
+19/10/2026). Lo fija el técnico en la pantalla Conexiones, entre 10 s y 60 min. Las
+conexiones sin valor propio usan el de defecto, `NLQP_QUERY_TIMEOUT_MS`: 480 000 ms =
+8 min, el umbral de reportes complejos de RNF-01. Hasta el 19/10 era un tope global de
+60 000 ms.
+
+- Siempre hay un tope: sin él, una consulta descontrolada ocuparía la base
+  indefinidamente.
+- Se aplica al abrir el pool de la conexión. Editar la conexión cierra su pool, así que
+  un tope nuevo rige desde la consulta siguiente.
+- Se aplica **dentro del motor**, no solo en el cliente: al vencer, el propio motor
+  cancela la sentencia y libera sus recursos. Que el cliente deje de esperar no
+  alcanza: la consulta seguiría consumiendo la base.
+
+Verificado el 19/10:
+- una consulta de 186 s completa con el tope de 8 min;
+- con 10 s, el motor cancela en los 4 (10,4–10,8 s, `api_conexiones.mjs`).
+
+Para que la prueba dure, la consulta lenta usa `SUM` sobre un producto cartesiano.
+**`COUNT(*)` no sirve**: MySQL y SQL Server lo resuelven multiplicando los conteos de
+cada tabla, sin recorrer las filas (0,4 s y 6 s para 9 000 millones de filas).
 
 | Motor | Mecanismo | Error que se reconoce |
 |---|---|---|
@@ -58,7 +75,7 @@ Tiene **contrapresión**: si el consumidor va más lento (p. ej. una descarga), 
 motor se pausa en lugar de acumular filas en memoria. Si el consumidor aborta, la
 consulta se cancela en el motor (cursor cerrado, socket destruido o ATTENTION). Con
 un cursor, el timeout del motor aplica por lote, así que además se exige un plazo
-total de `NLQP_QUERY_TIMEOUT_MS` desde el inicio.
+total igual al tope de la conexión desde el inicio.
 
 ### 3. Snapshot del resultado (`resultStore.service.ts`)
 

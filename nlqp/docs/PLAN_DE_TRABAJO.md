@@ -20,15 +20,15 @@ El estado diario y el próximo paso están en `CLAUDE.md`; el historial en `BITA
 ## Último corte
 
 <!-- corte:inicio (generado, no editar a mano) -->
-### Corte 18/10/2026
+### Corte 19/10/2026
 
-**Proyecto: plan 92 % · real 93 % · diferencia +0.9 puntos → vamos al día.** Excel: `Claude outputs/Plan_de_Trabajo_PG2 18-10-2026.xlsx`; foto: `plan/cortes/2026-10-18.json`.
+**Proyecto: plan 87 % · real 88 % · diferencia +1.0 puntos → vamos al día.** Excel: `Claude outputs/Plan_de_Trabajo_PG2 19-10-2026.xlsx`; foto: `plan/cortes/2026-10-19.json`.
 
-Lo que más pesa en el atraso: Presentación del prototipo funcional (0 % de 100 %); Frontend Next.js y autenticación de interfaz (95 % de 100 %); Pruebas de generación SQL en los cuatro motores (70 % de 100 %); Integración de módulos y pruebas del sistema (80 % de 100 %).
+Lo que más pesa en el atraso: Presentación del prototipo funcional (0 % de 100 %); Frontend Next.js y autenticación de interfaz (95 % de 100 %); Pruebas de generación SQL en los cuatro motores (70 % de 100 %); Integración de módulos y pruebas del sistema (80 % de 100 %); Superadministrador y gestión de usuarios (sin registro público) (90 % de 100 %).
 
 | No. | Tarea | Inicio | Fin | %plan | %real | Dif. | Comentario |
 |---|---|---|---|---|---|---|---|
-| 1 | **Proyecto NL-Query-Platform** | 01/06 | 31/10 | 92 % | 93 % | +1 |  |
+| 1 | **Proyecto NL-Query-Platform** | 01/06 | 31/10 | 87 % | 88 % | +1 |  |
 | 2 | **Capítulo 3 - Análisis y Diseño** | 01/06 | 14/08 | 100 % | 100 % | +0 |  |
 | 3 | **· Análisis de la situación propuesta** | 01/06 | 26/06 | 100 % | 100 % | +0 |  |
 | 4 | · · Levantamiento de requerimientos y factibilidad | 01/06 | 12/06 | 100 % | 100 % | +0 |  |
@@ -67,12 +67,15 @@ Lo que más pesa en el atraso: Presentación del prototipo funcional (0 % de 100
 | 33 | · Módulo 5: Historial y gestión de consultas guardadas | 08/10 | 09/10 | 100 % | 100 % | +0 | Versión mínima hecha el 10/10 (plan 08–09/10): historial automático y consultas guardadas por el usuario, reusar sin llamar a Gemini. Verificado 32/32 API + 10/10 UI. Falta la captura y pasarlo al Word; fuera: búsqueda, carpetas, compartir. 17/10: 100 %. Documentado en el Word (sección 6.6). |
 | 43 | · Migración del SDK de Vertex AI a @google/genai 🆕 | 09/10 | 09/10 | 100 % | 100 % | +0 | Tarea nueva, implementada 09/10: el SDK anterior estaba deprecado. Verificada con una llamada real. |
 | 44 | · Rediseño de la poda de esquema y medición de tokens 🆕 | 09/10 | 09/10 | 100 % | 100 % | +0 | Tarea nueva, implementada 09/10: 5,56 → 2,18 tablas enviadas, 0/50 consultas pierden tablas, 43,4 % menos tokens del prompt (countTokens). |
-| 34 | · Integración de módulos y pruebas del sistema | 12/10 | 13/10 | 100 % | 80 % | -20 | 17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar "Generar SQL" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27. |
+| 34 | · Integración de módulos y pruebas del sistema | 12/10 | 13/10 | 100 % | 80 % | -20 | 17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar "Generar SQL" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27. 19/10: tope de ejecución por conexión y gestión de usuarios; test:api 59/59 · 23/23 · 32/32 · 25/25 · 35/35 (174/174), test:ui 24/24 + 33/33 + 20/20 (77/77), test:seguridad 57/57 + 200/200. |
 | 45 | · Edición del SQL por origen y auditoría de cambios 🆕 | 13/10 | 13/10 | 100 % | 100 % | +0 | Tarea nueva, implementada 13/10 a pedido de David: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado 25/25 API + 23/23 UI. |
 | 35 | · Presentación del prototipo funcional | 14/10 | 14/10 | 100 % | 0 % | -100 |  |
 | 46 | · Cambio de modelo a Gemini 3.8 Flash por el retiro de Gemini 2.5 Pro 🆕 | 18/10 | 18/10 | 100 % | 100 % | +0 | Tarea nueva, implementada 18/10 a pedido de David: Gemini 2.5 Pro se retira de Vertex AI el 20/10. gemini-3.8-flash en global (GA, hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s). |
-| 36 | **Cierre y entrega** | 15/10 | 31/10 | 24 % | 47 % | +24 |  |
-| 37 | · Conclusiones y revisión final del documento | 15/10 | 30/10 | 25 % | 50 % | +25 | 10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10. |
+| 47 | · Tiempo máximo de ejecución por conexión 🆕 | 19/10 | 19/10 | 100 % | 100 % | +0 | Tarea nueva, implementada 19/10 a pedido de David: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; tope de 10 s cancelado por el motor en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200. |
+| 48 | · Superadministrador y gestión de usuarios (sin registro público) 🆕 | 19/10 | 19/10 | 100 % | 90 % | -10 | Tarea nueva, implementada 19/10 a pedido de David: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso superadmin solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. Falta: asignar la cuenta de David como superadmin. |
+| 36 | **Cierre y entrega** | 15/10 | 31/10 | 21 % | 36 % | +15 |  |
+| 37 | · Conclusiones y revisión final del documento | 15/10 | 30/10 | 31 % | 50 % | +19 | 10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10. |
+| 49 | · Despliegue on-premises: ajuste del documento 🆕 | 19/10 | 30/10 | 8 % | 20 % | +12 | Tarea nueva (decisión de David del 19/10): el sistema se instala en la red de la organización; serverless queda como escalamiento. Instrucciones paso a paso en nlqp/docs/CAMBIO_ON_PREMISES.md. Falta pasarlas al Word y verificar el acceso desde otro equipo de la red (6.7.4). |
 | 38 | · Entrega PG2 | 31/10 | 31/10 | 0 % | 0 % | +0 |  |
 
 🆕 = tarea nueva, fuera del plan original, ya implementada (azul en el Excel).

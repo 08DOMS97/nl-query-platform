@@ -1,5 +1,10 @@
 # Acceso remoto al banco de pruebas Docker
 
+> **19/10/2026:** David decidió que el despliegue del sistema es **on-premises**
+> (frontend y backend en un servidor de la organización, acceso por LAN/VPN). Los
+> cambios de la tesis están en `CAMBIO_ON_PREMISES.md`. Este archivo sigue valiendo
+> como referencia de las opciones de acceso remoto y de despliegue en la nube.
+
 **Estado: no implementado — documentado por si se necesita más adelante.**
 Decisión (01/10/2026): la presentación de la tesis se hace **en local**, así que
 nada de esto hace falta por ahora.

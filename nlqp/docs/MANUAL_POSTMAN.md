@@ -137,7 +137,7 @@ el resultado completo queda guardado 30 minutos. Para ver más:
   `GET <path>` descarga el CSV completo (el enlace sirve una sola vez y vence en 2 min).
 
 Límites (todo o nada, nunca un resultado parcial): si la consulta tarda más de
-60 s (`NLQP_QUERY_TIMEOUT_MS`) el propio motor la cancela y responde `504`; si el
+el tiempo máximo de su conexión (8 min por defecto; lo fija el técnico, ver §6) el propio motor la cancela y responde `504`; si el
 resultado pesa más de 1 GB (`NLQP_RESULT_MAX_BYTES`) responde `413`.
 
 Puedes editar el `sql` del Body para probar tus propias consultas. Recuerda: solo
@@ -163,6 +163,19 @@ Llama a Gemini (Vertex AI, proyecto `proyectog-340d3`) y devuelve `sql`, `safety
 y `metrics` (tokens, costo, latencia, tablas enviadas). **Cada envío cuesta ~$0.001–0.004**
 (Gemini 3.8 Flash) y tarda unos segundos. El SQL devuelto se ejecuta copiándolo en el endpoint 3 (Execute
 Query).
+
+### 6. Sesión y usuarios (19/10/2026; no están en la colección, se arman a mano)
+- `GET /me` → `{ email, role, superadmin }` del usuario del token. Una cuenta sin rol
+  recibe `403` (`nlqp/no-role`) y una desactivada `401` (`auth/user-disabled`), acá y en
+  cualquier otro endpoint.
+- `GET /users`, `POST /users` (`{ email, password, role }`) y `PUT /users?uid=...`
+  (`{ role?, disabled? }`) son solo para el superadministrador; cualquier otro usuario
+  recibe `403`. El token del superadmin de las pruebas se obtiene con
+  `NLQP_TEST_USER_EMAIL` y `NLQP_TEST_USER_PASSWORD` apuntando a los `NLQP_SUPERADMIN_*`
+  del `.env` y `npm run test:token`.
+- Conexiones: `POST`/`PUT /connections` aceptan `queryTimeoutSec`, un entero entre 10
+  y 3600. Si falta, una conexión nueva usa 480 (8 min) y una edición conserva el valor
+  actual.
 
 ---
 

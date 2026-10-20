@@ -223,7 +223,7 @@ Se confirma con David antes de cada corrida pagada.
   detector de antipatrones, banco de volumen alto **en los 4 motores**.
 - No truncar resultados ni pedir al modelo `LIMIT` no solicitados (ver
   `RENDIMIENTO_E_INTEGRIDAD.md`).
-- Timeout de 60 s; guardián de costo previo con `EXPLAIN`, después y calibrado.
+- Timeout de 60 s (desde el 19/10, 8 min por defecto: las consultas del banco tardan ms, no cambia la corrida); guardián de costo previo con `EXPLAIN`, después y calibrado.
 
 ## 8. Pendiente antes de la corrida
 

@@ -416,7 +416,7 @@
       "inicio": "2026-10-12",
       "fin": "2026-10-13",
       "real": 0.8,
-      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27."
+      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27. 19/10: tope de ejecución por conexión y gestión de usuarios; test:api 59/59 · 23/23 · 32/32 · 25/25 · 35/35 (174/174), test:ui 24/24 + 33/33 + 20/20 (77/77), test:seguridad 57/57 + 200/200."
     },
     {
       "no": 35,
@@ -453,6 +453,48 @@
       "inicio": "2026-10-31",
       "fin": "2026-10-31",
       "real": 0.0
+    },
+    {
+      "no": 47,
+      "tarea": "Tiempo máximo de ejecución por conexión",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-19",
+      "fin": "2026-10-19",
+      "real": 1.0,
+      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; tope de 10 s cancelado por el motor en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200.",
+      "nueva": {
+        "agregada": "2026-10-19",
+        "implementada": "2026-10-19"
+      }
+    },
+    {
+      "no": 48,
+      "tarea": "Superadministrador y gestión de usuarios (sin registro público)",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-19",
+      "fin": "2026-10-19",
+      "real": 0.9,
+      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso superadmin solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. Falta: asignar la cuenta de David como superadmin.",
+      "nueva": {
+        "agregada": "2026-10-19",
+        "implementada": "2026-10-19"
+      }
+    },
+    {
+      "no": 49,
+      "tarea": "Despliegue on-premises: ajuste del documento",
+      "nivel": 2,
+      "padre": 36,
+      "inicio": "2026-10-19",
+      "fin": "2026-10-30",
+      "real": 0.2,
+      "comentario": "Tarea nueva (decisión de David del 19/10): el sistema se instala en la red de la organización; serverless queda como escalamiento. Instrucciones paso a paso en nlqp/docs/CAMBIO_ON_PREMISES.md. Falta pasarlas al Word y verificar el acceso desde otro equipo de la red (6.7.4).",
+      "nueva": {
+        "agregada": "2026-10-19",
+        "implementada": null
+      }
     }
   ]
 }
