@@ -9,10 +9,16 @@ import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../servi
 import { connectionFromRequest } from '../services/connectionStore.service.js';
 import type { ConnectionDetail, GenerateSqlMetrics, GenerateSqlRequest } from '../types/index.js';
 import { handleConnectionError } from './connectionErrors.js';
+import { MAX_QUESTION_CHARS, findRowLimit, looksLikeSql, questionRequestsRowLimit } from '../services/questionGuard.service.js';
 
 /**
  * POST /generateSQL  { connectionId, naturalLanguageQuery } -> { sql, engine, connectionId, safety, metrics }
  * (`engine` se acepta como alias de `connectionId`: el runner de evaluación lo usa).
+ *
+ * Antes de llamar al modelo, sin costo: largo máximo de la pregunta (400) y rechazo de
+ * un texto que ya es SQL (422, `nlqp/sql-input`). Después: si el SQL limita filas y la
+ * pregunta no lo pide, no se entrega (422, `nlqp/unrequested-row-limit`; la llamada sí
+ * se cobró y se registra). Ver `questionGuard.service.ts`.
  *
  * Solo genera y hace una validación informativa de seguridad para la respuesta.
  * El Query Safety Engine se vuelve a aplicar de forma obligatoria en `executeQuery`
@@ -29,8 +35,19 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     return;
   }
-  if (!body.naturalLanguageQuery || !body.naturalLanguageQuery.trim()) {
+  if (typeof body.naturalLanguageQuery !== 'string' || !body.naturalLanguageQuery.trim()) {
     res.status(400).json({ error: 'Campo "naturalLanguageQuery" es requerido.' });
+    return;
+  }
+  if (body.naturalLanguageQuery.length > MAX_QUESTION_CHARS) {
+    res.status(400).json({ error: `La pregunta es demasiado larga (máximo ${MAX_QUESTION_CHARS.toLocaleString('es-GT')} caracteres).` });
+    return;
+  }
+  if (looksLikeSql(body.naturalLanguageQuery)) {
+    res.status(422).json({
+      code: 'nlqp/sql-input',
+      error: 'Escriba su consulta como una pregunta, por ejemplo «¿Cuántos clientes hay por país?». Esta función no recibe sentencias SQL.',
+    });
     return;
   }
 
@@ -50,6 +67,8 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     // El razonamiento interno se factura como salida, aunque no sea visible.
     const costUsd = estimateCostUsd(tokensInput, tokensOutput + tokensThinking);
     const latencyMs = Date.now() - startedAt;
+    const rowLimit = findRowLimit(sql);
+    const unrequestedLimit = rowLimit !== null && !questionRequestsRowLimit(body.naturalLanguageQuery);
 
     await recordUsageEvent({
       type: 'generateSQL',
@@ -65,6 +84,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       tokensTotal,
       costUsd,
       safe: safety.safe,
+      ...(unrequestedLimit ? { errorReason: `límite de filas no pedido: ${rowLimit}` } : {}),
     });
 
     const metrics: GenerateSqlMetrics = {
@@ -77,6 +97,18 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       tablesSent: prunedSchema.tables.length,
       tablesTotal: schema.tables.length,
     };
+    if (unrequestedLimit) {
+      res.status(422).json({
+        code: 'nlqp/unrequested-row-limit',
+        error:
+          `La consulta generada devolvía solo una parte de los resultados (${rowLimit}), aunque la pregunta no pide ` +
+          'una cantidad. No se muestra para no presentar datos incompletos. Vuelva a intentarlo o indique en la ' +
+          'pregunta cuántos registros quiere.',
+        sql,
+        metrics,
+      });
+      return;
+    }
     res.status(200).json({ sql, engine: connection.engine, connectionId: connection.id, safety, metrics });
   } catch (err) {
     await recordUsageEvent({

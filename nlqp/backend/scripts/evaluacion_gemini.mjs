@@ -22,7 +22,8 @@
  * guardado, sin llamar a Gemini. Una generación fallida no se reintenta salvo con
  * --reintentar-fallidas (puede haberse facturado).
  *
- * Requiere el backend corriendo (`npm run dev`, recompilado) y Docker levantado.
+ * Requiere el backend corriendo con `npm run build` + `npm start` (no `dev`: `node --watch`
+ * se reinicia solo en Windows y puede cortar una llamada ya cobrada) y Docker levantado.
  * Precisión = el resultado del SQL generado coincide con el del SQL de referencia
  * (execution accuracy, como Spider/BIRD), no el texto.
  */
@@ -162,7 +163,17 @@ async function generar(caso) {
       await esperar(ESPERAS_REINTENTO_MS[intento]);
       continue;
     }
-    return { ok: false, status, error: data.error ?? JSON.stringify(data), intentos: intento + 1 };
+    // Un rechazo después de llamar al modelo (límite de filas no pedido, 24/10) ya se cobró:
+    // trae sus métricas para que el tope de costo de la corrida lo cuente.
+    return {
+      ok: false,
+      status,
+      code: data.code,
+      error: data.error ?? JSON.stringify(data),
+      ...(data.sql ? { sql: data.sql } : {}),
+      ...(data.metrics ? { metrics: data.metrics } : {}),
+      intentos: intento + 1,
+    };
   }
 }
 
@@ -334,7 +345,8 @@ async function correr() {
       };
       registro.antipatrones = antipatrones(generacion.sql, caso.sqlReferencia);
     } else {
-      registro.comparacion = { veredicto: 'error_generacion' };
+      // El SQL limitaba filas sin que la pregunta lo pidiera: el backend no lo entrega (24/10).
+      registro.comparacion = { veredicto: generacion.code === 'nlqp/unrequested-row-limit' ? 'limite_no_pedido' : 'error_generacion' };
     }
 
     appendFileSync(archivo, JSON.stringify(registro) + '\n');
@@ -434,7 +446,7 @@ function resumen() {
     '',
     '## Seguridad',
     '',
-    `Consultas generadas bloqueadas por el Query Safety Engine: ${conteo((r) => r.comparacion?.veredicto === 'bloqueada')}. Errores de generación: ${conteo((r) => r.comparacion?.veredicto === 'error_generacion')}. Errores de ejecución: ${conteo((r) => r.comparacion?.veredicto === 'error_ejecucion')}.`,
+    `Consultas generadas bloqueadas por el Query Safety Engine: ${conteo((r) => r.comparacion?.veredicto === 'bloqueada')}. Errores de generación: ${conteo((r) => r.comparacion?.veredicto === 'error_generacion')}. Rechazadas por limitar filas sin que se pidiera: ${conteo((r) => r.comparacion?.veredicto === 'limite_no_pedido')}. Errores de ejecución: ${conteo((r) => r.comparacion?.veredicto === 'error_ejecucion')}.`,
     '',
     '## Tokens, latencia y poda',
     '',

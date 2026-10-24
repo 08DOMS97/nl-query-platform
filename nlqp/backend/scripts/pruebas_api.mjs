@@ -1,5 +1,6 @@
 /**
- * Pruebas de la API sin costo (no llaman a /generateSQL):
+ * Pruebas de la API sin costo (solo llaman a /generateSQL con entradas que el backend
+ * rechaza antes del modelo, y lo comprueban antes de cada llamada):
  *
  *   npm run test:api
  *
@@ -7,7 +8,7 @@
  * Pide un token para cada usuario de las pruebas (superadmin, técnico y no técnico, exclusivos de las
  * pruebas: NLQP_SUPERADMIN_*, NLQP_TEST_USER_* y NLQP_USUARIO_* del .env) y corre, en
  * orden, las pruebas de `scripts/pruebas/`: conexiones (M1), roles (M4), historial
- * y guardadas (M5), edición del SQL con su auditoría y gestión de usuarios. La de conexiones crea conexiones temporales y la de usuarios cuentas temporales; las dos las eliminan.
+ * y guardadas (M5), edición del SQL con su auditoría, gestión de usuarios, controles de la generación y robustez del servidor. La de conexiones crea conexiones temporales y la de usuarios cuentas temporales; las dos las eliminan.
  * Al terminar borra lo que las pruebas dejaron en Firestore (`limpiar_pruebas.mjs`).
  */
 import { spawnSync } from 'node:child_process';
@@ -56,6 +57,8 @@ const PRUEBAS = [
   ['Historial y guardadas (M5)', 'api_m5.mjs', [usr]],
   ['Edición del SQL y auditoría', 'api_auditoria.mjs', [tec, usr]],
   ['Gestión de usuarios (superadmin)', 'api_usuarios.mjs', [sup, tec, usr]],
+  ['Controles de la generación (sin llamar al modelo)', 'api_generacion.mjs', [tec, usr]],
+  ['Robustez del servidor', 'api_robustez.mjs', [usr]],
 ];
 
 const resumen = [];

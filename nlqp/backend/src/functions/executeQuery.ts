@@ -45,7 +45,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     return;
   }
-  if (!body.sql || !body.sql.trim()) {
+  if (typeof body.sql !== 'string' || !body.sql.trim()) {
     res.status(400).json({ error: 'Campo "sql" es requerido.' });
     return;
   }

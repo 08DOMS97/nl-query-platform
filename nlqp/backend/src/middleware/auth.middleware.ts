@@ -78,7 +78,9 @@ export async function verifyFirebaseAuth(
     email = account.email;
     claims = account.customClaims ?? {};
   } catch (err) {
-    res.status(401).json({ error: 'Token inválido o expirado.', detail: err instanceof Error ? err.message : String(err) });
+    // El detalle del SDK (proyecto esperado, motivo) queda en el servidor, no en la respuesta.
+    console.warn('[auth] token rechazado:', err instanceof Error ? err.message : String(err));
+    res.status(401).json({ error: 'Token inválido o expirado.' });
     return;
   }
   const role = roleFromClaims(claims);
