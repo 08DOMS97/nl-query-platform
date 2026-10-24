@@ -1,4 +1,4 @@
-"""Genera el corte del plan de trabajo en el formato del Excel de David.
+"""Genera el corte del plan de trabajo en el formato del Excel del plan.
 
     python nlqp/docs/plan/generar_corte.py 2026-10-10
 
@@ -46,7 +46,7 @@ def serial(iso):
 
 def ordenar(tareas):
     """Orden de filas: jerárquico, y dentro de cada grupo por fecha de inicio y de fin
-    (pedido de David, 10/10: una fila no puede ir antes que otra con fecha anterior).
+    (una fila no puede ir antes que otra con fecha anterior).
     Con el mismo inicio va primero la tarea sin subtareas, para que las subtareas de un
     grupo no queden antes de una tarea hermana que empieza antes. No cambia fechas."""
     pos = {t['no']: i for i, t in enumerate(tareas)}
@@ -150,7 +150,7 @@ def construir_hoja(sheet, tareas, hijos, raiz, corte, estilos, filas_cab, mapa_r
     rows = []
     for rnum, row in filas_cab:
         if rnum == 2:
-            # Sin textos extra en el Excel (pedido de David, 10/10): la fecha del
+            # Sin textos extra en el Excel : la fecha del
             # corte va solo en el nombre del archivo.
             s = re.search(r'<c r="B2" s="(\d+)"', row).group(1)
             row = f'<c r="B2" s="{s}"/>'
@@ -276,8 +276,14 @@ def main():
     comments, vml = construir_comentarios(z.read('xl/comments1.xml').decode('utf-8'), tareas, fila)
     workbook = z.read('xl/workbook.xml').decode('utf-8').replace('<calcPr ', '<calcPr fullCalcOnLoad="true" ', 1)
 
+    AUTOR = 'David Monterroso'
+    comments = comments.replace('<author>Unknown Author</author>', f'<author>{AUTOR}</author>')
+    core = z.read('docProps/core.xml').decode('utf-8')
+    core = re.sub(r'<dc:creator>[^<]*</dc:creator>', f'<dc:creator>{AUTOR}</dc:creator>', core)
+    core = re.sub(r'<cp:lastModifiedBy>[^<]*</cp:lastModifiedBy>|<cp:lastModifiedBy/>', f'<cp:lastModifiedBy>{AUTOR}</cp:lastModifiedBy>', core)
+    core = re.sub(r'(<dcterms:modified[^>]*>)[^<]*(</dcterms:modified>)', r'\g<1>' + f'{corte.isoformat()}T18:00:00Z' + r'\g<2>', core)
     reemplazos = {'xl/worksheets/sheet1.xml': sheet, 'xl/styles.xml': styles, 'xl/comments1.xml': comments,
-                  'xl/drawings/vmlDrawing1.vml': vml, 'xl/workbook.xml': workbook}
+                  'xl/drawings/vmlDrawing1.vml': vml, 'xl/workbook.xml': workbook, 'docProps/core.xml': core}
     for nombre, contenido in reemplazos.items():
         minidom.parseString(contenido.encode('utf-8'))  # falla si el XML quedó mal formado
 

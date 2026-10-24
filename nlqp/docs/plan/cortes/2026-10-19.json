@@ -264,7 +264,7 @@
       "inicio": "2026-09-07",
       "fin": "2026-09-08",
       "real": 1.0,
-      "comentario": "10/10: hecho en el Word revisado. 5.1.2, 5.1.3, 5.1.5 y 5.2 corregidos (caché de esquema como mejora futura; Figura 5 como ejemplo ilustrativo, con el 72 % medido); Tabla 10 vacía eliminada y leyendas con numeración automática. Las Figuras 2 y 5 no se redibujaron (decisión del 10/10).",
+      "comentario": "10/10: hecho en el documento. 5.1.2, 5.1.3, 5.1.5 y 5.2 corregidos (caché de esquema como mejora futura; Figura 5 como ejemplo ilustrativo, con el 72 % medido); Tabla 10 vacía eliminada y leyendas con numeración automática. Las Figuras 2 y 5 se mantienen sin redibujar.",
       "duracion": 2,
       "plan": 1.0,
       "real_calc": 1.0,
@@ -344,7 +344,7 @@
       "inicio": "2026-09-21",
       "fin": "2026-09-21",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 21/09 (backend): registro de tokens, costo y latencia por llamada y endpoint de estadísticas. 10/10: separa el uso normal de las corridas de evaluación. Falta el dashboard en el frontend.",
+      "comentario": "Agregada e implementada el 21/09 (backend): registro de tokens, costo y latencia por llamada y endpoint de estadísticas. 10/10: separa el uso normal de las corridas de evaluación. Falta el dashboard en el frontend.",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-09-21"
@@ -430,7 +430,7 @@
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
       "real": 0.7,
-      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado gratis 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates, M20 corregidos), 50 paráfrasis aprobadas. Falta: piloto (~$0.50), corrida completa con Gemini (~$4.25) y análisis de resultados; antes del retiro del modelo (~20/10). 18/10: sigue en 70 %. El modelo pasó a Gemini 3.8 Flash (tarea 46): el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60; ya no hay apuro por el retiro.",
+      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado sin costo 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates, M20 corregidos), 50 paráfrasis revisadas. Falta: piloto (~$0.50), corrida completa con Gemini (~$4.25) y análisis de resultados; antes del retiro del modelo (~20/10). 18/10: sigue en 70 %. El modelo pasó a Gemini 3.8 Flash (tarea 46): el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60; ya no hay apuro por el retiro.",
       "duracion": 2,
       "plan": 1.0,
       "real_calc": 0.7,
@@ -444,7 +444,7 @@
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
       "real": 1.0,
-      "comentario": "Tarea nueva (agregada 02/10, sección 6.3.5): tope de tiempo en los 4 motores, lectura por streaming, snapshot con paginación y CSV completo. 10/10: corregido bug de zona horaria (fechas distintas según el motor).",
+      "comentario": "Agregada el 02/10 (sección 6.3.5): tope de tiempo en los 4 motores, lectura por streaming, snapshot con paginación y CSV completo. 10/10: corregido bug de zona horaria (fechas distintas según el motor).",
       "nueva": {
         "agregada": "2026-10-02",
         "implementada": "2026-10-02"
@@ -476,7 +476,7 @@
       "inicio": "2026-10-08",
       "fin": "2026-10-08",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 08/10: literales, funciones de archivo y de ejecución de SQL como texto; batería de 57 casos + 50 consultas en 4 motores (npm run test:seguridad).",
+      "comentario": "Agregada e implementada el 08/10: literales, funciones de archivo y de ejecución de SQL como texto; batería de 57 casos + 50 consultas en 4 motores (npm run test:seguridad).",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-08"
@@ -508,7 +508,7 @@
       "inicio": "2026-10-09",
       "fin": "2026-10-09",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 09/10: el SDK anterior estaba deprecado. Verificada con una llamada real.",
+      "comentario": "Agregada e implementada el 09/10: el SDK anterior estaba deprecado. Verificada con una llamada real.",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-09"
@@ -526,7 +526,7 @@
       "inicio": "2026-10-09",
       "fin": "2026-10-09",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 09/10: 5,56 → 2,18 tablas enviadas, 0/50 consultas pierden tablas, 43,4 % menos tokens del prompt (countTokens).",
+      "comentario": "Agregada e implementada el 09/10: 5,56 → 2,18 tablas enviadas, 0/50 consultas pierden tablas, 43,4 % menos tokens del prompt (countTokens).",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-09"
@@ -558,7 +558,7 @@
       "inicio": "2026-10-13",
       "fin": "2026-10-13",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 13/10 a pedido de David: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado 25/25 API + 23/23 UI.",
+      "comentario": "Agregada e implementada el 13/10: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado 25/25 API + 23/23 UI.",
       "nueva": {
         "agregada": "2026-10-13",
         "implementada": "2026-10-13"
@@ -589,7 +589,7 @@
       "inicio": "2026-10-18",
       "fin": "2026-10-18",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 18/10 a pedido de David: Gemini 2.5 Pro se retira de Vertex AI el 20/10. gemini-3.8-flash en global (GA, hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s).",
+      "comentario": "Agregada e implementada el 18/10: Gemini 2.5 Pro se retira de Vertex AI el 20/10. gemini-3.8-flash en global (GA, hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s).",
       "nueva": {
         "agregada": "2026-10-18",
         "implementada": "2026-10-18"
@@ -607,7 +607,7 @@
       "inicio": "2026-10-19",
       "fin": "2026-10-19",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; tope de 10 s cancelado por el motor en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200.",
+      "comentario": "Agregada e implementada el 19/10: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; tope de 10 s cancelado por el motor en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200.",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": "2026-10-19"
@@ -625,7 +625,7 @@
       "inicio": "2026-10-19",
       "fin": "2026-10-19",
       "real": 0.9,
-      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso superadmin solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. Falta: asignar la cuenta de David como superadmin.",
+      "comentario": "Agregada e implementada el 19/10: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso superadmin solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. Falta: asignar mi cuenta como superadmin.",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": "2026-10-19"
@@ -655,7 +655,7 @@
       "inicio": "2026-10-15",
       "fin": "2026-10-30",
       "real": 0.5,
-      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10.",
+      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el documento (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10.",
       "duracion": 16,
       "plan": 0.3125,
       "real_calc": 0.5,
@@ -669,7 +669,7 @@
       "inicio": "2026-10-19",
       "fin": "2026-10-30",
       "real": 0.2,
-      "comentario": "Tarea nueva (decisión de David del 19/10): el sistema se instala en la red de la organización; serverless queda como escalamiento. Instrucciones paso a paso en nlqp/docs/CAMBIO_ON_PREMISES.md. Falta pasarlas al Word y verificar el acceso desde otro equipo de la red (6.7.4).",
+      "comentario": "Agregada el 19/10: el sistema se instala en la red de la organización; serverless queda como escalamiento. Falta pasarlo al documento y verificar el acceso desde otro equipo de la red (6.7.4).",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": null
