@@ -11,8 +11,18 @@ const { Pool: PgPool } = pg;
 // DATE no tiene hora ni zona: `pg` lo convierte a medianoche en la hora local del
 // servidor de NLQP (en Guatemala, 06:00 UTC), distinto de los otros 3 motores.
 // Se lee como medianoche UTC, igual que mysql2 (timezone 'Z') y mssql.
+// TIMESTAMP (sin zona) tenía el mismo problema y salía corrido 6 h (auditoría del
+// 24/10): se lee también como UTC, igual que DATETIME en MySQL y DATETIME2 en SQL Server.
+// Un valor que no es una fecha común ('infinity', fechas a. C.) queda como texto: como
+// Date sería inválido y se mostraría como NULL.
 const PG_DATE_OID = 1082;
-pg.types.setTypeParser(PG_DATE_OID, (value: string) => new Date(`${value}T00:00:00Z`));
+const PG_TIMESTAMP_OID = 1114;
+pg.types.setTypeParser(PG_DATE_OID, (value: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00Z`) : value,
+);
+pg.types.setTypeParser(PG_TIMESTAMP_OID, (value: string) =>
+  /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/.test(value) ? new Date(`${value.replace(' ', 'T')}Z`) : value,
+);
 
 /** Resultado uniforme de una consulta, sin importar el driver de origen. */
 export interface RawQueryResult {
@@ -80,6 +90,41 @@ export class QueryTimeoutError extends Error {
   }
 }
 
+/**
+ * El resultado no se puede mostrar sin confundir valores: dos columnas con el mismo
+ * nombre (los drivers devuelven cada fila como objeto por nombre, así que una pisa a
+ * la otra; mssql las junta en un arreglo) o una columna sin nombre (`COUNT(*)` sin
+ * alias en SQL Server). Se rechaza entero, como el resto de los límites (auditoría
+ * del 24/10): mostrar un valor en lugar de otro sería peor que no mostrar nada.
+ */
+export class ResultShapeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ResultShapeError';
+  }
+}
+
+function assertUsableColumns(columns: string[]): void {
+  if (columns.some((c) => !c || !c.trim())) {
+    throw new ResultShapeError(
+      'La consulta devuelve una columna sin nombre (por ejemplo, un COUNT(*) sin alias). ' +
+        'Asígnele un nombre con AS para poder mostrarla.',
+    );
+  }
+  const seen = new Set<string>();
+  for (const c of columns) {
+    if (seen.has(c)) throw duplicateColumnError(c);
+    seen.add(c);
+  }
+}
+
+function duplicateColumnError(name: string): ResultShapeError {
+  return new ResultShapeError(
+    `La consulta devuelve más de una columna llamada «${name}». Asigne un nombre distinto a cada una ` +
+      'con AS: con nombres repetidos, una columna mostraría los valores de la otra.',
+  );
+}
+
 /** Reconoce el error de cancelación por tiempo de cada driver. */
 function isTimeoutError(err: unknown): boolean {
   const e = err as { code?: unknown; errno?: unknown };
@@ -134,15 +179,26 @@ function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectio
     // salía con otra hora que en Postgres y SQL Server. Se lee como UTC, igual que
     // los otros motores.
     timezone: 'Z',
+    // BIGINT que no entra en un número de JavaScript (más de 2^53) llega como texto exacto,
+    // como en Postgres; los demás siguen siendo números (auditoría del 24/10).
+    supportBigNumbers: true,
   });
   pool.pool.on('connection', (conn) => {
     // MySQL: max_execution_time (ms), solo aplica a SELECT de solo lectura, que es lo
     // único que deja pasar el Query Safety Engine. MariaDB no lo tiene: su
     // equivalente es max_statement_time, en segundos.
+    // Si el SET falla (p. ej. una base MariaDB registrada como MySQL), la conexión no
+    // puede quedar sin tope: se descarta y la consulta falla. Sin callback, el error se
+    // emitía sin manejar (auditoría del 24/10).
     conn.query(
       engine === 'mysql'
         ? `SET SESSION max_execution_time = ${timeoutMs}`
         : `SET SESSION max_statement_time = ${timeoutMs / 1000}`,
+      (err: Error | null) => {
+        if (!err) return;
+        console.error(`[connectionManager] no se pudo fijar el tope de tiempo (${engine}); se descarta la conexión:`, err.message);
+        conn.destroy();
+      },
     );
   });
   return pool;
@@ -289,18 +345,22 @@ export async function streamQuery(
     rowCount++;
     return handlers.onRow(row);
   };
+  const onColumns = (columns: string[]) => {
+    assertUsableColumns(columns);
+    handlers.onColumns(columns);
+  };
 
   try {
     switch (h.engine) {
       case 'postgres':
-        await streamPostgres(h.pool, sql, handlers.onColumns, onRow);
+        await streamPostgres(h.pool, sql, onColumns, onRow);
         break;
       case 'mysql':
       case 'mariadb':
-        await streamMysqlFamily(h.pool, sql, handlers.onColumns, onRow);
+        await streamMysqlFamily(h.pool, sql, onColumns, onRow);
         break;
       case 'mssql':
-        await streamMssql(h.pool, sql, handlers.onColumns, onRow);
+        await streamMssql(h.pool, sql, onColumns, onRow);
         break;
     }
   } catch (err) {
@@ -377,7 +437,14 @@ async function streamMysqlFamily(
       };
       raw
         .query(sql)
-        .on('fields', (fields: { name: string }[]) => onColumns((fields ?? []).map((f) => f.name)))
+        .on('fields', (fields: { name: string }[]) => {
+          // Un error dentro del evento se lanzaría fuera de la promesa (y tumbaría el proceso).
+          try {
+            onColumns((fields ?? []).map((f) => f.name));
+          } catch (err) {
+            fail(err);
+          }
+        })
         .on('result', (row: Record<string, unknown>) => {
           const wait = callRow(onRow, row);
           if (!wait) return;
@@ -414,8 +481,23 @@ async function streamMssql(pool: mssql.ConnectionPool, sql: string, onColumns: (
       request.cancel(); // envía ATTENTION: el servidor aborta la sentencia.
       reject(err);
     };
-    request.on('recordset', (columns: Record<string, unknown>) => onColumns(Object.keys(columns)));
+    request.on('recordset', (columns: Record<string, unknown>) => {
+      try {
+        onColumns(Object.keys(columns));
+      } catch (err) {
+        fail(err);
+      }
+    });
     request.on('row', (row: Record<string, unknown>) => {
+      if (settled) return;
+      // mssql junta en un arreglo los valores de columnas con el mismo nombre (y su
+      // descripción de columnas trae una sola): SQL Server no tiene tipos que devuelvan
+      // arreglos, así que un arreglo es siempre una columna repetida.
+      const repeated = Object.keys(row).find((k) => Array.isArray(row[k]));
+      if (repeated !== undefined) {
+        fail(duplicateColumnError(repeated));
+        return;
+      }
       const wait = callRow(onRow, row);
       if (!wait) return;
       request.pause();
