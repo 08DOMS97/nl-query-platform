@@ -969,6 +969,33 @@ sistema»…". **Agregar al final:**
 - **Superadministrador:** Usuario técnico con permiso para gestionar las cuentas del
   sistema: crearlas con un rol, cambiar su rol y desactivarlas o reactivarlas.
 
+### [ ] US-09 · Contraseña nueva por el superadministrador (24/10)
+Pedido de David del 24/10. Se aplica **sobre** lo que ya dejaron US-02 y US-06 (si ya
+están en el Word, editar ese texto).
+- **RF-16** (Tabla 12), descripción → "El sistema debe permitir al usuario técnico con
+  permiso de superadministrador crear cuentas con un rol asignado, cambiar su rol,
+  ponerles una contraseña nueva y desactivarlas o reactivarlas, sin eliminarlas".
+- **6.5**, en el párrafo de la gestión de usuarios, **reemplazar** "cambia el rol y
+  desactiva o reactiva cuentas;" **por** "cambia el rol, pone una contraseña nueva y
+  desactiva o reactiva cuentas;" y **agregar** al final del párrafo:
+
+> Una contraseña nueva impide renovar las sesiones abiertas de la cuenta, aunque la que
+> esté en uso sigue vigente hasta que vence su token, una hora como máximo; para cortar
+> el acceso al instante, la cuenta se desactiva.
+
+- **6.5.1**, en el párrafo agregado por US-06:
+  - **reemplazar** "35 de 35 comprobaciones sobre la API" **por** "50 de 50
+    comprobaciones sobre la API";
+  - **agregar** antes de "y una cuenta sin rol recibe 403." el texto: "solo el
+    superadministrador puede poner una contraseña nueva, que se valida igual que en el
+    alta, deja de valer la anterior e impide renovar las sesiones abiertas;";
+  - **reemplazar** "En la interfaz, 20 de 20:" **por** "En la interfaz, 27 de 27:" y
+    **agregar** antes de "y que el técnico no accede a la pantalla." el texto: "el
+    cambio de contraseña con su confirmación,".
+- **Glosario** (US-08), **Superadministrador**, reemplazar "cambiar su rol y
+  desactivarlas o reactivarlas" por "cambiar su rol, ponerles una contraseña nueva y
+  desactivarlas o reactivarlas".
+
 ---
 
 ## Pendientes de código relacionados (no son cambios del Word; están en "Abierto" de `CLAUDE.md`)

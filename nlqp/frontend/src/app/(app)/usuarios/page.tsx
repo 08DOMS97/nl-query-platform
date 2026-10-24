@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { Fragment, useEffect, useState, type FormEvent } from 'react';
 import type { User } from 'firebase/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFetch, apiRequest } from '@/lib/api';
@@ -136,9 +136,97 @@ function NewUserForm({ user, onSaved, onCancel }: { user: User; onSaved: (u: Man
   );
 }
 
+/** Contraseña nueva para una cuenta, con confirmación. Se abre debajo de la fila. */
+function PasswordForm({
+  user,
+  target,
+  onSaved,
+  onCancel,
+}: {
+  user: User;
+  target: ManagedUser;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const mismatch = confirm.length > 0 && confirm !== password;
+  const valid = password.length >= MIN_PASSWORD && confirm === password;
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!valid || busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const { ok, status, data } = await apiRequest<ManagedUser>(`/users?uid=${encodeURIComponent(target.uid)}`, user, {
+        method: 'PUT',
+        body: { password },
+      });
+      if (!ok) throw new Error(data.error ?? `Error ${status} al cambiar la contraseña.`);
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} aria-label={`Cambiar la contraseña de ${target.email}`} className="space-y-3">
+      <div className="grid grid-cols-2 gap-x-4">
+        <div>
+          <FieldLabel htmlFor={`pw-${target.uid}`} hint={`Mínimo ${MIN_PASSWORD} caracteres`}>
+            Contraseña nueva
+          </FieldLabel>
+          <input
+            id={`pw-${target.uid}`}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            maxLength={128}
+            autoComplete="new-password"
+            className={INPUT}
+            autoFocus
+          />
+        </div>
+        <div>
+          <FieldLabel htmlFor={`pw2-${target.uid}`}>Repita la contraseña</FieldLabel>
+          <input
+            id={`pw2-${target.uid}`}
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            maxLength={128}
+            autoComplete="new-password"
+            className={INPUT}
+          />
+          {mismatch && <p className="mt-1 text-[12px] text-warn">Las contraseñas no coinciden.</p>}
+        </div>
+      </div>
+      {error && <Notice tone="bad">{error}</Notice>}
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-[12px] text-ink-3">
+          Se cierran las sesiones de la cuenta en los demás dispositivos. Entregue la contraseña por un medio seguro.
+        </p>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="primary" size="sm" disabled={!valid || busy}>
+            {busy ? 'Guardando…' : 'Guardar contraseña'}
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
 /**
  * Gestión de usuarios (solo superadministrador; el backend lo exige en `/users`):
- * alta con rol, cambio de rol y activar/desactivar. Las cuentas no se borran, se
+ * alta con rol, cambio de rol, contraseña nueva y activar/desactivar. Las cuentas no se borran, se
  * desactivan, para conservar su historial. Los cambios rigen en la siguiente acción
  * del usuario, sin que tenga que volver a iniciar sesión.
  */
@@ -149,6 +237,7 @@ export default function UsuariosPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
+  const [changingPassword, setChangingPassword] = useState<string | null>(null);
   const [runCount, setRunCount] = useState(0);
 
   useEffect(() => {
@@ -244,43 +333,73 @@ export default function UsuariosPage() {
                 const self = u.uid === user.uid;
                 const busy = pending === u.uid;
                 return (
-                  <tr key={u.uid} className="last:[&>td]:border-b-0">
-                    <td className={TD}>
-                      <p className="font-medium">{u.email}</p>
-                      <p className="text-[12px] text-ink-3">
-                        {u.superadmin ? 'Superadministrador' : `Creado el ${formatDateTime(u.createdAt)}`}
-                        {self && ' · su cuenta'}
-                      </p>
-                    </td>
-                    <td className={TD}>
-                      <div className="space-y-1">
-                        <RoleSwitch
-                          value={u.role}
-                          label={`Rol de ${u.email}`}
-                          disabled={self || u.superadmin || u.disabled || busy}
-                          onChange={(role) => update(u, { role }, `${u.email}: rol ${ROLE_LABELS[role].toLowerCase()}.`)}
-                        />
-                        {u.role === null && <p className="text-[12px] text-warn">Sin rol: no tiene acceso</p>}
-                      </div>
-                    </td>
-                    <td className={TD}>{u.disabled ? <Badge tone="bad">Desactivado</Badge> : <Badge tone="ok">Activo</Badge>}</td>
-                    <td className={`${TD} text-[12px] text-ink-2`}>{u.lastSignInAt ? formatDateTime(u.lastSignInAt) : 'Nunca'}</td>
-                    <td className={`${TD} text-right`}>
-                      {!self && (
-                        <Button
-                          size="sm"
-                          variant={u.disabled ? 'ghost' : 'danger'}
-                          disabled={busy}
-                          onClick={() => {
-                            if (!u.disabled && !window.confirm(`¿Desactivar la cuenta ${u.email}? No podrá iniciar sesión hasta que se reactive.`)) return;
-                            update(u, { disabled: !u.disabled }, `${u.email}: cuenta ${u.disabled ? 'reactivada' : 'desactivada'}.`);
-                          }}
-                        >
-                          {u.disabled ? 'Reactivar' : 'Desactivar'}
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
+                  <Fragment key={u.uid}>
+                    <tr className="last:[&>td]:border-b-0">
+                      <td className={TD}>
+                        <p className="font-medium">{u.email}</p>
+                        <p className="text-[12px] text-ink-3">
+                          {u.superadmin ? 'Superadministrador' : `Creado el ${formatDateTime(u.createdAt)}`}
+                          {self && ' · su cuenta'}
+                        </p>
+                      </td>
+                      <td className={TD}>
+                        <div className="space-y-1">
+                          <RoleSwitch
+                            value={u.role}
+                            label={`Rol de ${u.email}`}
+                            disabled={self || u.superadmin || u.disabled || busy}
+                            onChange={(role) => update(u, { role }, `${u.email}: rol ${ROLE_LABELS[role].toLowerCase()}.`)}
+                          />
+                          {u.role === null && <p className="text-[12px] text-warn">Sin rol: no tiene acceso</p>}
+                        </div>
+                      </td>
+                      <td className={TD}>{u.disabled ? <Badge tone="bad">Desactivado</Badge> : <Badge tone="ok">Activo</Badge>}</td>
+                      <td className={`${TD} text-[12px] text-ink-2`}>{u.lastSignInAt ? formatDateTime(u.lastSignInAt) : 'Nunca'}</td>
+                      <td className={`${TD} text-right`}>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={busy || changingPassword === u.uid}
+                            onClick={() => {
+                              setNotice(null);
+                              setChangingPassword(u.uid);
+                            }}
+                          >
+                            Cambiar contraseña
+                          </Button>
+                          {!self && (
+                            <Button
+                              size="sm"
+                              variant={u.disabled ? 'ghost' : 'danger'}
+                              disabled={busy}
+                              onClick={() => {
+                                if (!u.disabled && !window.confirm(`¿Desactivar la cuenta ${u.email}? No podrá iniciar sesión hasta que se reactive.`)) return;
+                                update(u, { disabled: !u.disabled }, `${u.email}: cuenta ${u.disabled ? 'reactivada' : 'desactivada'}.`);
+                              }}
+                            >
+                              {u.disabled ? 'Reactivar' : 'Desactivar'}
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {changingPassword === u.uid && (
+                      <tr>
+                        <td colSpan={5} className={`${TD} bg-surface`}>
+                          <PasswordForm
+                            user={user}
+                            target={u}
+                            onSaved={() => {
+                              setChangingPassword(null);
+                              setNotice(`${u.email}: contraseña cambiada.`);
+                            }}
+                            onCancel={() => setChangingPassword(null)}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>

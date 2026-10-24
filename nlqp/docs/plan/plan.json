@@ -184,7 +184,7 @@
       "inicio": "2026-09-07",
       "fin": "2026-09-08",
       "real": 1.0,
-      "comentario": "10/10: hecho en el Word revisado. 5.1.2, 5.1.3, 5.1.5 y 5.2 corregidos (caché de esquema como mejora futura; Figura 5 como ejemplo ilustrativo, con el 72 % medido); Tabla 10 vacía eliminada y leyendas con numeración automática. Las Figuras 2 y 5 no se redibujaron (decisión del 10/10)."
+      "comentario": "10/10: corregido en el documento. 5.1.2, 5.1.3, 5.1.5 y 5.2 ajustados (caché de esquema como mejora futura; Figura 5 como ejemplo ilustrativo, con el 72 % medido); Tabla 10 vacía eliminada y leyendas con numeración automática. Las Figuras 2 y 5 se mantienen sin redibujar."
     },
     {
       "no": 21,
@@ -202,7 +202,7 @@
       "inicio": "2026-09-07",
       "fin": "2026-09-11",
       "real": 1.0,
-      "comentario": "Completo y verificado en los 4 motores (sección 6.1). 13/10: registro de conexiones (Firestore + Secret Manager) con alta, prueba, edición y baja del técnico desde la pantalla Conexiones; Consultar y Esquema eligen entre las conexiones registradas. Verificado 38/38 API + 27/27 UI."
+      "comentario": "Completo y verificado en los 4 motores (sección 6.1). 13/10: registro de conexiones (Firestore + Secret Manager) con alta, prueba, edición y baja desde la pantalla Conexiones; Consultar y Esquema eligen entre las conexiones registradas. Verificado: API 38/38, UI 27/27."
     },
     {
       "no": 23,
@@ -258,7 +258,7 @@
       "inicio": "2026-10-09",
       "fin": "2026-10-09",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 09/10: 5,56 → 2,18 tablas enviadas, 0/50 consultas pierden tablas, 43,4 % menos tokens del prompt (countTokens).",
+      "comentario": "Agregada e implementada el 09/10: de 5,56 a 2,18 tablas enviadas en promedio, ninguna de las 50 consultas pierde tablas y 43,4 % menos tokens en el prompt (countTokens).",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-09"
@@ -282,7 +282,7 @@
       "inicio": "2026-10-09",
       "fin": "2026-10-09",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 09/10: el SDK anterior estaba deprecado. Verificada con una llamada real.",
+      "comentario": "Agregada e implementada el 09/10: el SDK anterior estaba deprecado. Verificada con una llamada real.",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-09"
@@ -296,7 +296,7 @@
       "inicio": "2026-09-29",
       "fin": "2026-09-30",
       "real": 1.0,
-      "comentario": "Batería 17/17 y bypass de SQL Server corregido. 08/10: endurecido, batería de 57 casos versionada (tarea 42)."
+      "comentario": "Batería 17/17 y bypass de SQL Server corregido. 08/10: validador endurecido, batería de 57 casos versionada (tarea 42)."
     },
     {
       "no": 42,
@@ -306,7 +306,7 @@
       "inicio": "2026-10-08",
       "fin": "2026-10-08",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 08/10: literales, funciones de archivo y de ejecución de SQL como texto; batería de 57 casos + 50 consultas en 4 motores (npm run test:seguridad).",
+      "comentario": "Agregada e implementada el 08/10: literales, funciones de archivo y ejecución de SQL como texto; batería de 57 casos + 50 consultas en los 4 motores (npm run test:seguridad).",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-10-08"
@@ -320,7 +320,7 @@
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
       "real": 0.7,
-      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado gratis 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates, M20 corregidos), 50 paráfrasis aprobadas. Falta: piloto (~$0.50), corrida completa con Gemini (~$4.25) y análisis de resultados; antes del retiro del modelo (~20/10). 18/10: sigue en 70 %. El modelo pasó a Gemini 3.8 Flash (tarea 46): el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60; ya no hay apuro por el retiro."
+      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado sin costo, 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates y M20 corregidos) y 50 paráfrasis revisadas. Falta: piloto, corrida completa con Gemini y análisis de resultados. 18/10: sigue en 70 %. Con Gemini 3.8 Flash (tarea 46) el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60."
     },
     {
       "no": 40,
@@ -330,7 +330,7 @@
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
       "real": 1.0,
-      "comentario": "Tarea nueva (agregada 02/10, sección 6.3.5): tope de tiempo en los 4 motores, lectura por streaming, snapshot con paginación y CSV completo. 10/10: corregido bug de zona horaria (fechas distintas según el motor).",
+      "comentario": "Agregada el 02/10 (sección 6.3.5): tope de tiempo en los 4 motores, lectura por streaming, snapshot con paginación y CSV completo. 10/10: corregido el error de zona horaria (fechas distintas según el motor).",
       "nueva": {
         "agregada": "2026-10-02",
         "implementada": "2026-10-02"
@@ -354,7 +354,7 @@
       "inicio": "2026-09-21",
       "fin": "2026-09-21",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 21/09 (backend): registro de tokens, costo y latencia por llamada y endpoint de estadísticas. 10/10: separa el uso normal de las corridas de evaluación. Falta el dashboard en el frontend.",
+      "comentario": "Agregada e implementada el 21/09 (backend): registro de tokens, costo y latencia por llamada y endpoint de estadísticas. 10/10: separa el uso normal de las corridas de evaluación y se consulta en la pantalla Uso y costos (rol técnico).",
       "nueva": {
         "agregada": "2026-10-10",
         "implementada": "2026-09-21"
@@ -368,7 +368,7 @@
       "inicio": "2026-10-05",
       "fin": "2026-10-07",
       "real": 1.0,
-      "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado 23/23 API + 12/12 UI. Falta pasarlo al Word con su captura. 17/10: 100 %. Documentado en el Word (sección 6.5), con la Figura 10."
+      "comentario": "Hecho el 10/10 (plan 05–07/10): roles por custom claim aplicados en el backend; rol técnico con SQL editable y consumo, conexiones + pool, esquema y uso y costos. Verificado: API 23/23, UI 12/12. 17/10: documentado en el Word (sección 6.5), con la Figura 10."
     },
     {
       "no": 45,
@@ -378,7 +378,7 @@
       "inicio": "2026-10-13",
       "fin": "2026-10-13",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 13/10 a pedido de David: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado 25/25 API + 23/23 UI.",
+      "comentario": "Agregada e implementada el 13/10: el técnico edita la sentencia generada y las guardadas (las del historial se guardan antes de editarlas), «Guardar cambios», y auditoría de cada edición ejecutada o guardada (lo reemplazado, quién, fecha y hora) en la pestaña Cambios. Verificado: API 25/25, UI 23/23.",
       "nueva": {
         "agregada": "2026-10-13",
         "implementada": "2026-10-13"
@@ -392,7 +392,7 @@
       "inicio": "2026-10-18",
       "fin": "2026-10-18",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 18/10 a pedido de David: Gemini 2.5 Pro se retira de Vertex AI el 20/10. gemini-3.8-flash en global (GA, hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s).",
+      "comentario": "Agregada e implementada el 18/10: Gemini 2.5 Pro se retira de Vertex AI el 20/10. Cambio a gemini-3.8-flash en global (GA, soporte hasta 02/09/2027 o más), razonamiento LOW, precios $1.50/$7.50 por millón. Verificado: seguridad 57/57 + 200/200, API 38/38 · 23/23 · 32/32 · 25/25, S10 real correcto ($0.0012, 2,9 s).",
       "nueva": {
         "agregada": "2026-10-18",
         "implementada": "2026-10-18"
@@ -406,7 +406,7 @@
       "inicio": "2026-10-08",
       "fin": "2026-10-09",
       "real": 1.0,
-      "comentario": "Versión mínima hecha el 10/10 (plan 08–09/10): historial automático y consultas guardadas por el usuario, reusar sin llamar a Gemini. Verificado 32/32 API + 10/10 UI. Falta la captura y pasarlo al Word; fuera: búsqueda, carpetas, compartir. 17/10: 100 %. Documentado en el Word (sección 6.6)."
+      "comentario": "Versión mínima hecha el 10/10 (plan 08–09/10): historial automático y consultas guardadas por el usuario, reusar sin llamar a Gemini. Verificado: API 32/32, UI 10/10. Fuera de esta versión: búsqueda, carpetas y compartir. 17/10: documentado en el Word (sección 6.6)."
     },
     {
       "no": 34,
@@ -416,7 +416,7 @@
       "inicio": "2026-10-12",
       "fin": "2026-10-13",
       "real": 0.8,
-      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repo y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan (historial de la demo limpio); test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27. 19/10: tope de ejecución por conexión y gestión de usuarios; test:api 59/59 · 23/23 · 32/32 · 25/25 · 35/35 (174/174), test:ui 24/24 + 33/33 + 20/20 (77/77), test:seguridad 57/57 + 200/200."
+      "comentario": "17/10: 80 %. Pruebas de API, interfaz y seguridad en el repositorio y documentadas (sección 6.7). Falta probar \"Generar SQL\" con Gemini desde la interfaz. 18/10: las pruebas usan usuarios exclusivos y borran lo que dejan; test:api 38/38 · 23/23 · 32/32 · 25/25, test:ui 24/24 + 27/27. 19/10: tope de ejecución por conexión y gestión de usuarios; test:api 59/59 · 23/23 · 32/32 · 25/25 · 35/35 (174/174), test:ui 24/24 + 33/33 + 20/20 (77/77), test:seguridad 57/57 + 200/200."
     },
     {
       "no": 35,
@@ -442,8 +442,8 @@
       "padre": 36,
       "inicio": "2026-10-15",
       "fin": "2026-10-30",
-      "real": 0.5,
-      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento en el Word revisado (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). Falta: reescribir las Conclusiones con los resultados de la corrida, recalcular 1.6.3 y la revisión final antes de entregar. 17/10: 50 %. Revisión del Word casi completa (M1, M4, M5, formato, tablas reducidas, índices). Falta: conclusiones. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10."
+      "real": 0.6,
+      "comentario": "10/10: 30 %, antes de su fecha. Hecho: revisión del documento (correcciones de los caps. 1 a 5, índices, capítulos en página impar, párrafos de máximo 12 líneas). 17/10: 50 %. Revisión de los módulos 1, 4 y 5, formato, tablas reducidas e índices. Fecha de fin movida al 30/10 porque la universidad pasó la entrega al 31/10. 22/10: 60 %. Revisión completa del documento (redacción, consistencia con el sistema y puntos débiles para la defensa). Falta: conclusiones, recálculo de 1.6.3 con la corrida y orden de la bibliografía (APA 7)."
     },
     {
       "no": 38,
@@ -462,7 +462,7 @@
       "inicio": "2026-10-19",
       "fin": "2026-10-19",
       "real": 1.0,
-      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; tope de 10 s cancelado por el motor en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200.",
+      "comentario": "Agregada e implementada el 19/10: el tope pasó de 60 s fijos a 8 min por defecto (RNF-01) y el técnico lo fija por conexión (10 s a 60 min) en la pantalla Conexiones. Verificado: consulta de 186 s completa; con tope de 10 s el motor cancela en los 4 (10,4–10,8 s); API 59/59, UI 33/33, seguridad 57/57 + 200/200.",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": "2026-10-19"
@@ -475,8 +475,8 @@
       "padre": 21,
       "inicio": "2026-10-19",
       "fin": "2026-10-19",
-      "real": 0.9,
-      "comentario": "Tarea nueva, implementada 19/10 a pedido de David: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso superadmin solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. Falta: asignar la cuenta de David como superadmin.",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 19/10: pantalla Usuarios (alta con rol, cambio de rol, desactivar/reactivar), permiso de superadministrador asignado solo por script, sin /signup, cuentas sin rol sin acceso; rol y estado leídos de la cuenta en cada solicitud. Verificado: API 35/35, UI 20/20. 24/10: 100 %. Mi cuenta (davidmonterroso0897@gmail.com) ya es superadministrador y entró. Agregado a pedido mío: el superadministrador pone una contraseña nueva a cualquier cuenta desde Usuarios. Verificado: API 50/50, UI 27/27, seguridad 57/57 + 200/200.",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": "2026-10-19"
@@ -489,8 +489,8 @@
       "padre": 36,
       "inicio": "2026-10-19",
       "fin": "2026-10-30",
-      "real": 0.2,
-      "comentario": "Tarea nueva (decisión de David del 19/10): el sistema se instala en la red de la organización; serverless queda como escalamiento. Instrucciones paso a paso en nlqp/docs/CAMBIO_ON_PREMISES.md. Falta pasarlas al Word y verificar el acceso desde otro equipo de la red (6.7.4).",
+      "real": 0.8,
+      "comentario": "Agregada el 19/10: el sistema se instala en la red de la organización y la arquitectura sin servidor queda como ruta de escalamiento. 22/10: 80 %. Documento actualizado (PG2-2026 revisado 22-10-2026): caps. 1 a 6 con el despliegue local, secciones 5.3.1 y 5.3.2, Gemini 3.8 Flash en todo el documento, RF-15 y RF-16 y Figuras 1, 2, 3, 4 y 8. Falta: verificar el acceso desde otro equipo de la red.",
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": null

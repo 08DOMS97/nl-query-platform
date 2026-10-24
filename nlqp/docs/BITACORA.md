@@ -6,6 +6,44 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-24 — Cuenta de David como superadmin y contraseña nueva desde Usuarios
+
+Sin gasto en GCP.
+
+### Acceso a la app
+- David no podía entrar con las cuentas de la demo. Las cuentas estaban bien: activas,
+  con rol, y la contraseña del `.env` entra (verificado contra Firebase y con `/me` 200
+  en las dos). **La app no estaba levantada**: Docker, el backend y el frontend estaban
+  apagados.
+- Las contraseñas de la demo las lee David del `.env` con `!`; no pasan por el chat.
+- **Cuenta de David como superadmin:** `davidmonterroso0897@gmail.com`, creada por él con
+  `npm run set:superadmin -- … --crear`. Verificado: `role: tecnico`,
+  `superadmin: true`, activa y con inicio de sesión registrado. **Tarea 48 al 100 %.**
+
+### Contraseña nueva (pedido de David, "dale" a la propuesta)
+- `PUT /users?uid=…` acepta `{ password }` (de 8 a 128 caracteres, la misma validación
+  que el alta, ahora en `parsePassword`). Solo el superadmin, para cualquier cuenta,
+  incluida la suya.
+- Pantalla Usuarios: botón «Cambiar contraseña» en cada fila, que abre el formulario
+  debajo, con confirmación.
+- La contraseña solo va a Firebase Auth: no se guarda, no se registra y no vuelve en la
+  respuesta.
+- Firebase invalida los refresh tokens de la cuenta, pero **el token ya emitido sigue
+  valiendo hasta una hora**: el backend no verifica revocaciones (el reloj, 19/10). Para
+  cortar el acceso al instante, se desactiva la cuenta.
+- Verificado:
+  - **API 189/189** (59 · 23 · 32 · 25 · **50**);
+  - **interfaz 84/84** (24 · 33 · **27**);
+  - **seguridad 57/57 + 200/200**.
+- La primera corrida de seguridad no mostró resultado porque corrió en paralelo con la
+  de interfaz; sola dio verde.
+- **Docs:** `SEGURIDAD.md` §14, `MANUAL_POSTMAN.md` §6, `CAMBIO_ON_PREMISES.md` **US-09**
+  (RF-16, 6.5, 6.5.1 y glosario) y `RESUMEN_PARA_DOC_TEORICO.md` (25 pendientes).
+- **Plan:** tarea 48 al 100 %. Corte 24/10: plan 93 %, real 93 %, **+0,3 puntos**.
+- **Sigue:** piloto con paráfrasis (~$0.10–0.16), con confirmación previa.
+
+---
+
 ## 2026-10-19 (2) — Tope de ejecución por conexión y superadministrador con gestión de usuarios
 
 Pedidos de David del 19/10 ("dale" a las propuestas). Sin gasto en GCP.

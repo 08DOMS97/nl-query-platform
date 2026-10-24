@@ -8,7 +8,7 @@ import { UserValidationError, createUser, listUsers, updateUser } from '../servi
  *
  *   GET  /users              -> { users }
  *   POST /users              -> crea; body: { email, password, role }
- *   PUT  /users?uid=...      -> body: { role?, disabled? }
+ *   PUT  /users?uid=...      -> body: { role?, disabled?, password? }
  *
  * No hay DELETE: las cuentas se desactivan para conservar su historial.
  */

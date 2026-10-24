@@ -573,6 +573,17 @@ pantalla. Las pruebas de API e interfaz quedaron en el repo: `npm run test:api`
   - El superadministrador no puede desactivarse ni quitarse el rol técnico a sí mismo.
   - Las cuentas no se borran desde la interfaz, se desactivan, para conservar su
     historial y su auditoría.
+- **Contraseña nueva (24/10, pedido de David).** El superadministrador puede ponerle una
+  contraseña nueva a cualquier cuenta, incluida la suya, con `PUT /users?uid=…`
+  (`{ password }`, de 8 a 128 caracteres, la misma regla que el alta), desde la pantalla
+  Usuarios.
+  - La contraseña solo pasa a Firebase Auth: no se guarda en Firestore, no se registra y
+    la respuesta no la incluye. El backend no escribe el cuerpo de las solicitudes en
+    los registros.
+  - Firebase invalida los refresh tokens de la cuenta, así que sus sesiones no se pueden
+    renovar. **El token de identidad ya emitido sigue valiendo hasta que vence (una hora
+    como mucho)**, porque el backend no verifica revocaciones (ver el reloj, arriba).
+    Para cortar el acceso al instante hay que desactivar la cuenta.
 
 ### Verificación (19/10)
 
@@ -586,6 +597,23 @@ pantalla. Las pruebas de API e interfaz quedaron en el repo: `npm run test:api`
 - `ui_usuarios.mjs` **20/20** (8 de 9 corridas; la que no dio resultado no se repitió
   en 6 intentos más): sin enlace de registro, `/signup` responde 404, y el aviso de
   cuenta desactivada aparece.
+- Sin cambios en lo demás: API 59/59 · 23/23 · 32/32 · 25/25, interfaz 24/24 · 33/33,
+  `test:seguridad` 57/57 + 200/200.
+
+### Verificación (24/10, contraseña nueva)
+
+- `api_usuarios.mjs` **50/50** (+15):
+  - el técnico, el no técnico y la propia cuenta no técnica reciben 403;
+  - una contraseña corta, que no es texto o de más de 128 caracteres da 400, y la
+    anterior sigue valiendo;
+  - el cambio da 200, la respuesta no trae la contraseña y no cambia el rol ni el
+    estado;
+  - con la contraseña anterior ya no se entra y con la nueva sí;
+  - la sesión anterior ya no se puede renovar, y su token vigente sigue respondiendo
+    hasta que vence (lo documentado arriba).
+- `ui_usuarios.mjs` **27/27** (+7): botón también en la propia cuenta; con una
+  contraseña corta o que no coincide, Guardar queda deshabilitado; aviso al guardar;
+  la contraseña anterior no entra y la nueva sí.
 - Sin cambios en lo demás: API 59/59 · 23/23 · 32/32 · 25/25, interfaz 24/24 · 33/33,
   `test:seguridad` 57/57 + 200/200.
 

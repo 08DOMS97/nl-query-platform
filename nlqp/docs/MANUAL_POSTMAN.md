@@ -169,7 +169,8 @@ Query).
   recibe `403` (`nlqp/no-role`) y una desactivada `401` (`auth/user-disabled`), acá y en
   cualquier otro endpoint.
 - `GET /users`, `POST /users` (`{ email, password, role }`) y `PUT /users?uid=...`
-  (`{ role?, disabled? }`) son solo para el superadministrador; cualquier otro usuario
+  (`{ role?, disabled?, password? }`; `password` desde el 24/10, de 8 a 128 caracteres)
+  son solo para el superadministrador; cualquier otro usuario
   recibe `403`. El token del superadmin de las pruebas se obtiene con
   `NLQP_TEST_USER_EMAIL` y `NLQP_TEST_USER_PASSWORD` apuntando a los `NLQP_SUPERADMIN_*`
   del `.env` y `npm run test:token`.

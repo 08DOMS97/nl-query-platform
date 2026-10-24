@@ -48,6 +48,14 @@ function parseRole(value: unknown): UserRole {
   return value as UserRole;
 }
 
+function parsePassword(value: unknown): string {
+  const password = typeof value === 'string' ? value : '';
+  if (password.length < MIN_PASSWORD || password.length > 128) {
+    throw new UserValidationError(`La contraseña debe tener entre ${MIN_PASSWORD} y 128 caracteres.`);
+  }
+  return password;
+}
+
 export async function listUsers(): Promise<ManagedUser[]> {
   const auth = getFirebaseAdmin().auth();
   const users: ManagedUser[] = [];
@@ -66,10 +74,7 @@ export async function createUser(body: unknown): Promise<ManagedUser> {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
     throw new UserValidationError('Correo inválido.');
   }
-  const password = typeof b.password === 'string' ? b.password : '';
-  if (password.length < MIN_PASSWORD || password.length > 128) {
-    throw new UserValidationError(`La contraseña debe tener entre ${MIN_PASSWORD} y 128 caracteres.`);
-  }
+  const password = parsePassword(b.password);
   const role = parseRole(b.role);
   const auth = getFirebaseAdmin().auth();
   let user: UserRecord;
@@ -85,7 +90,12 @@ export async function createUser(body: unknown): Promise<ManagedUser> {
   return toManaged(await auth.getUser(user.uid));
 }
 
-/** Cambia el rol o activa/desactiva una cuenta. `actingUid`: el superadministrador que lo pide. */
+/**
+ * Cambia el rol, activa/desactiva una cuenta o le pone una contraseña nueva. `actingUid`:
+ * el superadministrador que lo pide. La contraseña solo pasa a Firebase Auth (no se guarda
+ * ni se registra); Firebase invalida entonces las sesiones de la cuenta, aunque el token
+ * que cada una ya tiene sigue valiendo hasta que vence (una hora como mucho).
+ */
 export async function updateUser(uid: string, body: unknown, actingUid: string): Promise<ManagedUser> {
   const b = (body ?? {}) as Record<string, unknown>;
   const role = b.role === undefined ? undefined : parseRole(b.role);
@@ -93,8 +103,9 @@ export async function updateUser(uid: string, body: unknown, actingUid: string):
     throw new UserValidationError('El campo "disabled" debe ser true o false.');
   }
   const disabled = b.disabled as boolean | undefined;
-  if (role === undefined && disabled === undefined) {
-    throw new UserValidationError('Indique "role" o "disabled".');
+  const password = b.password === undefined ? undefined : parsePassword(b.password);
+  if (role === undefined && disabled === undefined && password === undefined) {
+    throw new UserValidationError('Indique "role", "disabled" o "password".');
   }
 
   const auth = getFirebaseAdmin().auth();
@@ -119,6 +130,9 @@ export async function updateUser(uid: string, body: unknown, actingUid: string):
   }
   if (disabled !== undefined && disabled !== current.disabled) {
     await auth.updateUser(uid, { disabled });
+  }
+  if (password !== undefined) {
+    await auth.updateUser(uid, { password });
   }
   return toManaged(await auth.getUser(uid));
 }

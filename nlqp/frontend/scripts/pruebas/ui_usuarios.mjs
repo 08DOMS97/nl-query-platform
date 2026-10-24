@@ -1,5 +1,5 @@
 // Interfaz de Usuarios (superadministrador): menú y acceso según el rol, alta, cambio de
-// rol, desactivar y reactivar; inicio de sesión sin registro público y cuenta
+// rol, desactivar y reactivar, contraseña nueva; inicio de sesión sin registro público y cuenta
 // desactivada. NUNCA aprieta "Generar SQL" (aborta si se pide). Crea una cuenta
 // temporal nlqp-ci-tmp-*@example.com; la borra `limpiar_pruebas.mjs` al terminar.
 // Se corre con `npm run test:ui` (scripts/pruebas_ui.mjs).
@@ -103,6 +103,30 @@ check('Cuenta desactivada: no entra y se avisa', await bloqueada.waitForSelector
 await fila(page, nuevoEmail).getByRole('button', { name: 'Reactivar' }).click();
 check('Reactivar: avisa', await page.waitForSelector(`text=${nuevoEmail}: cuenta reactivada.`, { timeout: 15000 }).then(() => true, () => false));
 
+// Contraseña nueva
+const otraPassword = `Otra-ui-${stamp}-clave`;
+check('Su cuenta: también puede cambiar su contraseña', (await fila(page, SUP_EMAIL).getByRole('button', { name: 'Cambiar contraseña' }).count()) === 1);
+await fila(page, nuevoEmail).getByRole('button', { name: 'Cambiar contraseña' }).click();
+const formPw = page.getByRole('form', { name: `Cambiar la contraseña de ${nuevoEmail}` });
+check('Cambiar contraseña: abre el formulario', await formPw.isVisible());
+await formPw.getByLabel('Contraseña nueva').fill('corta');
+await formPw.getByLabel('Repita la contraseña').fill('corta');
+check('Contraseña corta: Guardar deshabilitado', await formPw.getByRole('button', { name: 'Guardar contraseña' }).isDisabled());
+await formPw.getByLabel('Contraseña nueva').fill(otraPassword);
+await formPw.getByLabel('Repita la contraseña').fill(`${otraPassword}x`);
+check('No coinciden: avisa y Guardar deshabilitado', (await formPw.getByText('Las contraseñas no coinciden.').count()) === 1 && (await formPw.getByRole('button', { name: 'Guardar contraseña' }).isDisabled()));
+await formPw.getByLabel('Repita la contraseña').fill(otraPassword);
+await formPw.getByRole('button', { name: 'Guardar contraseña' }).click();
+check('Guardar contraseña: avisa y cierra el formulario', await page.waitForSelector(`text=${nuevoEmail}: contraseña cambiada.`, { timeout: 15000 }).then(() => true, () => false) && (await formPw.count()) === 0);
+const vieja = await newPage();
+await vieja.goto('http://localhost:3000/login');
+await vieja.fill('#email', nuevoEmail);
+await vieja.fill('#password', nuevoPassword);
+await vieja.click('button[type=submit]');
+check('Contraseña anterior: no entra', await vieja.waitForSelector('text=Correo o contraseña incorrectos.', { timeout: 15000 }).then(() => true, () => false));
+const conNueva = await login(nuevoEmail, otraPassword);
+check('Contraseña nueva: entra', conNueva.url() === 'http://localhost:3000/');
+
 // --- Técnico: sin gestión de usuarios
 page = await login(TEC_EMAIL, TEC_PASSWORD);
 check('Técnico: sin menú Usuarios', (await page.locator('nav >> text=Usuarios').count()) === 0);
@@ -110,7 +134,7 @@ await page.goto('http://localhost:3000/usuarios');
 check('Técnico: /usuarios restringido', await page.waitForSelector('text=solo para el superadministrador').then(() => true, () => false));
 
 // 404 (/signup ya no existe), 409 (correo repetido) y
-// el 400 de Firebase al iniciar sesión con la cuenta desactivada son esperados.
+// el 400 de Firebase al iniciar sesión con la cuenta desactivada o la contraseña anterior son esperados.
 const inesperados = consoleErrors.filter((e) => !/status of (400|404|409)/.test(e));
 check('Sin errores de consola (salvo los esperados)', inesperados.length === 0, inesperados.join(' | '));
 console.log(`\n${ok}/${ok + fail} OK`);

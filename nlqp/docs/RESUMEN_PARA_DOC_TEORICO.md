@@ -24,15 +24,15 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-19, despliegue on-premises)
+## Contador (actualizado 2026-10-24, contraseña nueva por el superadministrador)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 8 | 1 | 20 |
 | 5 | 2 | 0 | 4 |
-| 6 | 6 | 0 | 39 |
+| 6 | 7 | 0 | 39 |
 | Conclusiones / limitaciones | 8 | 0 | 0 |
-| **Total** | **24** | **1** | **63** |
+| **Total** | **25** | **1** | **63** |
 
 > **19/10 — Despliegue on-premises, tope por conexión y gestión de usuarios.** Las 4
 > entradas nuevas (una por capítulo, marcadas "(19/10) On-premises") remiten a
@@ -269,6 +269,11 @@ una sola nueva (10) pendiente.
     33/33); 6.4 sin `/signup`; 6.5 con la gestión de usuarios (35/35 y 20/20); y
     hallazgo nuevo en la Tabla 14. **OD-02** ahora describe el tope por conexión
     (8 min por defecto).
+
+- [ ] (24/10) **Contraseña nueva por el superadministrador**: `CAMBIO_ON_PREMISES.md`
+  **US-09**. RF-16 (Tabla 12, cap. 4), párrafo de 6.5, cifras de 6.5.1 (API 50/50, UI
+  27/27) y glosario. Se cuenta en este capítulo, aunque RF-16 y el glosario estén en
+  otros. Pedido de David del 24/10.
 
 ### Introducción
 - [x] (25/09) **Reemplazar el segundo párrafo** por el de `CAPITULO_6.md`: el Word

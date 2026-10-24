@@ -1,5 +1,5 @@
 // Gestión de usuarios (superadministrador): permisos, validaciones, alta, cambio de rol
-// (rige en la solicitud siguiente, con la misma sesión), desactivación, protecciones sobre la propia
+// (rige en la solicitud siguiente, con la misma sesión), desactivación, contraseña nueva, protecciones sobre la propia
 // cuenta y rechazo de cuentas sin rol. Crea cuentas temporales nlqp-ci-tmp-*@example.com
 // y las borra al final. Se corre con `npm run test:api` (scripts/pruebas_api.mjs).
 import { readFileSync } from 'node:fs';
@@ -21,7 +21,7 @@ const call = async (token, method, path, body) => {
   let json = null; try { json = text ? JSON.parse(text) : null; } catch {}
   return { status: res.status, json };
 };
-/** Inicia sesión con correo y contraseña (API REST de Firebase Auth) y devuelve el ID token o el código de error. */
+/** Inicia sesión con correo y contraseña (API REST de Firebase Auth) y devuelve los tokens o el código de error. */
 const signIn = async (email, password) => {
   const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`, {
     method: 'POST',
@@ -29,7 +29,16 @@ const signIn = async (email, password) => {
     body: JSON.stringify({ email, password, returnSecureToken: true }),
   });
   const json = await res.json();
-  return res.ok ? { token: json.idToken } : { error: json.error?.message };
+  return res.ok ? { token: json.idToken, refresh: json.refreshToken } : { error: json.error?.message };
+};
+/** Renueva la sesión con el refresh token, como hace la interfaz cada hora. Devuelve true si Firebase la acepta. */
+const refresh = async (refreshToken) => {
+  const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${process.env.FIREBASE_WEB_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
+  });
+  return res.ok;
 };
 
 if (admin.apps.length === 0) admin.initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID });
@@ -85,6 +94,28 @@ try {
   check('cuenta desactivada: no puede iniciar sesión', (await signIn(tmpEmail, tmpPassword)).error === 'USER_DISABLED');
   check('reactivar 200', (await call(sup, 'PUT', `/users?uid=${uid}`, { disabled: false })).json?.disabled === false);
   check('reactivada: vuelve a iniciar sesión', !!(await signIn(tmpEmail, tmpPassword)).token);
+
+  // Contraseña nueva (solo superadmin)
+  const nuevaPassword = `Nueva-${stamp}-clave`;
+  const antes = await signIn(tmpEmail, tmpPassword);
+  check('sesión antes del cambio se renueva', await refresh(antes.refresh));
+  check('técnico: cambiar contraseña 403', (await call(tec, 'PUT', `/users?uid=${uid}`, { password: nuevaPassword })).status === 403);
+  check('usuario: cambiar contraseña 403', (await call(usr, 'PUT', `/users?uid=${uid}`, { password: nuevaPassword })).status === 403);
+  check('la propia cuenta no técnica: cambiar su contraseña 403', (await call(antes.token, 'PUT', `/users?uid=${uid}`, { password: nuevaPassword })).status === 403);
+  check('contraseña corta 400', (await call(sup, 'PUT', `/users?uid=${uid}`, { password: 'corta' })).status === 400);
+  check('contraseña que no es texto 400', (await call(sup, 'PUT', `/users?uid=${uid}`, { password: 12345678 })).status === 400);
+  check('contraseña de más de 128 caracteres 400', (await call(sup, 'PUT', `/users?uid=${uid}`, { password: 'x'.repeat(129) })).status === 400);
+  check('tras los rechazos sigue entrando con la anterior', !!(await signIn(tmpEmail, tmpPassword)).token);
+  const cambio = await call(sup, 'PUT', `/users?uid=${uid}`, { password: nuevaPassword });
+  check('cambiar contraseña 200', cambio.status === 200 && cambio.json.uid === uid, JSON.stringify(cambio.json));
+  check('la respuesta no incluye la contraseña', JSON.stringify(cambio.json).match(/password|Nueva-/i) === null);
+  check('rol y estado sin cambios', cambio.json?.role === 'no_tecnico' && cambio.json?.disabled === false);
+  const vieja = await signIn(tmpEmail, tmpPassword);
+  check('con la contraseña anterior ya no entra', !vieja.token, JSON.stringify(vieja));
+  check('con la contraseña nueva entra', !!(await signIn(tmpEmail, nuevaPassword)).token);
+  check('la sesión anterior ya no se puede renovar', (await refresh(antes.refresh)) === false);
+  // Lo documentado (SEGURIDAD.md §14): el token ya emitido vale hasta que vence (una hora como mucho).
+  check('el token ya emitido sigue valiendo hasta que vence', (await call(antes.token, 'GET', '/me')).status === 200);
 
   // Validaciones del cambio
   check('PUT sin datos 400', (await call(sup, 'PUT', `/users?uid=${uid}`, {})).status === 400);
