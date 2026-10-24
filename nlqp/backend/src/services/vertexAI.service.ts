@@ -160,6 +160,19 @@ export async function countPromptTokens(
   return result.totalTokens ?? 0;
 }
 
+type GenerationUsage = Omit<GenerateSqlResult, 'sql'>;
+
+/**
+ * La llamada al modelo se hizo (y se factura) pero no dejó un SQL usable: lleva los
+ * tokens para que el registro de uso no la cuente como gratis (auditoría del 24/10).
+ */
+export class GenerationFailedError extends Error {
+  constructor(message: string, readonly usage: GenerationUsage) {
+    super(message);
+    this.name = 'GenerationFailedError';
+  }
+}
+
 export interface GenerateSqlResult {
   sql: string;
   tokensInput: number;
@@ -194,25 +207,25 @@ export async function generateSql(
   // `response.text` concatena las partes de texto de la respuesta, sin el
   // razonamiento interno (no se pide `includeThoughts`).
   const text = response.text;
+  const usageMetadata = response.usageMetadata;
+  const usage: GenerationUsage = {
+    tokensInput: usageMetadata?.promptTokenCount ?? 0,
+    tokensOutput: usageMetadata?.candidatesTokenCount ?? 0,
+    tokensThinking: usageMetadata?.thoughtsTokenCount ?? 0,
+    tokensTotal: usageMetadata?.totalTokenCount ?? 0,
+  };
 
   // Un SQL cortado por el tope de salida no debe llegar al Query Safety Engine
   // como si fuera una respuesta completa: se reporta como error explícito.
   if (candidate?.finishReason === FinishReason.MAX_TOKENS) {
-    throw new Error(
+    throw new GenerationFailedError(
       `Vertex AI cortó la respuesta al alcanzar el tope de ${MAX_OUTPUT_TOKENS} tokens de salida.`,
+      usage,
     );
   }
   if (!text) {
-    throw new Error('Vertex AI no devolvió texto en la respuesta.');
+    throw new GenerationFailedError('Vertex AI no devolvió texto en la respuesta.', usage);
   }
 
-  const usage = response.usageMetadata;
-
-  return {
-    sql: stripMarkdownFences(text),
-    tokensInput: usage?.promptTokenCount ?? 0,
-    tokensOutput: usage?.candidatesTokenCount ?? 0,
-    tokensThinking: usage?.thoughtsTokenCount ?? 0,
-    tokensTotal: usage?.totalTokenCount ?? 0,
-  };
+  return { sql: stripMarkdownFences(text), ...usage };
 }

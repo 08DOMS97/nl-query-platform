@@ -2,13 +2,14 @@ import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
 import { extractSchema } from '../services/schemaExtractor.service.js';
 import { pruneSchema } from '../services/schemaPruning.service.js';
-import { generateSql } from '../services/vertexAI.service.js';
+import { GenerationFailedError, generateSql } from '../services/vertexAI.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { estimateCostUsd } from '../services/vertexAiPricing.service.js';
 import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
 import { connectionFromRequest } from '../services/connectionStore.service.js';
 import type { ConnectionDetail, GenerateSqlMetrics, GenerateSqlRequest } from '../types/index.js';
 import { handleConnectionError } from './connectionErrors.js';
+import type { AuthedRequest } from '../middleware/auth.middleware.js';
 import { MAX_QUESTION_CHARS, findRowLimit, looksLikeSql, questionRequestsRowLimit } from '../services/questionGuard.service.js';
 
 /**
@@ -52,7 +53,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
   }
 
   const uid = (req as Request & { uid?: string }).uid ?? null;
-  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER]);
+  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER], (req as AuthedRequest).role);
   const startedAt = Date.now();
 
   try {
@@ -102,8 +103,8 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
         code: 'nlqp/unrequested-row-limit',
         error:
           `La consulta generada devolvía solo una parte de los resultados (${rowLimit}), aunque la pregunta no pide ` +
-          'una cantidad. No se muestra para no presentar datos incompletos. Vuelva a intentarlo o indique en la ' +
-          'pregunta cuántos registros quiere.',
+          'una cantidad. No se muestra para no presentar datos incompletos. Reformule la pregunta o indique ' +
+          'cuántos registros quiere.',
         sql,
         metrics,
       });
@@ -111,6 +112,11 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     }
     res.status(200).json({ sql, engine: connection.engine, connectionId: connection.id, safety, metrics });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    // Si el modelo respondió (se factura) sin un SQL usable, se registra lo que costó.
+    const billed = err instanceof GenerationFailedError
+      ? { ...err.usage, costUsd: estimateCostUsd(err.usage.tokensInput, err.usage.tokensOutput + err.usage.tokensThinking) }
+      : {};
     await recordUsageEvent({
       type: 'generateSQL',
       engine: connection.engine,
@@ -119,9 +125,15 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       origin,
       success: false,
       latencyMs: Date.now() - startedAt,
-      errorReason: err instanceof Error ? err.message : String(err),
+      ...billed,
+      errorReason: message,
     });
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    // El detalle (errores de Vertex AI, del motor o de Secret Manager) es para el técnico.
+    res.status(500).json({
+      error: (req as AuthedRequest).role === 'tecnico'
+        ? message
+        : 'No se pudo generar la consulta. Inténtelo de nuevo en unos minutos; si se repite, avise al administrador.',
+    });
   }
 };
 

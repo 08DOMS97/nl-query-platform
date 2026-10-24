@@ -180,7 +180,18 @@ async function generar(caso) {
 /** Ejecuta por `/executeQuery` y trae todas las páginas (nunca se compara un resultado parcial). */
 async function ejecutar(motor, sql) {
   const t0 = Date.now();
-  const { status, data } = await api('POST', '/executeQuery', { engine: motor, sql });
+  let respuesta;
+  try {
+    respuesta = await api('POST', '/executeQuery', { engine: motor, sql });
+  } catch (err) {
+    // `fetch` de Node espera la respuesta 300 s como máximo, menos que el tope de la
+    // conexión (8 min por defecto): una consulta tan lenta cuenta como error de ejecución.
+    if (err?.cause?.code === 'UND_ERR_HEADERS_TIMEOUT') {
+      return { ok: false, status: 0, error: 'sin respuesta del backend en 300 s', latenciaMs: Date.now() - t0 };
+    }
+    throw err;
+  }
+  const { status, data } = respuesta;
   if (status !== 200) return { ok: false, status, error: data.reason ?? data.error, latenciaMs: Date.now() - t0 };
   const filas = [...data.rows];
   for (let p = 2; p <= data.totalPages; p++) {
@@ -304,6 +315,12 @@ async function correr() {
     const previo = previos.get(clave(caso));
     if (previo?.comparacion && !necesitaGenerar(caso)) continue;
 
+    // La referencia se ejecuta antes de pagar la generación: si falla, no se gasta.
+    const claveRef = `${caso.id}|${caso.motor}`;
+    if (!resultadosReferencia.has(claveRef)) resultadosReferencia.set(claveRef, await ejecutar(caso.motor, caso.sqlReferencia));
+    const ref = resultadosReferencia.get(claveRef);
+    if (!ref.ok) throw new Error(`La referencia ${claveRef} falló (${ref.error}): corregir antes de evaluar.`);
+
     let generacion;
     if (modo === 'prueba') {
       generacion = { ok: true, sql: caso.sqlReferencia, prueba: true };
@@ -315,7 +332,8 @@ async function correr() {
         break;
       }
       generacion = await generar(caso);
-      costoCorrida += generacion.metrics?.costUsd ?? 0;
+      // Sin métricas no se sabe si el modelo llegó a responder: se suma el costo estimado.
+      costoCorrida += generacion.metrics?.costUsd ?? COSTO_ESTIMADO_POR_LLAMADA;
     }
 
     const registro = {
@@ -329,13 +347,18 @@ async function correr() {
       generacion,
     };
 
-    if (generacion.ok) {
-      const claveRef = `${caso.id}|${caso.motor}`;
-      if (!resultadosReferencia.has(claveRef)) resultadosReferencia.set(claveRef, await ejecutar(caso.motor, caso.sqlReferencia));
-      const ref = resultadosReferencia.get(claveRef);
-      if (!ref.ok) throw new Error(`La referencia ${claveRef} falló (${ref.error}): corregir antes de evaluar.`);
+    // La generación pagada se guarda apenas vuelve (sin comparación): si algo falla
+    // después, la próxima corrida reutiliza este SQL en lugar de pagarlo de nuevo.
+    if (pagado && !generacion.prueba) appendFileSync(archivo, JSON.stringify(registro) + '\n');
 
-      const gen = await ejecutar(caso.motor, generacion.sql);
+    if (generacion.ok) {
+      let gen;
+      try {
+        gen = await ejecutar(caso.motor, generacion.sql);
+      } catch (err) {
+        console.log(`${caso.id} ${caso.variante} ${caso.motor}: falló la ejecución (${err.message}). La generación quedó guardada; volver a correr para seguir.`);
+        break;
+      }
       registro.ejecucion = gen.ok
         ? { ok: true, filas: gen.filas.length, latenciaMs: gen.latenciaMs, huella: huella(gen.filas, gen.columnas) }
         : { ok: false, status: gen.status, error: gen.error, latenciaMs: gen.latenciaMs };
@@ -392,7 +415,11 @@ function resumen() {
       porClave.set(clave(r), r);
     }
   }
-  const rs = [...porClave.values()];
+  // Una generación guardada sin comparación (la corrida se cortó después de pagarla) se
+  // completa en la próxima corrida; hasta entonces no entra en las cifras.
+  const sinComparar = [...porClave.values()].filter((r) => !r.comparacion).length;
+  if (sinComparar) console.log(`${sinComparar} generaciones guardadas sin comparar: volver a correr el modo para completarlas.`);
+  const rs = [...porClave.values()].filter((r) => r.comparacion);
   const gen = rs.filter((r) => r.generacion?.ok);
   const metr = gen.map((r) => r.generacion.metrics).filter(Boolean);
   const modelos = [...new Set(rs.map((r) => r.modelo).filter(Boolean))].join(', ');

@@ -82,7 +82,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
     });
   }
 
-  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER]);
+  const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER], role);
   const startedAt = Date.now();
   const question =
     typeof body.question === 'string' && body.question.trim() ? body.question.trim() : null;

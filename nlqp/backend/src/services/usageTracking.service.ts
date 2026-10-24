@@ -13,9 +13,14 @@ export type UsageEventType = 'generateSQL' | 'executeQuery';
 export type UsageOrigin = 'usuario' | 'evaluacion';
 export const USAGE_ORIGIN_HEADER = 'x-nlqp-origin';
 
-/** Lee el origen del encabezado `X-NLQP-Origin`; cualquier otro valor es 'usuario'. */
-export function usageOriginFrom(headerValue: unknown): UsageOrigin {
-  return headerValue === 'evaluacion' ? 'evaluacion' : 'usuario';
+/**
+ * Lee el origen del encabezado `X-NLQP-Origin`; cualquier otro valor es 'usuario'.
+ * Solo el rol técnico (el runner usa la cuenta técnica de las pruebas) puede marcar
+ * una llamada como evaluación: si no, cualquier usuario podría sacar su consumo de
+ * «Uso y costos» y del historial (auditoría del 24/10).
+ */
+export function usageOriginFrom(headerValue: unknown, role: string | undefined): UsageOrigin {
+  return headerValue === 'evaluacion' && role === 'tecnico' ? 'evaluacion' : 'usuario';
 }
 
 export interface UsageEvent {

@@ -54,7 +54,7 @@ writeFileSync(sup, token(process.env.NLQP_SUPERADMIN_EMAIL, process.env.NLQP_SUP
 const PRUEBAS = [
   ['Conexiones (M1)', 'api_conexiones.mjs', [tec, usr]],
   ['Roles (M4)', 'api_roles.mjs', [tec, usr]],
-  ['Historial y guardadas (M5)', 'api_m5.mjs', [usr]],
+  ['Historial y guardadas (M5)', 'api_m5.mjs', [usr, tec]],
   ['Edición del SQL y auditoría', 'api_auditoria.mjs', [tec, usr]],
   ['Gestión de usuarios (superadmin)', 'api_usuarios.mjs', [sup, tec, usr]],
   ['Controles de la generación (sin llamar al modelo)', 'api_generacion.mjs', [tec, usr]],

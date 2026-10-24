@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 
 const token = readFileSync(process.argv[2], 'utf8').trim();
+const tecToken = readFileSync(process.argv[3], 'utf8').trim();
 const BASE = 'http://localhost:8080';
 let ok = 0, fail = 0;
 const check = (name, cond, extra = '') => {
@@ -45,9 +46,18 @@ const blk = await call('POST', '/executeQuery', { engine: 'postgres', sql: 'DELE
 check('executeQuery DELETE 403', blk.status === 403, blk.status);
 check('bloqueada: no entra al historial', (await history())[0].id === antes);
 
-// Corrida de evaluación -> no se registra
+// Corrida de evaluación: solo el técnico puede marcarla; la de un no técnico se registra igual
 await call('POST', '/executeQuery', { engine: 'postgres', sql: 'SELECT 3 AS z', question: `${marca} eval` }, { 'X-NLQP-Origin': 'evaluacion' });
-check('evaluación: no entra al historial', (await history())[0].id === antes);
+const ultima = (await history())[0];
+check('no técnico con X-NLQP-Origin: evaluacion: entra al historial igual', ultima.question === `${marca} eval`, JSON.stringify(ultima));
+const tecHistory = async () => (await (await fetch(`${BASE}/history`, { headers: { Authorization: `Bearer ${tecToken}` } })).json()).entries;
+const tecAntes = (await tecHistory())[0]?.id ?? null;
+await fetch(`${BASE}/executeQuery`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${tecToken}`, 'Content-Type': 'application/json', 'X-NLQP-Origin': 'evaluacion' },
+  body: JSON.stringify({ engine: 'postgres', sql: 'SELECT 3 AS z', question: `${marca} eval` }),
+});
+check('técnico, evaluación: no entra al historial', ((await tecHistory())[0]?.id ?? null) === tecAntes);
 
 // Orden y límite
 const all = await history();
@@ -61,7 +71,7 @@ check('guardar 201', s.status === 201, JSON.stringify(s));
 check('guardar: nombre recortado', s.json?.name === `${marca} guardada`);
 const lista = (await call('GET', '/savedQueries')).json.queries;
 check('listar: aparece primero', lista.length === savedAntes + 1 && lista[0].id === s.json.id && lista[0].engine === 'mysql' && lista[0].question === '¿uno?');
-check('guardar no toca el historial', (await history())[0].id === antes);
+check('guardar no toca el historial', (await history())[0].id === ultima.id);
 
 check('guardar sin nombre 400', (await call('POST', '/savedQueries', { name: ' ', engine: 'mysql', sql: 'SELECT 1' })).status === 400);
 check('guardar nombre > 100 400', (await call('POST', '/savedQueries', { name: 'a'.repeat(101), engine: 'mysql', sql: 'SELECT 1' })).status === 400);
