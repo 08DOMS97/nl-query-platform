@@ -278,12 +278,20 @@ export async function deleteConnection(id: string): Promise<void> {
   await deleteSecret(current.secretName);
 }
 
-/** Datos de la conexión para probarla en una edición: los nuevos, con la contraseña nueva o la guardada. */
+/**
+ * Datos de la conexión para probarla en una edición: los nuevos, con la contraseña nueva o
+ * la guardada. La guardada solo se reutiliza con el mismo servidor, puerto y usuario: si no,
+ * se podría mandar a un servidor cualquiera y leerla ahí (auditoría del 24/10).
+ */
 export async function configForEdit(
   id: string,
   input: ConnectionInput,
 ): Promise<{ engine: DbEngine; config: EngineConnectionConfig }> {
   const current = await getStored(id);
+  const sameServer = input.host === current.host && input.port === current.port && input.user === current.user;
+  if (!input.password && !sameServer) {
+    throw new ConnectionValidationError('Para cambiar el servidor, el puerto o el usuario, escriba la contraseña de nuevo.');
+  }
   const password = input.password ?? (await getSecret(current.secretName));
   return {
     engine: current.engine,

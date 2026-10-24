@@ -37,12 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, loading: true }));
       try {
         const { ok, status, data } = await apiRequest<{ role: UserRole; superadmin: boolean }>('/me', user);
+        // Si se cerró la sesión (o entró otra cuenta) mientras se leía, la respuesta ya no vale.
+        if (auth.currentUser !== user) return;
         if (ok) {
           setState({ user, role: data.role, superadmin: data.superadmin, accessError: null, loading: false });
         } else {
           setState({ ...SIN_SESION, user, accessError: data.error ?? `Error ${status} al leer la cuenta.` });
         }
       } catch {
+        if (auth.currentUser !== user) return;
         setState({ ...SIN_SESION, user, accessError: 'No hay conexión con el servidor de NLQP.' });
       }
     });

@@ -394,6 +394,11 @@ async function streamPostgres(pool: pg.Pool, sql: string, onColumns: (c: string[
         // recibir RowDescription; está disponible incluso si no hay filas.
         const fields = (cursor as unknown as { _result?: { fields?: { name: string }[] } })._result
           ?.fields;
+        // Es un campo privado: si una versión de pg-cursor lo cambia, se falla en vez de
+        // entregar filas sin columnas (se verían vacías).
+        if (!fields?.length && rows.length > 0) {
+          throw new Error('No se pudo leer la descripción de las columnas del resultado (pg-cursor).');
+        }
         onColumns((fields ?? []).map((f) => f.name));
         first = false;
       }

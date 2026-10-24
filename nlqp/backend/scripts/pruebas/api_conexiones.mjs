@@ -106,6 +106,16 @@ check('editar el tiempo máximo 200', et.status === 200 && et.json.queryTimeoutS
 const ec = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: undefined });
 check('editar sin tiempo máximo lo conserva', ec.status === 200 && ec.json.queryTimeoutSec === 90, JSON.stringify(ec.json));
 check('editar con tiempo máximo inválido 400', (await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, password: undefined, queryTimeoutSec: 4000 })).status === 400);
+// La contraseña guardada no se manda a otro servidor, puerto o usuario (auditoría 24/10)
+const otroHost = await call(tec, 'PUT', `/connections?id=${id}`, { ...pg, name: nuevoNombre, host: '203.0.113.7', password: undefined });
+check('editar el servidor sin contraseña 400', otroHost.status === 400 && /escriba la contraseña de nuevo/.test(otroHost.json?.error), JSON.stringify(otroHost.json));
+check('la conexión conserva su servidor tras el rechazo', (await call(tec, 'GET', `/connections`)).json.connections.find((x) => x.id === id)?.host === pg.host);
+const otroPuerto = await call(tec, 'POST', '/testConnectionConfig', { ...pg, id, port: pg.port + 1, password: undefined });
+check('probar con otro puerto sin contraseña 400', otroPuerto.status === 400, JSON.stringify(otroPuerto.json));
+const otroUsuario = await call(tec, 'POST', '/testConnectionConfig', { ...pg, id, user: 'otro', password: undefined });
+check('probar con otro usuario sin contraseña 400', otroUsuario.status === 400, JSON.stringify(otroUsuario.json));
+const mismaBase = await call(tec, 'POST', '/testConnectionConfig', { ...pg, id, password: undefined });
+check('probar con los mismos datos sin contraseña sí usa la guardada', mismaBase.status === 200 && mismaBase.json.ok === true, JSON.stringify(mismaBase.json));
 
 // Baja
 check('usuario: eliminar 403', (await call(usr, 'DELETE', `/connections?id=${id}`)).status === 403);

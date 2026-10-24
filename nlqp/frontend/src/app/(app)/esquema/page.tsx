@@ -141,7 +141,26 @@ export default function EsquemaPage() {
         }
       />
 
-      {error && <Notice tone="bad">{error}</Notice>}
+      {error && (
+        <Notice tone="bad">
+          {error}
+          {selectedId && errors[selectedId] && (
+            <button
+              type="button"
+              onClick={() =>
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  delete next[selectedId];
+                  return next;
+                })
+              }
+              className="ml-2 font-medium text-accent-700 underline underline-offset-2 hover:text-accent-800"
+            >
+              Reintentar
+            </button>
+          )}
+        </Notice>
+      )}
 
       {!schema && !error && (
         <p className="text-[13px] text-ink-3">
