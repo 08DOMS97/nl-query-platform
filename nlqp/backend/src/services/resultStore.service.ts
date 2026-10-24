@@ -63,7 +63,7 @@ export class ResultTooLargeError extends Error {
   constructor() {
     super(
       `El resultado supera el tamaño máximo de ${formatBytes(RESULT_MAX_BYTES)} y ` +
-        'se descartó completo (no se entregan resultados parciales). Acota la consulta.',
+        'se descartó completo (no se entregan resultados parciales). Acote la consulta.',
     );
     this.name = 'ResultTooLargeError';
   }
@@ -71,7 +71,7 @@ export class ResultTooLargeError extends Error {
 
 export class ResultNotFoundError extends Error {
   constructor() {
-    super('El resultado no existe o expiró. Vuelve a ejecutar la consulta.');
+    super('El resultado no existe o expiró. Vuelva a ejecutar la consulta.');
     this.name = 'ResultNotFoundError';
   }
 }

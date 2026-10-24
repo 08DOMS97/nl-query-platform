@@ -125,8 +125,8 @@ export function QueryResult({ initial, user }: { initial: ExecuteQueryResponse; 
                       );
                     }
                     return (
-                      <td key={col} className={`whitespace-nowrap px-4 py-1.5 ${numeric.has(col) ? 'text-right' : ''}`}>
-                        {String(value)}
+                      <td key={col} className={`whitespace-pre px-4 py-1.5 ${numeric.has(col) ? 'text-right' : ''}`}>
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </td>
                     );
                   })}

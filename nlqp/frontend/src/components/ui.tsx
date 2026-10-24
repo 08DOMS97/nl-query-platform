@@ -136,7 +136,7 @@ export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: R
 export function Notice({ tone = 'neutral', children }: { tone?: Exclude<Tone, 'accent'>; children: ReactNode }) {
   const bar = { ok: 'border-l-ok', bad: 'border-l-bad', warn: 'border-l-warn', neutral: 'border-l-line-strong' }[tone];
   return (
-    <div className={`rounded-sm border border-line border-l-2 ${bar} bg-canvas px-3 py-2 text-[13px] text-ink-2`}>
+    <div role={tone === 'bad' ? 'alert' : undefined} className={`rounded-sm border border-line border-l-2 ${bar} bg-canvas px-3 py-2 text-[13px] text-ink-2`}>
       {children}
     </div>
   );

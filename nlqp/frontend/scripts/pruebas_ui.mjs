@@ -44,6 +44,7 @@ const PRUEBAS = [
   ['Interfaz general (M4, M5)', 'ui_general.mjs'],
   ['Conexiones (M1)', 'ui_conexiones.mjs'],
   ['Usuarios (superadmin)', 'ui_usuarios.mjs'],
+  ['Consultar', 'ui_consultar.mjs'],
 ];
 
 const resumen = [];

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 import type { ExecuteQueryResponse, GenerateSqlMetrics, QuerySafetyResult, ReusedQuery, SqlEditInfo } from '@/lib/types';
 
 /** De dónde salió la sentencia en curso. Define si el técnico puede editarla. */
@@ -47,15 +47,28 @@ export interface QueryDraft {
   question: string;
   pending: PendingQuery | null;
   result: ExecuteQueryResponse | null;
+  /** Lo que se está haciendo con el backend. Vive acá para que salir de Consultar y volver no permita pagar otra generación. */
+  busy: 'generando' | 'ejecutando' | null;
+  error: string | null;
 }
 
-const EMPTY: QueryDraft = { connectionId: 'postgres', question: '', pending: null, result: null };
+const EMPTY: QueryDraft = { connectionId: 'postgres', question: '', pending: null, result: null, busy: null, error: null };
 
 interface QueryDraftState {
   draft: QueryDraft;
   setDraft: (update: (d: QueryDraft) => QueryDraft) => void;
   /** Carga una consulta del historial o de las guardadas en la pantalla Consultar. */
   reuse: (query: ReusedQuery, from: { origin: 'historial' } | { origin: 'guardada'; id: string; name: string }) => void;
+  /**
+   * Empieza una generación o ejecución y devuelve su número. Solo la última vale:
+   * `isCurrent(n)` es falso si después se empezó otra, se cambió de conexión o se
+   * reusó otra consulta, y su respuesta se descarta (no aparece un resultado viejo
+   * bajo una sentencia nueva).
+   */
+  begin: () => number;
+  isCurrent: (n: number) => boolean;
+  /** Cambia de conexión: la sentencia y el resultado de la anterior dejan de valer. */
+  selectConnection: (connectionId: string) => void;
 }
 
 const QueryDraftContext = createContext<QueryDraftState | null>(null);
@@ -66,11 +79,21 @@ const QueryDraftContext = createContext<QueryDraftState | null>(null);
  */
 export function QueryDraftProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<QueryDraft>(EMPTY);
+  const run = useRef(0);
 
   const value: QueryDraftState = {
     draft,
     setDraft: (update) => setDraftState(update),
-    reuse: (query, from) =>
+    begin: () => ++run.current,
+    isCurrent: (n) => n === run.current,
+    selectConnection: (connectionId) => {
+      run.current++;
+      setDraftState((d) =>
+        d.connectionId === connectionId ? d : { ...d, connectionId, pending: null, result: null, busy: null, error: null },
+      );
+    },
+    reuse: (query, from) => {
+      run.current++;
       setDraftState({
         connectionId: query.connectionId,
         question: query.question ?? '',
@@ -84,7 +107,10 @@ export function QueryDraftProvider({ children }: { children: ReactNode }) {
           savedQueryName: from.origin === 'guardada' ? from.name : null,
         },
         result: null,
-      }),
+        busy: null,
+        error: null,
+      });
+    },
   };
 
   return <QueryDraftContext.Provider value={value}>{children}</QueryDraftContext.Provider>;

@@ -19,14 +19,20 @@ export async function apiRequest<T>(
 ): Promise<{ ok: boolean; status: number; data: T & { error?: string } }> {
   const idToken = await user.getIdToken();
 
-  const res = await fetch(`${BACKEND_URL}${path}`, {
-    method: options.method ?? 'GET',
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}${path}`, {
+      method: options.method ?? 'GET',
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch {
+    // Sin conexión con el backend el navegador solo dice «Failed to fetch».
+    throw new Error('No hay conexión con el servidor. Revise la red e inténtelo de nuevo.');
+  }
 
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, data };

@@ -10,6 +10,8 @@ import { Badge, Button, ConnectionSelector, FieldLabel, Notice, PageHeader, Pane
 import { QueryResult } from '@/components/QueryResult';
 import { SaveQueryButton } from '@/components/SaveQueryButton';
 
+const errorMessage = (err: unknown) => (err instanceof Error ? err.message : String(err));
+
 /** Consumo de la generación: solo lo ve el rol técnico. */
 function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
   const items: [string, string][] = [
@@ -33,17 +35,17 @@ function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
 
 export default function ConsultarPage() {
   const { user, role } = useAuth();
-  const { draft, setDraft } = useQueryDraft();
+  const { draft, setDraft, begin, isCurrent, selectConnection } = useQueryDraft();
   const { connections, error: connectionsError } = useConnections();
-  const [error, setError] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [executing, setExecuting] = useState(false);
   const [savingChanges, setSavingChanges] = useState(false);
   const [changesSaved, setChangesSaved] = useState(false);
 
   if (!user) return null;
   const isTechnical = role === 'tecnico';
-  const { question, pending, result } = draft;
+  const { question, pending, result, busy, error } = draft;
+  const generating = busy === 'generando';
+  const executing = busy === 'ejecutando';
+  const setError = (e: string | null) => setDraft((d) => ({ ...d, error: e }));
   // Si la conexión elegida ya no existe (se eliminó), se usa la primera.
   const selected = connections?.find((c) => c.id === draft.connectionId) ?? connections?.[0] ?? null;
   const blocked = pending?.safety?.safe === false;
@@ -51,17 +53,19 @@ export default function ConsultarPage() {
   const editable = isTechnical && !!pending && canEdit(pending);
 
   async function handleGenerate() {
-    if (!user || !selected || !question.trim() || generating) return;
-    setError(null);
-    setGenerating(true);
-    setDraft((d) => ({ ...d, pending: null, result: null }));
+    // `busy` vive en el provider: volver a Consultar mientras se genera no permite pagar otra.
+    if (!user || !selected || !question.trim() || busy) return;
+    const n = begin();
+    setDraft((d) => ({ ...d, pending: null, result: null, error: null, busy: 'generando' }));
     try {
       const data = await apiFetch<GenerateSqlResponse>('/generateSQL', user, {
         method: 'POST',
         body: { connectionId: selected.id, naturalLanguageQuery: question },
       });
+      if (!isCurrent(n)) return;
       setDraft((d) => ({
         ...d,
+        busy: null,
         pending: {
           connectionId: selected.id,
           connectionName: selected.name,
@@ -77,38 +81,37 @@ export default function ConsultarPage() {
         },
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setGenerating(false);
+      if (isCurrent(n)) setDraft((d) => ({ ...d, busy: null, error: errorMessage(err) }));
     }
   }
 
   async function handleExecute() {
-    if (!user || !pending) return;
-    setError(null);
-    setExecuting(true);
+    if (!user || !pending || busy) return;
+    const n = begin();
+    const sent = pending;
+    // El resultado anterior se quita al empezar: si esta ejecución falla, no queda a la vista como si fuera de ella.
+    setDraft((d) => ({ ...d, result: null, error: null, busy: 'ejecutando' }));
     try {
       const { ok, status, data } = await apiRequest<ExecuteQueryResponse & { reason?: string }>('/executeQuery', user, {
         method: 'POST',
         body: {
-          connectionId: pending.connectionId,
-          sql: pending.sql,
-          question: pending.question ?? undefined,
+          connectionId: sent.connectionId,
+          sql: sent.sql,
+          question: sent.question ?? undefined,
           // Si el técnico la editó: de dónde venía, para la auditoría.
-          edit: isTechnical ? editInfo(pending) : undefined,
+          edit: isTechnical ? editInfo(sent) : undefined,
         },
       });
+      if (!isCurrent(n)) return;
       if (status === 403 && data.reason) {
         // El backend la rechazó al validarla (SQL editado o reutilizado): queda marcada en su panel.
-        setDraft((d) => (d.pending ? { ...d, result: null, pending: { ...d.pending, safety: { safe: false, reason: data.reason } } } : d));
+        setDraft((d) => (d.pending ? { ...d, busy: null, result: null, pending: { ...d.pending, safety: { safe: false, reason: data.reason } } } : { ...d, busy: null }));
         return;
       }
       if (!ok) throw new Error(data.error ?? `Error ${status} al ejecutar la consulta.`);
-      setDraft((d) => ({ ...d, result: data }));
+      setDraft((d) => ({ ...d, busy: null, result: data }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setExecuting(false);
+      if (isCurrent(n)) setDraft((d) => ({ ...d, busy: null, error: errorMessage(err) }));
     }
   }
 
@@ -132,7 +135,7 @@ export default function ConsultarPage() {
       setDraft((d) => (d.pending ? { ...d, pending: { ...d.pending, originalSql: data.sql } } : d));
       setChangesSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setSavingChanges(false);
     }
@@ -180,8 +183,8 @@ export default function ConsultarPage() {
               <ConnectionSelector
                 connections={connections}
                 value={selected.id}
-                onChange={(c) => setDraft((d) => ({ ...d, connectionId: c.id }))}
-                disabled={generating}
+                onChange={(c) => selectConnection(c.id)}
+                disabled={!!busy}
               />
             ) : connectionsError ? (
               <Notice tone="bad">{connectionsError}</Notice>
@@ -206,7 +209,7 @@ export default function ConsultarPage() {
         </div>
         <div className="flex items-center justify-between gap-4 border-t border-line bg-surface px-4 py-2.5">
           <p className="text-[12px] text-ink-3">{isTechnical ? 'Cada generación tiene un costo de procesamiento.' : ''}</p>
-          <Button variant="primary" onClick={handleGenerate} disabled={generating || !selected || !question.trim()}>
+          <Button variant="primary" onClick={handleGenerate} disabled={!!busy || !selected || !question.trim()}>
             {generating ? 'Generando…' : 'Generar SQL'}
           </Button>
         </div>
@@ -228,7 +231,8 @@ export default function ConsultarPage() {
               rows={Math.min(Math.max(pending.sql.split('\n').length, 3), 16)}
               onChange={(e) => {
                 setChangesSaved(false);
-                setDraft((d) => (d.pending ? { ...d, result: null, pending: { ...d.pending, sql: e.target.value, safety: null } } : d));
+                if (executing) begin(); // la ejecución en curso es de la sentencia anterior: su resultado se descarta
+                setDraft((d) => (d.pending ? { ...d, result: null, busy: executing ? null : d.busy, pending: { ...d.pending, sql: e.target.value, safety: null } } : d));
               }}
               className="block w-full resize-y bg-canvas px-4 py-3 font-mono text-[13px] leading-relaxed focus:bg-accent-50/40 focus:outline-none"
             />
@@ -255,13 +259,14 @@ export default function ConsultarPage() {
           {blocked && (
             <div className="border-t border-line px-4 py-3">
               <Notice tone="bad">
-                El Query Safety Engine bloqueó la sentencia{pending.safety?.reason ? `: ${pending.safety.reason}` : '.'}
+                {isTechnical ? 'El Query Safety Engine bloqueó la sentencia' : 'Por seguridad, la sentencia no se ejecuta'}
+                {pending.safety?.reason ? `: ${pending.safety.reason}` : '.'}
               </Notice>
             </div>
           )}
 
           <div className="flex items-center gap-2 border-t border-line px-4 py-2.5">
-            <Button variant="primary" onClick={handleExecute} disabled={blocked || executing || !pending.sql.trim()}>
+            <Button variant="primary" onClick={handleExecute} disabled={blocked || !!busy || !pending.sql.trim()}>
               {executing ? 'Ejecutando…' : 'Ejecutar'}
             </Button>
             {!blocked && pending.origin === 'guardada' && edited && isTechnical && (
@@ -271,7 +276,7 @@ export default function ConsultarPage() {
             )}
             {!blocked && (
               <SaveQueryButton
-                key={`${pending.savedQueryId ?? ''}|${pending.sql}`}
+                key={pending.sql}
                 query={pending}
                 user={user}
                 edit={isTechnical ? editInfo(pending) : undefined}
