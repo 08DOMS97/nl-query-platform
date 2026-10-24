@@ -1,4 +1,4 @@
-# Revisión de seguridad — backend NLQP (2026-09-17, actualizada 2026-10-19)
+# Revisión de seguridad — backend NLQP (2026-09-17, actualizada 2026-10-24)
 
 Revisión manual del backend construido hasta el momento (módulos 1, 2, 3, 5 y 6:
 ConnectionManager, SchemaExtractor, SchemaPruning, Query Safety Engine,
@@ -33,6 +33,7 @@ el banco de pruebas real** (no solo lectura de código) antes de reportarlo.
 | 12 | Sin control por rol: todo usuario autenticado veía conexiones, esquema y costos (10/10) | Media | Corregido (10/10); queda un riesgo aceptado, ver §12 |
 | 13 | Contraseñas de las bases en `.env` en vez de Secret Manager, contra lo que dice RNF-05 y el texto de 6.1 (13/10) | Media | Corregido (10/10, documentado el 13/10) |
 | 14 | Registro público abierto: cualquiera podía crearse una cuenta y consultar las bases; rol leído del token, con hasta 1 h de atraso (19/10) | Media | Corregido (19/10) |
+| 15 | Auditoría 23–24/10: caída del backend con un tipo inesperado, contraseña guardada mandada a otro servidor, origen de uso falsificable; contraseñas del banco de pruebas commiteadas (24/10) | **Alta** | Corregido en parte; H2, H4, H7, H8 y H11 pendientes de David (§15, `AUDITORIA_2026-10-24.md`) |
 
 Después de aplicar las 3 correcciones: batería de seguridad 17/17, y las 50
 consultas de prueba siguen en 200/200 ejecuciones y 50/50 consistentes entre los 4
@@ -620,6 +621,56 @@ pantalla. Las pruebas de API e interfaz quedaron en el repo: `npm run test:api`
 **Pendiente:** los handlers registrados con `functions.http(...)` (`users`, `me` y el
 resto) siguen sin el middleware de autenticación. Solo importa si se despliega en Cloud
 Functions (`CAMBIO_ON_PREMISES.md` OP-03).
+
+## 15. Auditoría del 23–24/10: caída del backend, contraseña guardada y origen de uso — ALTA (corregido en parte, 24/10/2026)
+
+Detalle completo, con todos los hallazgos y su estado: **`AUDITORIA_2026-10-24.md`**.
+Esta sección resume solo los de seguridad. La revisión del Query Safety Engine quedó
+**pendiente**: la batería sigue en 57/57 + 200/200, pero no hubo una revisión nueva.
+
+**Corregidos:**
+- **Caída del backend (R1, ALTA).** Cualquier cuenta autenticada apagaba el servidor con
+  `POST /executeQuery {"sql": 1}`: el `TypeError` salía de un handler async sin manejar.
+  Ahora se validan los tipos, los 16 handlers async pasan por `wrap()` y hay un
+  manejador de errores JSON. JSON malformado da 400, más de 100 kB da 413 y lo demás un
+  500 genérico, siempre sin stack trace (`api_robustez` 14/14).
+- **401 sin el detalle interno (R3)** de la verificación del token.
+- **Contraseña guardada mandada a otro servidor (H3, MEDIA).** Al editar o probar una
+  conexión con la contraseña vacía, se usaba la guardada con el servidor, el puerto y el
+  usuario nuevos: un técnico podía mandarla a un servidor suyo y leerla. Ahora, si
+  cambia cualquiera de los tres, hay que escribirla (`configForEdit`;
+  `api_conexiones` 64/64).
+- **Origen de uso falsificable (U1, MEDIA).** Cualquier cuenta podía marcar sus llamadas
+  con `X-NLQP-Origin: evaluacion` y sacarlas de «Uso y costos» y del historial. Ahora
+  solo vale para el rol técnico (`api_m5` 33/33).
+- **Errores crudos al no técnico (G5, relacionado con el §5).** El 500 de
+  `/generateSQL` ya no muestra el detalle de Vertex AI, del motor o de Secret Manager al
+  no técnico.
+- **Docker (24/10, `DOCKER.md`).**
+  - Solo el frontend se publica en la red; el backend escucha en la red interna y en
+    127.0.0.1.
+  - La credencial de Google Cloud se monta como secreto de solo lectura.
+  - `NLQP_ALLOW_DEV_AUTH_BYPASS` queda fijo en `false`.
+  - Los contenedores corren sin root, de solo lectura, sin capacidades y con
+    `no-new-privileges`.
+  - Con el reenvío `/api`, el CORS abierto del hallazgo 4 deja de importar en la
+    instalación con Docker.
+
+**Pendientes de decisión de David:**
+- **H2 (ALTA con la instalación en red):** las contraseñas del banco de pruebas
+  (`testuser`, admin de Postgres) están commiteadas en `Bases de datos/README.md` e
+  `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` y siguen vigentes, y su compose publica los
+  puertos en todas las interfaces. Cambiarlas y publicar en `127.0.0.1`. Lo del 18/10
+  («se cambiaron») valía solo para los usuarios de la app.
+- **H4:** `NLQP_ALLOW_DEV_AUTH_BYPASS=true` en `backend/.env` (inactivo mientras haya
+  `FIREBASE_PROJECT_ID`). Recomendado: `false`.
+- **H7 / H8:** sin auditoría de la gestión de usuarios; un superadmin puede operar sobre
+  otro; carrera al cambiar claims.
+- **H11:** reglas de Firestore sin versionar.
+- **G7:** la pregunta va al prompt sin delimitar (inyección de instrucciones). El Query
+  Safety Engine sigue frenando cualquier escritura, así que el riesgo es un SQL de
+  lectura distinto al pedido.
+- **G8:** sin límite de llamadas ni de gasto por usuario.
 
 ---
 

@@ -165,6 +165,33 @@ otra página: ~5 ms. CSV completo: ~1 s.
    con `timezone: 'Z'` y parser de `DATE` en `pg` a medianoche UTC. Ahora los 4
    motores devuelven el mismo valor. Lo detectó el runner de evaluación al comparar
    contenido (antes solo se comparaba el número de filas).
+5. **(24/10/2026, auditoría) Valores que se mostraban mal o en lugar de otros.**
+   Prueba nueva: `scripts/pruebas/api_integridad.mjs`, 19/19 en los 4 motores.
+   Detalle en `AUDITORIA_2026-10-24.md` §2.
+   - Dos columnas con el mismo nombre (p. ej. `c.customer_id` y
+     `o.order_id AS customer_id`) quedaban en la misma clave de la fila: se mostraba un
+     valor en la columna del otro. En SQL Server, una columna sin nombre
+     (`COUNT(*)`) también. Ahora es **422** con un aviso que pide alias distintos
+     (`ResultShapeError`). En SQL Server se detecta porque el driver junta los valores
+     repetidos en un arreglo; se descartó `arrayRowMode` porque rompe `FOR JSON`.
+   - `TIMESTAMP` sin zona de Postgres salía +6 h (`pg` lo leía como hora local): ahora
+     se lee como UTC, igual que el `DATETIME` de MySQL. Los valores especiales
+     (`infinity`) quedan como texto.
+   - BIGINT de MySQL/MariaDB de más de 2^53 llegaba redondeado: ahora llega como texto
+     exacto (`supportBigNumbers`), como en Postgres. Un conteo sigue siendo número.
+   - MySQL/MariaDB: si fallaba el `SET SESSION` del tope de tiempo, la conexión quedaba
+     sin tope y el error salía sin manejar. Ahora la conexión se descarta y la
+     consulta falla.
+   - Postgres: si pg-cursor no da la descripción de columnas (es un campo privado) y
+     hay filas, ahora es un error y no filas vacías.
+6. **(24/10/2026) Pantalla Consultar.**
+   - Una respuesta lenta podía dejar un resultado viejo bajo una sentencia nueva.
+   - Un error al ejecutar dejaba visible el resultado anterior.
+   - Los objetos y JSON salían como `[object Object]`, y los espacios repetidos se
+     colapsaban.
+
+   Corregido en `useQueryDraft.tsx`, `page.tsx` y `QueryResult.tsx`
+   (`ui_consultar` 18/18).
 
 ## Limitaciones conocidas
 
@@ -174,6 +201,14 @@ otra página: ~5 ms. CSV completo: ~1 s.
   Storage).
 - Un reinicio del backend invalida los resultados vigentes (el usuario vuelve a
   ejecutar la consulta).
+- (24/10, pendiente de David) SQL Server: DECIMAL y MONEY pierden precisión en el driver
+  (12.50 → 12.5; un DECIMAL(38,2) grande se redondea). MySQL: las fechas cero llegan
+  como NULL y el `TIMESTAMP` depende de la `time_zone` de la sesión. CSV: un valor que
+  empieza con `=` se abre en Excel como fórmula, y NULL y la cadena vacía se exportan
+  igual.
+- En Docker, el frontend reenvía `/api` al backend con un tope de 61 min (más que los
+  60 min máximos de una conexión). Verificado con una consulta de 48 s; el valor por
+  defecto de Next era 30 s (`DOCKER.md`).
 - Pendiente (decisión del 02/10/2026): un "guardián de costo" que rechace consultas
   **antes** de ejecutarlas según el costo estimado por `EXPLAIN`. Se calibrará con
   los datos del banco de volumen alto en vez de fijar un umbral a ciegas.

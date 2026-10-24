@@ -6,6 +6,92 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-24 (2) — Auditoría, correcciones e instalación con Docker
+
+Sin gasto en GCP. Pedidos de David: auditar a fondo, corregir y documentar («trabajá
+esta noche sin mí… versionando cada cambio exitoso», «no hagas acciones que generen
+costo») y, después, «que el proyecto esté en docker para… pasarlo a otro equipo».
+Detalle de cada hallazgo y su estado: **`AUDITORIA_2026-10-24.md`**.
+
+### Decisiones de David (24/10)
+- Commit y push de cada cambio verificado; los cambios del 22–23/10 en un commit aparte.
+- SQL como pregunta: rechazarlo para todos los roles.
+- LIMIT/TOP que la pregunta no pide: bloquear con aviso, sin modificar el SQL en
+  silencio.
+
+### Qué se corrigió (un commit por bloque)
+- **Generar SQL** (ec7948c):
+  - rechaza SQL de entrada y preguntas de más de 1000 caracteres antes del modelo;
+  - bloquea los límites de filas no pedidos (422);
+  - el servidor ya no se cae con un campo de tipo inesperado (`sql: 1` lo apagaba) y
+    no muestra stack traces.
+- La consulta de David del 24/10 (`SELECT TOP 10…` en MySQL, $0.0017) no tenía un
+  límite inventado: el `LIMIT 10` venía de su `TOP 10`.
+- **Integridad** (639614c): columnas repetidas, `TIMESTAMP` de Postgres +6 h, BIGINT de
+  MySQL y conexiones de MySQL/MariaDB sin tope.
+- **Consultar** (a46e398): resultados viejos bajo una sentencia nueva, pago doble al
+  cambiar de pantalla, el resultado anterior visible tras un error, «Failed to fetch» y
+  detalles de la tabla.
+- **Uso y costos** (018565b): `X-NLQP-Origin` solo para el técnico; se registra el
+  costo de MAX_TOKENS; el runner guarda cada generación pagada apenas vuelve.
+- **Conexiones** (634fde1):
+  - la contraseña guardada no se usa con otro servidor, puerto o usuario;
+  - Esquema tiene «Reintentar»;
+  - carrera de `useAuth` al cerrar sesión;
+  - guardia de pg-cursor.
+
+### Docker (8ccf060)
+- `nlqp/docker-compose.yml` + Dockerfiles: `docker compose up -d --build`.
+- Solo el frontend (3000) se publica en la red. El navegador llama a `/api` y Next lo
+  reenvía al backend, que queda en la red interna y en `127.0.0.1:8080`.
+- Credencial de Google Cloud como secreto de solo lectura. Contenedores sin root, de
+  solo lectura y sin capacidades. Dev bypass fijo en `false`.
+- `NLQP_LOCALHOST_ALIAS`: las conexiones registradas con `localhost` llegan a la máquina
+  anfitriona.
+- Imágenes revisadas: sin `.env` ni credenciales. Guía: `DOCKER.md`.
+- La primera construcción falló al descargar la fuente de Google (red); la segunda pasó.
+
+### Verificado
+- **API 275/275** (64 · 23 · 33 · 25 · 50 · 47 · 14 · 19).
+- **Interfaz 102/102** (24 · 33 · 27 · **18**, `ui_consultar` nueva).
+- **Seguridad 57/57 + 200/200**.
+- **Evaluación en modo prueba 200/200**.
+- Todo, también contra los contenedores de Docker. Además, una consulta de 48 s por el
+  reenvío `/api` (el valor por defecto de Next corta a los 30 s).
+- `ui_consultar` responde `/generateSQL` en el navegador (en `:8080` y en `/api`): no
+  llamó a Gemini.
+
+### No se hizo
+- La revisión del Query Safety Engine quedó cortada: **pendiente**.
+- El acceso desde otro equipo de la red no se probó.
+- **Pendiente de David:**
+  - contraseñas del banco de pruebas commiteadas y puertos en 0.0.0.0 (H2, alta);
+  - `NLQP_ALLOW_DEV_AUTH_BYPASS=true` en `backend/.env`;
+  - cambios al prompt;
+  - límite de llamadas por usuario;
+  - auditoría de la gestión de usuarios;
+  - CSV y fórmulas;
+  - DECIMAL de SQL Server;
+  - cuenta de servicio para Docker.
+- Los permisos: la sesión principal ya corría en modo automático; los pedidos de
+  aprobación venían de los agentes de la auditoría. No se cambió la configuración.
+
+### Docs y plan
+- `AUDITORIA_2026-10-24.md` y `DOCKER.md` (nuevos).
+- `SEGURIDAD.md` §15, `RENDIMIENTO_E_INTEGRIDAD.md` (bugs 5 y 6),
+  `PREPARACION_EVALUACION_GEMINI.md` §8 (nota del 24/10).
+- `RESUMEN_PARA_DOC_TEORICO.md`: **30 pendientes** (+5).
+- Plan: tareas nuevas 50 (auditoría) y 51 (Docker), al 100 %. Corte 24/10: plan 93 %,
+  real 93 %, +0,3. El Excel del corte quedó en el scratchpad de la sesión, porque
+  `Claude outputs/Plan_de_Trabajo_PG2 24-10-2026.xlsx` estaba abierto: volver a
+  generarlo con Excel cerrado.
+
+### Sigue
+- El piloto con paráfrasis (~$0.10–0.16), con confirmación. Incluye la primera
+  verificación real del 422 de límite no pedido.
+
+---
+
 ## 2026-10-24 — Cuenta de David como superadmin y contraseña nueva desde Usuarios
 
 Sin gasto en GCP.

@@ -8,10 +8,10 @@
       "padre": null,
       "inicio": "2026-06-01",
       "fin": "2026-10-31",
-      "duracion": 177,
-      "plan": 0.9266,
-      "real_calc": 0.9299,
-      "dif": 0.0034
+      "duracion": 180,
+      "plan": 0.9278,
+      "real_calc": 0.9311,
+      "dif": 0.0033
     },
     {
       "no": 2,
@@ -277,10 +277,10 @@
       "padre": 1,
       "inicio": "2026-09-07",
       "fin": "2026-10-14",
-      "duracion": 57,
+      "duracion": 60,
       "plan": 1.0,
-      "real_calc": 0.9544,
-      "dif": -0.0456
+      "real_calc": 0.9567,
+      "dif": -0.0433
     },
     {
       "no": 22,
@@ -629,6 +629,42 @@
       "nueva": {
         "agregada": "2026-10-19",
         "implementada": "2026-10-19"
+      },
+      "duracion": 1,
+      "plan": 1.0,
+      "real_calc": 1.0,
+      "dif": 0.0
+    },
+    {
+      "no": 50,
+      "tarea": "Auditoría del sistema y correcciones",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-23",
+      "fin": "2026-10-24",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 23–24/10 a pedido mío: auditoría de generación, ejecución, integridad, robustez, pantalla Consultar, uso y costos, conexiones y despliegue. Corregido: rechazo de SQL como pregunta y de límites de filas no pedidos, caída del backend ante tipos inesperados, columnas repetidas, TIMESTAMP de Postgres, BIGINT de MySQL, tope de MySQL/MariaDB, resultados viejos y pago doble en Consultar, origen de uso falsificable, reuso de la contraseña guardada con otro servidor. Verificado: API 275/275, UI 102/102, seguridad 57/57 + 200/200. Pendientes de mi decisión en AUDITORIA_2026-10-24.md (contraseñas del banco de pruebas, prompt, límite por usuario).",
+      "nueva": {
+        "agregada": "2026-10-23",
+        "implementada": "2026-10-24"
+      },
+      "duracion": 2,
+      "plan": 1.0,
+      "real_calc": 1.0,
+      "dif": 0.0
+    },
+    {
+      "no": 51,
+      "tarea": "Instalación con Docker",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-24",
+      "fin": "2026-10-24",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 24/10 a pedido mío: frontend y backend en contenedores con docker compose up, para pasar el sistema a otro equipo. Solo el frontend se publica en la red, la credencial de Google Cloud va como secreto de solo lectura, contenedores sin root. Verificado contra Docker: API 275/275, UI 102/102, seguridad 57/57 + 200/200, consulta de 48 s por el reenvío. Guía: docs/DOCKER.md.",
+      "nueva": {
+        "agregada": "2026-10-24",
+        "implementada": "2026-10-24"
       },
       "duracion": 1,
       "plan": 1.0,

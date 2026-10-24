@@ -24,15 +24,15 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-24, contraseña nueva por el superadministrador)
+## Contador (actualizado 2026-10-24, auditoría y Docker)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 8 | 1 | 20 |
-| 5 | 2 | 0 | 4 |
-| 6 | 7 | 0 | 39 |
-| Conclusiones / limitaciones | 8 | 0 | 0 |
-| **Total** | **25** | **1** | **63** |
+| 5 | 3 | 0 | 4 |
+| 6 | 10 | 0 | 39 |
+| Conclusiones / limitaciones | 9 | 0 | 0 |
+| **Total** | **30** | **1** | **63** |
 
 > **19/10 — Despliegue on-premises, tope por conexión y gestión de usuarios.** Las 4
 > entradas nuevas (una por capítulo, marcadas "(19/10) On-premises") remiten a
@@ -212,6 +212,17 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Capítulo 5 — Diseño de la aplicación
 
+- [ ] (24/10) **Instalación con Docker — 5.3 / 5.3.1 y Figura 8**: agregar que frontend
+  y backend se instalan como dos contenedores con un solo comando
+  (`docker compose up -d --build`), lo que facilita llevar el sistema a otro servidor.
+  Para la Figura 8:
+  - solo el frontend se publica en la red; el navegador llama a `/api` y el frontend
+    reenvía al backend por la red interna;
+  - la credencial de Google Cloud se monta como secreto de solo lectura;
+  - las bases siguen fuera de los contenedores.
+
+  Fuente: `DOCKER.md`.
+
 - [ ] (19/10) **On-premises — Cap. 5**: `CAMBIO_ON_PREMISES.md` OP-01 a OP-08. Incluye:
   - reemplazar el párrafo de 5.3;
   - **5.3.1 Justificación del despliegue local** y **5.3.2 Escalamiento a la
@@ -318,6 +329,20 @@ una sola nueva (10) pendiente.
 - [x] (25/09) Texto pegado en el Word (versión con la poda vieja).
 
 ### 6.3.2 — Integración con Vertex AI Gemini Pro (pasa a "Integración con Gemini en Vertex AI")
+- [ ] (24/10) **Agregar los controles alrededor de la llamada al modelo**, para todos
+  los roles:
+  - (a) si la «pregunta» ya es una sentencia SQL, se rechaza antes de llamar al modelo y
+    sin costo;
+  - (b) la pregunta admite hasta 1000 caracteres;
+  - (c) si el SQL generado limita las filas (LIMIT/TOP/FETCH) y la pregunta no pide una
+    cantidad ni un extremo, no se entrega: se avisa, para no presentar como completo un
+    resultado parcial (refuerza RF-07 y la regla de no truncar).
+
+  Ninguna de las 100 preguntas del conjunto (50 + 50 paráfrasis) se toma por SQL y las
+  22 que piden un límite pasan. Fuente: `PREPARACION_EVALUACION_GEMINI.md` §8 (nota del
+  24/10) y `AUDITORIA_2026-10-24.md` §1. En 6.3.6, el veredicto `limite_no_pedido` va
+  como categoría propia.
+
 - [ ] (18/10) **Actualizar por el cambio de modelo**: título → "Integración con Gemini en
   Vertex AI"; modelo por defecto `gemini-3.8-flash` en `global` (no `gemini-2.5-pro` en
   `us-central1`); párrafo nuevo sobre el retiro de 2.5 Pro (20/10/2026) y el cambio sin
@@ -375,6 +400,16 @@ una sola nueva (10) pendiente.
   entrada del 08/10).
 
 ### 6.3.5 — Control de tiempo de ejecución e integridad de resultados
+- [ ] (24/10) **Agregar a la verificación de integridad** los defectos que encontró la
+  auditoría, ya corregidos y verificados en los 4 motores (19/19):
+  - dos columnas con el mismo nombre mostraban un valor en lugar de otro (ahora se
+    rechaza con un aviso);
+  - el `TIMESTAMP` de PostgreSQL salía corrido 6 h;
+  - un BIGINT grande de MySQL/MariaDB llegaba redondeado;
+  - si fallaba fijar el tope de tiempo en MySQL/MariaDB, la conexión quedaba sin tope.
+
+  Fuente: `RENDIMIENTO_E_INTEGRIDAD.md`, bug 5.
+
 - [x] (02/10) **Reemplazar el párrafo "Tiempo máximo de ejecución"** por el de
   `CAPITULO_6.md`: el Word todavía dice "de 60 segundos por defecto", y David decidió no
   mencionar el valor. **Aplicado el 10/10** en `PG2-2026 capítulo 6 revisado
@@ -452,6 +487,18 @@ una sola nueva (10) pendiente.
   10/10 muestra el selector de motores viejo: hay que retomarla.
  **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`. La Figura 9 sigue siendo la captura vieja hasta tener la nueva (ver entrada de capturas).
 ### 6.7 — Integración y pruebas del sistema
+- [ ] (24/10) **6.7.2 — filas nuevas en la tabla de hallazgos** (`SEGURIDAD.md` §15):
+
+  | Hallazgo | Severidad | Estado |
+  |---|---|---|
+  | Caída del backend ante un dato de tipo inesperado | Alta | Corregido |
+  | Reuso de la contraseña guardada con otro servidor | Media | Corregido |
+  | Origen de uso falsificable | Media | Corregido |
+  | Contraseñas del banco de pruebas en el repositorio | Alta | Pendiente |
+
+  Actualizar también las cifras de pruebas: API 275/275, interfaz 102/102 y seguridad
+  57/57 + 200/200.
+
 - [ ] (18/10) **6.7.1 — precios y razonamiento del modelo nuevo**: precio de lista de
   Gemini 3.8 Flash (global): USD 1.50 / M entrada y USD 7.50 / M salida y razonamiento
   (catálogo de Cloud Billing, 18/10); razonamiento en el nivel más bajo; ~USD 0.001 por
@@ -509,6 +556,14 @@ una sola nueva (10) pendiente.
 - [ ] Redactar después del 14/10.
 
 ## Conclusiones y limitaciones
+
+- [ ] (24/10) **Limitaciones**: agregar
+  - la pérdida de precisión de DECIMAL/MONEY en el driver de SQL Server;
+  - que el CSV no neutraliza valores que Excel interpreta como fórmulas;
+  - que el control de límites no pedidos se basa en palabras de la pregunta, y puede
+    dejar pasar un límite cuando la pregunta usa «más» o «mayor».
+
+  Fuente: `AUDITORIA_2026-10-24.md`.
 
 - [ ] (19/10) **On-premises — Conclusiones, recomendaciones, glosario y bibliografía**:
   `CAMBIO_ON_PREMISES.md` OP-37 a OP-41 y la recomendación de OD-04:

@@ -227,6 +227,31 @@ Se confirma con David antes de cada corrida pagada.
 
 ## 8. Pendiente antes de la corrida
 
+> **24/10/2026 — Controles de `/generateSQL` y cambios del runner** (auditoría,
+> `AUDITORIA_2026-10-24.md` §1 y §5):
+> - **Antes del modelo, sin costo:**
+>   - una «pregunta» que ya es SQL da 422 `nlqp/sql-input`;
+>   - una de más de 1000 caracteres da 400.
+>
+>   Ninguna de las 100 preguntas del corpus se toma por SQL (`api_generacion` 47/47).
+> - **Después del modelo:** si el SQL limita filas (LIMIT/TOP/FETCH) y la pregunta no
+>   pide una cantidad ni un extremo, da 422 `nlqp/unrequested-row-limit`, con el SQL y
+>   las métricas. En el runner es el veredicto nuevo **`limite_no_pedido`**: cuenta como
+>   no correcto y tiene su propia línea en el resumen.
+>   - Las 22 preguntas del corpus que piden un límite pasan.
+>   - El control es deliberadamente laxo: 22 preguntas sin límite (13 consultas) usan
+>     palabras como «más» o «mayor» y dejarían pasar un LIMIT.
+>   - **Falta verificarlo con Gemini real** (~$0.002): se hace en el piloto.
+> - **Runner:**
+>   - ejecuta la referencia antes de pagar la generación;
+>   - guarda cada generación apenas vuelve, así que si algo falla después, la próxima
+>     corrida la reutiliza;
+>   - suma el costo estimado si una respuesta no trae métricas;
+>   - el resumen ignora (y avisa) las generaciones guardadas sin comparar.
+>
+>   El encabezado `X-NLQP-Origin: evaluacion` ahora solo vale para el rol técnico; el
+>   runner ya usaba la cuenta técnica de las pruebas. Modo prueba: 200/200.
+
 1. ~~Streaming, paginación y CSV~~ — hecho (`RENDIMIENTO_E_INTEGRIDAD.md`).
 2. ~~Índices en el esquema + reglas de rendimiento en el prompt~~ — hecho (§4).
 2b. ~~Migrar a `@google/genai`~~ — **hecho 09/10/2026** (`@google/genai` 2.24.0
