@@ -1,0 +1,6 @@
+# La configuración entra como argumentos de construcción, no desde los .env locales.
+.env*
+node_modules
+.next
+scripts
+*.log

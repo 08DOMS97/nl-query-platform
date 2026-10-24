@@ -1,0 +1,8 @@
+# Nada de secretos ni artefactos locales en la imagen.
+.env
+.env.*
+!.env.example
+node_modules
+lib
+scripts
+*.log

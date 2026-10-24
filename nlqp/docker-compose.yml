@@ -1,0 +1,77 @@
+# NLQP en Docker: frontend + backend (despliegue on-premises).
+#
+#   cd nlqp
+#   copy .env.example .env        (y completarlo; ver docs/DOCKER.md)
+#   docker compose up -d --build
+#   -> http://<IP-del-servidor>:3000
+#
+# Las bases de datos NO están acá: son las de la organización (o el banco de pruebas de
+# "Bases de datos/docker-compose.yml", que se levanta aparte). Vertex AI, Firebase Auth,
+# Firestore y Secret Manager siguen en Google Cloud (despliegue híbrido).
+#
+# Seguridad:
+#   - Solo el frontend (puerto 3000) se publica en la red. El backend escucha en la red
+#     interna de Docker y, para los scripts y pruebas de esta máquina, en 127.0.0.1:8080.
+#   - El único secreto es la credencial de Google Cloud: se monta como secreto de solo
+#     lectura, no entra en la imagen ni en variables de entorno.
+#   - Los contenedores corren sin root, con el sistema de archivos de solo lectura y sin
+#     privilegios adicionales. El acceso de desarrollo sin token queda apagado.
+
+name: nlqp
+
+services:
+  backend:
+    build: ./backend
+    image: nlqp-backend
+    restart: unless-stopped
+    environment:
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:?Falta GCP_PROJECT_ID en nlqp/.env}
+      GCP_LOCATION: ${GCP_LOCATION:-global}
+      VERTEX_AI_MODEL: ${VERTEX_AI_MODEL:-gemini-3.8-flash}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:?Falta FIREBASE_PROJECT_ID en nlqp/.env}
+      DB_MSSQL_TRUST_SERVER_CERTIFICATE: ${DB_MSSQL_TRUST_SERVER_CERTIFICATE:-false}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp_credentials
+      NLQP_ALLOW_DEV_AUTH_BYPASS: "false"
+      # Una conexión registrada con "localhost" apunta a esta máquina, no al contenedor.
+      NLQP_LOCALHOST_ALIAS: host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    secrets:
+      - gcp_credentials
+    ports:
+      - "127.0.0.1:${NLQP_BACKEND_PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_FIREBASE_API_KEY: ${NEXT_PUBLIC_FIREBASE_API_KEY:?Falta NEXT_PUBLIC_FIREBASE_API_KEY en nlqp/.env}
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+        NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID}
+    image: nlqp-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${NLQP_PORT:-3000}:3000"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache:uid=1000,gid=1000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+secrets:
+  gcp_credentials:
+    file: ${GCP_CREDENTIALS_FILE:?Falta GCP_CREDENTIALS_FILE en nlqp/.env}

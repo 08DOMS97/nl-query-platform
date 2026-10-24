@@ -151,9 +151,22 @@ const pools = new Map<string, Promise<PoolHandle>>();
 /** Pools ya abiertos, para `getPoolStatus` (que no espera ni abre ninguno). */
 const readyPools = new Map<string, PoolHandle>();
 
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+
+/**
+ * Dentro de un contenedor, «localhost» es el propio contenedor y no el servidor donde
+ * están las bases. Con `NLQP_LOCALHOST_ALIAS` (en Docker, `host.docker.internal`) una
+ * conexión registrada con localhost llega a la máquina anfitriona; sin la variable, el
+ * host queda igual. Así las mismas conexiones sirven con y sin Docker.
+ */
+export function networkHost(host: string): string {
+  const alias = process.env.NLQP_LOCALHOST_ALIAS?.trim();
+  return alias && LOCAL_HOSTS.has(host.trim().toLowerCase()) ? alias : host;
+}
+
 function createPgPool(cfg: EngineConnectionConfig, timeoutMs: number): pg.Pool {
   return new PgPool({
-    host: cfg.host,
+    host: networkHost(cfg.host),
     port: cfg.port,
     database: cfg.database,
     user: cfg.user,
@@ -167,7 +180,7 @@ function createPgPool(cfg: EngineConnectionConfig, timeoutMs: number): pg.Pool {
 
 function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectionConfig, timeoutMs: number): mysql.Pool {
   const pool = mysql.createPool({
-    host: cfg.host,
+    host: networkHost(cfg.host),
     port: cfg.port,
     database: cfg.database,
     user: cfg.user,
@@ -206,7 +219,7 @@ function createMysqlFamilyPool(engine: 'mysql' | 'mariadb', cfg: EngineConnectio
 
 function createMssqlPool(cfg: EngineConnectionConfig, timeoutMs: number): Promise<mssql.ConnectionPool> {
   return new mssql.ConnectionPool({
-    server: cfg.host,
+    server: networkHost(cfg.host),
     port: cfg.port,
     database: cfg.database,
     user: cfg.user,

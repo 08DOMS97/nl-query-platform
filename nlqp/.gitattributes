@@ -1,0 +1,4 @@
+# Los archivos que leen Docker y los contenedores (Linux) van siempre con LF.
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+docker-compose.yml text eol=lf

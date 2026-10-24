@@ -31,7 +31,9 @@ const GENERADA = "SELECT 'a  b' AS texto, json_build_object('k', 1) AS objeto";
 async function login(email, password) {
   const ctl = { generaciones: 0, generarDemora: 0, ejecutar: 'normal', ejecutarDemora: 0 };
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  await context.route('http://localhost:8080/**', async (route) => {
+  // El backend puede estar en :8080 (npm run dev) o detrás de /api del frontend (Docker).
+  const alBackend = (u) => u.port === '8080' || u.pathname.startsWith('/api/');
+  await context.route(alBackend, async (route) => {
     const url = route.request().url();
     if (url.includes('/generateSQL')) {
       ctl.generaciones++;
@@ -40,7 +42,7 @@ async function login(email, password) {
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Access-Control-Allow-Origin': '*', 'x-nlqp-prueba': '1' },
         body: JSON.stringify({
           sql: GENERADA, engine: 'postgres', connectionId, safety: { safe: true },
           metrics: { tokensInput: 1, tokensOutput: 1, tokensThinking: 0, tokensTotal: 2, costUsd: 0, latencyMs: 1, tablesSent: 1, tablesTotal: 1 },
@@ -58,6 +60,10 @@ async function login(email, password) {
   });
   const page = await context.newPage();
   page.on('dialog', (d) => d.accept());
+  // Red de seguridad: si /generateSQL llegara a salir del navegador, se aborta la prueba.
+  page.on('requestfinished', async (r) => {
+    if (r.url().includes('/generateSQL') && !(await r.response())?.headers()['x-nlqp-prueba']) { console.log('ABORTO: /generateSQL llegó al backend'); process.exit(2); }
+  });
   await page.goto('http://localhost:3000/login');
   await page.fill('#email', email);
   await page.fill('#password', password);
