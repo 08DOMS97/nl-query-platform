@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-// En Docker (`docker/docker-compose.yml`) el navegador no llama al backend directamente:
+// En Docker (`nlqp/docker-compose.yml`) el navegador no llama al backend directamente:
 // pide `/api/...` al frontend y este lo reenvía por la red interna de Docker. Así el
 // backend no queda expuesto en la red, no hace falta CORS y la imagen no depende de la
 // IP del servidor. Se activa al construir con NLQP_BACKEND_INTERNAL_URL; sin ella (npm

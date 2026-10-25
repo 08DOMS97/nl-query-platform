@@ -16,7 +16,7 @@ Sin gasto en GCP. Todas las correcciones tienen pruebas y un commit propio. El 2
 también se empaquetó NLQP en Docker (`DOCKER.md`).
 
 **Resultados al cierre (24/10):**
-- API **275/275**: 64 · 23 · 33 · 25 · 50 · 47 · 14 · 19.
+- API **358/358**: 64 · 23 · 33 · 25 · 50 · 62 · 14 · 19, más la exportación a Excel (68).
 - Interfaz **102/102**: 24 · 33 · 27 · 18.
 - Seguridad **57/57 + 200/200**.
 - Evaluación en modo prueba **200/200**.
@@ -36,8 +36,8 @@ la configuración, o agrega una función · **Aceptado**: riesgo conocido, con e
 | G4 | MAX_TOKENS o respuesta sin texto se registraban con costo 0, aunque se facturan. | Media | **Corregido** (018565b): `GenerationFailedError` lleva los tokens y el evento registra el costo. |
 | G5 | El 500 mostraba al no técnico errores crudos de Vertex AI, del motor o de Secret Manager. | Baja | **Corregido**: el detalle solo lo ve el técnico. |
 | G6 | La poda de esquema pierde tablas con algunos verbos conjugados (paráfrasis de M17: solo manda `orders`; «compraron», «vendieron», «sin pagar»). | Media | **Pendiente (David)**. No se ajusta el diccionario: las paráfrasis se escribieron sin ajustarlo a propósito (`parafrasis_50.json`). Se puede medir gratis la cobertura de tablas. |
-| G7 | Prompt: «el que más» con LIMIT 1 pierde empates. Las reglas de dominio de e-commerce se aplican a toda conexión. «Nunca SELECT *» recorta «todos los datos». La pregunta va sin delimitar (inyección de instrucciones). No exige alias únicos. «hola» manda el esquema completo. | Media | **Pendiente (David)**: cambia el prompt y, por lo tanto, la medición. |
-| G8 | Sin límite de llamadas ni de gasto por usuario (429), ni timeout en `generateContent`. | Media | **Pendiente (David)**: función nueva. |
+| G7 | Prompt: «el que más» con LIMIT 1 pierde empates. Las reglas de dominio de e-commerce se aplican a toda conexión. «Nunca SELECT *» recorta «todos los datos». La pregunta va sin delimitar (inyección de instrucciones). No exige alias únicos. «hola» manda el esquema completo. | Media | «hola» **corregido** (15589cb): «hola», «gracias», «asdf», «ok» y «¿?» reciben 422 `nlqp/no-content` sin llamar al modelo; las 100 preguntas del corpus pasan. El resto, **pendiente (David)**: cambia el prompt y, por lo tanto, la medición. |
+| G8 | Sin límite de llamadas ni de gasto por usuario (429), ni timeout en `generateContent`. | Media | **Decidido por David (24/10): no por ahora.** No se agrega el timeout con reintento ni el tope por usuario (`USO_Y_COSTOS.md`, tiempo por etapa). |
 | G9 | Tope de 20 tablas en la poda. | Baja | **Pendiente (David)**. |
 
 ## 2. Ejecución e integridad de los valores

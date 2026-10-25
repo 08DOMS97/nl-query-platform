@@ -118,7 +118,7 @@ Banco de pruebas en la misma máquina: `cd "Bases de datos"; docker compose up -
 
 Con los contenedores arriba, las mismas pruebas de siempre funcionan sin cambios (el
 backend responde en `127.0.0.1:8080` y el frontend en `:3000`). El 24/10:
-- `npm run test:api`: 275/275
+- `npm run test:api`: 358/358 (incluye la exportación a Excel)
 - `npm run test:seguridad`: 57/57 + 200/200
 - `npm run test:ui`: 102/102
 
