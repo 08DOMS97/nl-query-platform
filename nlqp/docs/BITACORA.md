@@ -6,6 +6,70 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-24 (3) — Por qué una generación simple tardó 24 s, y mejoras de tiempo
+
+Sin gasto en GCP. David probó «Muéstrame las categorías que hay» (MariaDB, en Docker) y
+tardó **24,2 s**.
+
+### Diagnóstico, medido sin costo
+- El evento de uso registró 533 tokens de entrada, 12 de salida y 0 de razonamiento.
+- `/me` tardó ~0,1 s; `/getSchema`, 0,12–0,45 s en los 4 motores.
+- `countTokens` desde el contenedor tardó 2,8 s la primera vez y 0,14 s después.
+- El SDK no reintenta (no tiene `retryOptions`).
+- Conclusión: **~20 s fueron espera al modelo** (servicio de Google). Con prompts
+  parecidos, otras llamadas tardaron 2,9 y 5,5 s.
+
+### Revisión con agentes (pedido de David; 3 agentes, solo lectura)
+Revisaron la latencia de Gemini, el ahorro de costo y el resto del camino de la
+solicitud. Conclusiones:
+- No hay ahorro grande que no comprometa la evaluación.
+- La corrida completa costaría ~$0.60 si el razonamiento sigue en 0.
+- Lo útil es sacar el arranque del camino y medir por etapa.
+
+El detalle de lo descartado está en `USO_Y_COSTOS.md`.
+
+### Decisiones de David
+- Sí a los 5 cambios gratuitos.
+- No al timeout con reintento, al tope de gasto por usuario ni a la caché del rol.
+- **Documentar en la tesis** que el tiempo de generación depende de la consulta y del
+  servicio del modelo, y que se suman la conexión y el proceso desde que se aprieta
+  «Generar SQL».
+
+### Hecho (15589cb)
+- Vertex se prepara al arrancar: `[vertexAI] cliente listo en 2785 ms`.
+- Caché del esquema de 60 s.
+- Tiempo por etapa en las métricas, en el evento de uso y en Uso y costos («Tiempos de
+  generación»: mediana, p95, máximo).
+- 422 `nlqp/no-content` para «hola», «gracias», «asdf» (las 100 preguntas del corpus
+  pasan en los 4 motores; «buenos días» pasa, es conservador a propósito).
+- Uso e historial en paralelo en `/executeQuery`.
+
+### Verificado
+- **API 358/358**: 290 propias (`api_generacion` 62/62) + 68 de `api_exportacion`, que
+  no es de esta sesión.
+- **UI 102/102**.
+- **Seguridad 57/57 + 200/200**.
+- `getUsageStats`: 5 generaciones, mediana 9,8 s, máximo 24,2 s. El detalle por etapa
+  aparece desde la próxima generación real.
+
+### Trabajo ajeno en el repositorio
+Durante la sesión aparecieron cambios sin commitear que no son de esta sesión:
+- una exportación a Excel: `resultExcel.service.ts`, `api_exportacion.mjs`, y cambios en
+  `package.json`, `resultPages.ts`, `resultStore.service.ts`, `QueryResult.tsx` y
+  `ui_general.mjs`;
+- `Bases de datos/generar_seed.py`.
+
+No se tocaron ni se commitearon. El commit se armó solo con los bloques propios y se
+verificó que compila sin ellos.
+
+### Docs
+- `USO_Y_COSTOS.md` (tiempo por etapa).
+- `RESUMEN_PARA_DOC_TEORICO.md`: 3.3.1.3 con la decisión de David y 6.3.6 con mediana/p95
+  por etapa. Siguen 30 pendientes: las dos entraron en entradas que ya estaban
+  pendientes.
+
+---
+
 ## 2026-10-24 (2) — Auditoría, correcciones e instalación con Docker
 
 Sin gasto en GCP. Pedidos de David: auditar a fondo, corregir y documentar («trabajá

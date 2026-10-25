@@ -74,6 +74,51 @@ consulta se ejecuta una sola vez y las páginas y el CSV se leen de un snapshot
 (`RENDIMIENTO_E_INTEGRIDAD.md`), así que navegar páginas o descargar el CSV no
 genera eventos nuevos ni carga la base.
 
+## Tiempo de generación por etapa (24/10/2026)
+
+David vio una generación simple de 24,2 s («Muéstrame las categorías que hay», MariaDB).
+Desglose medido sin costo:
+
+| Etapa | Tiempo |
+|---|---|
+| Autenticación + esquema | ~0,3–0,6 s |
+| Primera llamada a Vertex del proceso (cliente, token, TLS) | ~2,7 s (`countTokens`: 2,8 s la primera, 0,14 s después) |
+| Espera al modelo | ~20 s, con 533 tokens de entrada, 12 de salida y 0 de razonamiento |
+
+La espera depende del servicio de Google, no de NLQP: con un prompt igual de chico,
+otras generaciones tardaron 2,9 s y 5,5 s.
+
+Lo que se cambió:
+- **Vertex listo al arrancar** (`warmUpVertex`, un `countTokens` que no se factura): la
+  primera generación ya no paga los ~2,7 s.
+- **Esquema en caché** 60 s por conexión (`NLQP_SCHEMA_CACHE_SEC`, 0 la apaga):
+  - se borra al editar o eliminar la conexión;
+  - la pantalla Esquema y las corridas de evaluación lo leen siempre actual.
+- **Tiempo por etapa** en `metrics.stages` y en el evento de uso: `schemaMs`, `pruneMs`,
+  `modelMs` y `checkMs`. Uso y costos muestra, en «Tiempos de generación», la mediana, el
+  p95 y el máximo del total, de la espera al modelo y del esquema. En Consultar, el
+  técnico ve «modelo / resto».
+- **Sin llamada al modelo para «hola»:** si la pregunta no deja palabras útiles, o deja
+  una sola sin relación con el esquema, da 422 `nlqp/no-content`. Antes esas entradas
+  mandaban el esquema completo, la llamada más cara.
+- **`/executeQuery`** registra el uso y el historial en paralelo.
+
+Se evaluó y se descartó (revisión con agentes del 24/10):
+- **Caché de contexto:** 3.8 Flash la admite desde 6.144 tokens y los prompts tienen
+  500–1.200.
+- **Batch prediction:** cuesta 50 % menos, pero no mide latencia y no pasa por
+  `/generateSQL`.
+- **Otro modelo o prompt más corto:** obliga a rehacer la evaluación.
+- **Priority PayGo / Provisioned Throughput:** no tiene cifras oficiales de mejora y la
+  capacidad reservada exige un compromiso mínimo de una semana.
+- **Razonamiento MINIMAL:** el modelo lo rechaza; LOW ya es el mínimo.
+- **Timeout + reintento:** se cobra igual. David decidió no hacerlo.
+- **Tope de gasto por usuario y caché del rol:** David decidió no hacerlos.
+
+Para la tesis (decisión de David, 24/10): el tiempo de generación no es fijo. Depende de
+la consulta y del servicio del modelo, y se suman la conexión y el proceso; se reporta
+con la mediana y el p95 por etapa (`RESUMEN_PARA_DOC_TEORICO.md` 3.3.1.3 y 6.3.6).
+
 ## Endpoint
 
 `GET /getUsageStats?periodDays=30` (autenticado, igual que el resto de la

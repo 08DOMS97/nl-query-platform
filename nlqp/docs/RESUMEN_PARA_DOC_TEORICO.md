@@ -24,7 +24,7 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-24, auditoría y Docker)
+## Contador (actualizado 2026-10-24, auditoría, Docker y tiempo de generación)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
@@ -88,6 +88,24 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   no cambiar el umbral; reportar en la sección de evaluación (cuando se escriba) cuántas
   consultas lo cumplen y discutirlo.
   Cambiar una meta después de medir le quita valor a la evaluación.
+  **Actualización — decisión de David (24/10):** agregar en 3.3.1.3, y donde RNF-01
+  dé un tiempo para la generación, que el tiempo **no es fijo**:
+  - depende de la consulta;
+  - depende sobre todo del servicio externo del modelo, que varía según su carga;
+  - a eso se suma el tiempo de conexión y de proceso desde que el usuario aprieta
+    «Generar SQL»: autenticación, lectura del esquema, validación y red.
+
+  Los umbrales quedan como **referencia**, no como garantía. Datos para el texto
+  (24/10):
+  - una consulta simple («Muéstrame las categorías que hay», 533 tokens de entrada y 12
+    de salida, sin razonamiento) tardó **24,2 s**. Unos 20 s fueron espera al modelo,
+    ~2,7 s la preparación del cliente en la primera llamada y ~0,3–0,6 s el esquema y la
+    autenticación;
+  - otras consultas simples tardaron 2,9 s y 5,5 s;
+  - mediana de las 5 generaciones registradas: 9,8 s.
+
+  Desde el 24/10 la preparación se hace al arrancar el servidor y el esquema se
+  guarda en caché 60 s. Fuente: `BITACORA.md` 24/10 (3) y `USO_Y_COSTOS.md`.
 - [ ] (19/09) **3.6 — muestra**: si no se consiguen los 35 participantes, documentar la
   muestra reducida.
 - [?] (10/10) **Confirmar el equipo de 3.8**: el texto se unificó con la Tabla 8 (i7 de
@@ -428,7 +446,10 @@ una sola nueva (10) pendiente.
   completa). Métricas: precisión por ejecución (exacto / con columnas extra), por nivel
   y por motor; consistencia entre motores; robustez con paráfrasis; reducción de tokens;
   costo y latencia (incluido cuántas simples cumplen los 15 s); seguridad (consultas
-  bloqueadas); antipatrones. Datos: `evaluacion_gemini/resumen.md`. Método de
+  bloqueadas); antipatrones. **(24/10)** Reportar el tiempo con la mediana y el p95, y
+  separado por etapa: espera al modelo frente a esquema, poda y controles. Los datos
+  salen de `stages` en `resultados.jsonl` y del evento de uso; Uso y costos los muestra.
+  Datos: `evaluacion_gemini/resumen.md`. Método de
   comparación: `PREPARACION_EVALUACION_GEMINI.md` §8 punto 6. Sus tablas van antes de la
   16 y corren las siguientes.
 
