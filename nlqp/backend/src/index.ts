@@ -9,7 +9,7 @@ import { getHistoryHandler, savedQueriesHandler, sqlEditsHandler } from './funct
 import { connectionsHandler, testConnectionConfigHandler } from './functions/connections.js';
 import {
   createResultExportHandler,
-  exportResultCsvHandler,
+  exportResultHandler,
   getResultPageHandler,
 } from './functions/resultPages.js';
 import { meHandler, usersHandler } from './functions/users.js';
@@ -61,7 +61,7 @@ app.get('/me', verifyFirebaseAuth, wrap(meHandler));
 // Gestión de usuarios: solo el superadministrador.
 app.all('/users', verifyFirebaseAuth, requireSuperadmin, wrap(usersHandler));
 // Sin verifyFirebaseAuth a propósito: lo autoriza el token de un solo uso (ver handler).
-app.get('/exportResultCsv', wrap(exportResultCsvHandler));
+app.get('/exportResult', wrap(exportResultHandler));
 
 // Errores sin manejar: respuesta JSON sin stack trace ni rutas del servidor.
 app.use((err: unknown, _req: Request, res: Response, next: NextFunction): void => {

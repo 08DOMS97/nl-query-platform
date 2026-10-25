@@ -80,8 +80,8 @@ total igual al tope de la conexión desde el inicio.
 ### 3. Snapshot del resultado (`resultStore.service.ts`)
 
 La consulta se ejecuta **una sola vez** y el resultado completo se vuelca por
-streaming a un archivo NDJSON temporal (`<tmp>/nlqp-results/`). Las páginas y el
-CSV se leen de ese mismo archivo.
+streaming a un archivo NDJSON temporal (`<tmp>/nlqp-results/`). Las páginas y la
+descarga en Excel se leen de ese mismo archivo.
 
 Por qué un snapshot y no re-ejecutar la consulta en cada página: sin un `ORDER BY`
 estable, dos ejecuciones pueden devolver las filas en distinto orden, y paginar
@@ -105,21 +105,55 @@ pantalla y lo que descarga son exactamente los mismos datos.
 | `POST /executeQuery` `{engine, sql}` | Firebase | Ejecuta una vez, guarda el snapshot y devuelve la página 1: `resultId, columns, rows, rowCount, totalRows, page, pageSize, totalPages`. `rowCount` = total del resultado (no de la página). |
 | `GET /getResultPage?resultId&page` | Firebase | Otra página del snapshot. No re-ejecuta. |
 | `POST /createResultExport` `{resultId}` | Firebase | Devuelve `{ path }` con un token de descarga. |
-| `GET /exportResultCsv?token` | Token de un solo uso | CSV completo por streaming (UTF-8 con BOM para Excel). |
+| `GET /exportResult?token` | Token de un solo uso | Resultado completo como Excel (.xlsx) por streaming (§4.1). Hasta el 24/10 era `/exportResultCsv` y entregaba CSV. |
 
 Códigos de error: `504` timeout, `413` resultado demasiado grande, `404` resultado
 inexistente o vencido, `400` página fuera de rango.
 
-La descarga del CSV es una navegación del navegador (para que el archivo vaya
+La descarga es una navegación del navegador (para que el archivo vaya
 directo a disco sin pasar por la memoria de la página), y una navegación no puede
-llevar el encabezado `Authorization`. Por eso `/exportResultCsv` no pasa por el
+llevar el encabezado `Authorization`. Por eso `/exportResult` no pasa por el
 middleware de Firebase: lo autoriza un token aleatorio de un solo uso, que vence a
 los 2 minutos y solo se emite al dueño del resultado. Ver `SEGURIDAD.md` §7.
+
+### 4.1 Exportación a Excel (`resultExcel.service.ts`, 24/10/2026)
+
+Pedido de David: el CSV llevaba los datos, pero en Excel salían desordenados. La causa:
+Windows en es-GT usa `;` como separador de listas y el CSV usaba `,`, así que Excel
+ponía cada fila entera en la columna A. Además, las fechas salían en formato ISO y
+los encabezados con el nombre de SQL. Se reemplazó por un .xlsx pensado para un
+usuario no técnico:
+
+- Hoja «Resultado»: cada dato en su columna, en cualquier configuración regional.
+  Los encabezados son legibles (`total_pedido` → «Total pedido»; las siglas se
+  respetan), en negrita, con fondo naranja claro, fijos al bajar y con filtro. El
+  ancho de cada columna se calcula con la primera página.
+- Fechas como fechas (`dd/mm/yyyy`, o con `hh:mm:ss` si alguna trae hora), la misma
+  hora que muestra la pantalla.
+- Números como números, para sumar y ordenar. Los decimales se muestran con todos
+  sus dígitos (12.50 y no 12.5). El tipo se decide por columna al guardar el snapshot
+  (`ColumnProfile`): una columna es numérica solo si **todos** sus valores lo son.
+  Un número de más de 15 dígitos (BIGINT, DECIMAL grandes) o con ceros a la izquierda
+  (`00123`) queda como **texto**, porque Excel no lo guarda exacto.
+- Un texto que empieza con `=` se guarda como texto y no se vuelve fórmula
+  (resuelve E8 de la auditoría). NULL queda como celda vacía.
+- Hoja «Detalles»: la pregunta (si la hubo), la conexión, la fecha y hora de la
+  consulta (hora de Guatemala) y el total de filas.
+- **Nunca se trunca.** Excel admite 1 048 576 filas por hoja; si el resultado
+  tiene más, continúa en «Resultado 2», «Resultado 3»…, y «Detalles» lo indica. Una
+  celda de Excel admite 32 767 caracteres: si algún valor es más largo, la descarga
+  sale como CSV (el formato anterior) para no recortarlo.
+- Memoria: exceljs pasa el XML de la hoja al zip sin esperar a que lo comprima, y
+  con 800 000 filas acumulaba ~130 MB. La escritura espera a que el zip alcance
+  (`zipCaughtUp`, usa campos internos de exceljs/readable-stream). Medido aislado:
+  pico de 143 MB con 200 000 filas y también con 800 000, con un cliente rápido o
+  lento.
+- Dependencia nueva: `exceljs@4.4.0` (versión fija).
 
 ### 5. Frontend (`QueryResult.tsx`)
 
 - Arriba de la tabla: "Filas 1–1000 de 20.000", navegación Anterior/Siguiente con
-  "Página N de M" y "Descargar CSV completo".
+  "Página N de M" y «Descargar Excel» (hasta el 24/10, «Descargar CSV completo»).
 - La tabla tiene scroll propio (60 % de la altura de la ventana) con encabezado
   fijo; al cambiar de página vuelve al inicio.
 
@@ -139,6 +173,9 @@ Todo contra las bases reales del banco de pruebas, sin llamadas a Vertex AI.
 | Tope de 100 KB con un resultado de 20 000 filas, 4 motores | `413` en los 4; ningún archivo queda en disco; el backend sigue vivo |
 | Descarga de CSV cortada por el cliente | El backend sigue vivo; la descarga siguiente sale completa |
 | Interfaz real en el navegador (Playwright) | Paginación, conteo, scroll y descarga del CSV correctos; 0 errores de consola |
+| (24/10) Exportación a Excel, 4 motores (`api_exportacion.mjs`) | 68/68. Tipos, encabezados, fechas, decimales, `=` como texto, NULL vacío, número de 16 dígitos exacto, `00123`, «Detalles», enlace de un solo uso y 40 000 filas completas y en orden |
+| (24/10) 1 100 000 filas (aislado) | 1 048 575 en «Resultado» + 51 425 en «Resultado 2»: todas |
+| (24/10) 400 000 / 800 000 filas en Docker | Descarga en 11 s / 22 s con un cliente lento |
 
 Rendimiento con 400 000 filas (Postgres local): la primera respuesta pasó de 8,4 s
 a 1,5 s tras las optimizaciones (lotes de cursor más grandes, esperar solo cuando
@@ -203,9 +240,12 @@ otra página: ~5 ms. CSV completo: ~1 s.
   ejecutar la consulta).
 - (24/10, pendiente de David) SQL Server: DECIMAL y MONEY pierden precisión en el driver
   (12.50 → 12.5; un DECIMAL(38,2) grande se redondea). MySQL: las fechas cero llegan
-  como NULL y el `TIMESTAMP` depende de la `time_zone` de la sesión. CSV: un valor que
-  empieza con `=` se abre en Excel como fórmula, y NULL y la cadena vacía se exportan
-  igual.
+  como NULL y el `TIMESTAMP` depende de la `time_zone` de la sesión. (El problema del
+  CSV con `=` quedó resuelto el 24/10 con la exportación a Excel, §4.1. En el Excel,
+  NULL queda vacío y la cadena vacía también: siguen sin distinguirse.)
+- En Docker, `/tmp` es tmpfs: los snapshots ocupan RAM del contenedor (unos 230 MB con
+  tres resultados de 800 000 filas). Vencen a los 30 min. Medido el 24/10; no se
+  cambió.
 - En Docker, el frontend reenvía `/api` al backend con un tope de 61 min (más que los
   60 min máximos de una conexión). Verificado con una consulta de 48 s; el valor por
   defecto de Next era 30 s (`DOCKER.md`).
@@ -221,7 +261,8 @@ otra página: ~5 ms. CSV completo: ~1 s.
   tokens de descarga.
 - `backend/src/functions/executeQuery.ts` — ejecuta vía snapshot, devuelve la página 1.
 - `backend/src/functions/resultPages.ts` — nuevo: `getResultPage`,
-  `createResultExport`, `exportResultCsv`.
+  `createResultExport`, `exportResult` (antes `exportResultCsv`).
+- `backend/src/services/resultExcel.service.ts` — (24/10) exportación a Excel.
 - `backend/src/index.ts`, `backend/src/types/index.ts` — rutas y tipos.
 - `backend/package.json` — dependencia `pg-cursor`.
 - `frontend/src/components/QueryResult.tsx`, `QueryForm.tsx`, `lib/types.ts`,

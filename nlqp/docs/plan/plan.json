@@ -523,6 +523,20 @@
         "agregada": "2026-10-24",
         "implementada": "2026-10-24"
       }
+    },
+    {
+      "no": 52,
+      "tarea": "Descarga del resultado en Excel",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-24",
+      "fin": "2026-10-24",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 24/10 a pedido mío: el CSV se veía desordenado en Excel (en Guatemala el separador de listas es «;»). Ahora la descarga es un Excel con cada dato en su columna, encabezados legibles, fechas y números con su tipo, y una hoja con la pregunta, la conexión y el total de filas. Nunca recorta filas: si pasa el máximo de una hoja, sigue en otra. Verificado: exportación 68/68 en los 4 motores, API 358/358, UI 102/102, seguridad 57/57 + 200/200.",
+      "nueva": {
+        "agregada": "2026-10-24",
+        "implementada": "2026-10-24"
+      }
     }
   ]
 }

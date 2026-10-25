@@ -62,7 +62,7 @@ await page.waitForURL('http://localhost:3000/');
 const sqlBox = page.locator('textarea[aria-label="Sentencia SQL"]');
 check('historial: no editable', (await sqlBox.count()) === 0 && (await page.getByText('Para modificar esta consulta, guárdela primero').count()) === 1);
 await page.getByRole('button', { name: 'Ejecutar' }).click();
-check('historial: se ejecuta tal cual', await page.waitForSelector('text=Descargar CSV completo', { timeout: 30000 }).then(() => true, () => false));
+check('historial: se ejecuta tal cual', await page.waitForSelector('text=Descargar Excel', { timeout: 30000 }).then(() => true, () => false));
 
 // Para editarla, se guarda: queda editable como guardada
 const marca = `ui${Date.now() % 1000000}`;
@@ -80,7 +80,7 @@ await sqlBox.fill(SQL_EDITADO);
 check('técnico: insignia de editada', await page.waitForSelector('text=Editada · se valida al ejecutar', { timeout: 5000 }).then(() => true, () => false));
 check('guardada editada: botón Guardar cambios', (await page.getByRole('button', { name: 'Guardar cambios' }).count()) === 1);
 await page.getByRole('button', { name: 'Ejecutar' }).click();
-await page.waitForSelector('text=Descargar CSV completo');
+await page.waitForSelector('text=Descargar Excel');
 check('técnico: ejecuta SQL editado', (await page.locator('table td', { hasText: '42' }).count()) === 1);
 
 // SQL editado peligroso: lo frena el backend

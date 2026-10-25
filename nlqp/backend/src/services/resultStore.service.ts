@@ -35,11 +35,40 @@ const WRITE_BLOCK_BYTES = 256 * 1024;
 const EXPORT_TOKEN_TTL_MS = 2 * 60 * 1000;
 const STORE_DIR = path.join(os.tmpdir(), 'nlqp-results');
 
-interface StoredResult {
+/**
+ * Lo que se sabe de cada columna al guardar el resultado, para exportarla a Excel
+ * con el formato que le corresponde (en el NDJSON las fechas ya son texto y el
+ * tipo original se pierde).
+ */
+export interface ColumnProfile {
+  /** Tiene al menos un valor no nulo (si no, `date` y `number` no significan nada). */
+  seen: boolean;
+  /** Todos los valores no nulos son fechas. */
+  date: boolean;
+  /** Alguna de esas fechas tiene una hora distinta de medianoche. */
+  time: boolean;
+  /** Todos los valores no nulos son números, o texto numérico que Excel guarda exacto. */
+  number: boolean;
+  /** Máximo de decimales visto, para mostrar 12.50 y no 12.5. */
+  decimals: number;
+  /** Largo del texto más largo en la primera página, para el ancho de la columna. */
+  width: number;
+}
+
+export interface ResultMeta {
+  question: string | null;
+  connectionName: string;
+}
+
+export interface StoredResult extends ResultMeta {
   id: string;
   uid: string | null;
   connectionId: string;
   columns: string[];
+  profiles: ColumnProfile[];
+  /** Algún valor supera lo que admite una celda de Excel: se exporta como CSV. */
+  exceedsExcelCell: boolean;
+  createdAt: Date;
   totalRows: number;
   filePath: string;
   /** Byte de inicio de cada página dentro del archivo, para leerla sin recorrer las anteriores. */
@@ -74,6 +103,49 @@ export class ResultNotFoundError extends Error {
     super('El resultado no existe o expiró. Vuelva a ejecutar la consulta.');
     this.name = 'ResultNotFoundError';
   }
+}
+
+export const EXCEL_MAX_CELL_CHARS = 32_767;
+// Excel guarda los números con 15 dígitos significativos: un DECIMAL o BIGINT más
+// largo se exporta como texto para no perder precisión.
+const EXCEL_MAX_DIGITS = 15;
+const NUMERIC_TEXT = /^-?(0|[1-9]\d*)(\.\d+)?$/;
+const DAY_MS = 86_400_000;
+
+function newProfile(): ColumnProfile {
+  return { seen: false, date: true, time: false, number: true, decimals: 0, width: 0 };
+}
+
+/** Actualiza el perfil de la columna con un valor; devuelve el largo de su texto. */
+function profileValue(p: ColumnProfile, value: unknown, sample: boolean): number {
+  if (value === null || value === undefined) return 0;
+  p.seen = true;
+  if (value instanceof Date) {
+    p.number = false;
+    if (value.getTime() % DAY_MS !== 0) p.time = true;
+    return 0;
+  }
+  p.date = false;
+  let text: string;
+  if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'string') {
+    text = String(value);
+    if (p.number) {
+      if (typeof value === 'number') {
+        const decimals = Number.isFinite(value) && !text.includes('e') ? (text.split('.')[1]?.length ?? 0) : -1;
+        if (decimals < 0) p.number = false;
+        else p.decimals = Math.max(p.decimals, decimals);
+      } else if (NUMERIC_TEXT.test(text) && text.replace(/^-/, '').replace('.', '').replace(/^0+/, '').length <= EXCEL_MAX_DIGITS) {
+        p.decimals = Math.max(p.decimals, text.split('.')[1]?.length ?? 0);
+      } else {
+        p.number = false;
+      }
+    }
+  } else {
+    p.number = false;
+    text = typeof value === 'boolean' ? (value ? 'Sí' : 'No') : JSON.stringify(value);
+  }
+  if (sample) p.width = Math.max(p.width, text.length);
+  return text.length;
 }
 
 /** BigInt no es serializable en JSON: se envía como texto para no perder precisión. */
@@ -113,6 +185,7 @@ export async function createResult(
   connectionId: string,
   sql: string,
   uid: string | null,
+  meta: ResultMeta,
 ): Promise<StoredResult> {
   await startupCleanup;
   await mkdir(STORE_DIR, { recursive: true });
@@ -127,6 +200,8 @@ export async function createResult(
   });
 
   let columns: string[] = [];
+  let profiles: ColumnProfile[] = [];
+  let exceedsExcelCell = false;
   const pageOffsets: number[] = [];
   let bytes = 0;
   let totalRows = 0;
@@ -144,9 +219,14 @@ export async function createResult(
     await streamQuery(connectionId, sql, {
       onColumns: (c) => {
         columns = c;
+        profiles = c.map(newProfile);
       },
       onRow: (row) => {
         if (totalRows % RESULT_PAGE_SIZE === 0) pageOffsets.push(bytes);
+        const sample = totalRows < RESULT_PAGE_SIZE;
+        for (let i = 0; i < columns.length; i++) {
+          if (profileValue(profiles[i], row[columns[i]], sample) > EXCEL_MAX_CELL_CHARS) exceedsExcelCell = true;
+        }
         const line = serializeRow(row) + '\n';
         const lineBytes = Buffer.byteLength(line);
         bytes += lineBytes;
@@ -176,7 +256,11 @@ export async function createResult(
     id,
     uid,
     connectionId,
+    ...meta,
     columns,
+    profiles,
+    exceedsExcelCell,
+    createdAt: new Date(),
     totalRows,
     filePath,
     pageOffsets,
@@ -300,13 +384,18 @@ export async function writeCsv(stored: StoredResult, out: Writable): Promise<voi
 
   // BOM para que Excel reconozca UTF-8 (acentos y ñ).
   await write(UTF8_BOM + stored.columns.map(csvCell).join(',') + '\r\n');
+  for await (const row of readRows(stored)) {
+    await write(stored.columns.map((c) => csvCell(row[c])).join(',') + '\r\n');
+  }
+}
+
+/** Recorre todas las filas del snapshot, en orden, sin cargarlas juntas en memoria. */
+export async function* readRows(stored: StoredResult): AsyncGenerator<Record<string, unknown>> {
   const input = createReadStream(stored.filePath, { encoding: 'utf8' });
   const lines = readline.createInterface({ input, crlfDelay: Infinity });
   try {
     for await (const line of lines) {
-      if (!line) continue;
-      const row = JSON.parse(line) as Record<string, unknown>;
-      await write(stored.columns.map((c) => csvCell(row[c])).join(',') + '\r\n');
+      if (line) yield JSON.parse(line) as Record<string, unknown>;
     }
   } finally {
     input.destroy();

@@ -100,7 +100,7 @@ export interface GenerateSqlResponse {
 /**
  * Una página del resultado. El backend ejecuta la consulta una sola vez y guarda
  * el resultado completo; las demás páginas se piden con `/getResultPage` y el
- * total se descarga como CSV con `/createResultExport`.
+ * total se descarga como Excel con `/createResultExport`.
  */
 export interface ExecuteQueryResponse {
   resultId: string;

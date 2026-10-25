@@ -7,6 +7,7 @@ import {
   ResultNotFoundError,
   writeCsv,
 } from '../services/resultStore.service.js';
+import { excelFileName, writeXlsx } from '../services/resultExcel.service.js';
 
 type AuthedRequest = Request & { uid?: string };
 
@@ -32,7 +33,7 @@ export const getResultPageHandler = async (req: Request, res: Response): Promise
 
 /**
  * POST /createResultExport { resultId } -> { path }
- * Devuelve la ruta de descarga del CSV completo, con un token de un solo uso.
+ * Devuelve la ruta de descarga del resultado completo, con un token de un solo uso.
  */
 export const createResultExportHandler = async (req: Request, res: Response): Promise<void> => {
   const resultId = (req.body as { resultId?: unknown }).resultId;
@@ -43,7 +44,7 @@ export const createResultExportHandler = async (req: Request, res: Response): Pr
 
   try {
     const token = createExportToken(resultId, (req as AuthedRequest).uid ?? null);
-    res.status(200).json({ path: `/exportResultCsv?token=${encodeURIComponent(token)}` });
+    res.status(200).json({ path: `/exportResult?token=${encodeURIComponent(token)}` });
   } catch (err) {
     const status = err instanceof ResultNotFoundError ? 404 : 500;
     res.status(status).json({ error: err instanceof Error ? err.message : String(err) });
@@ -51,11 +52,13 @@ export const createResultExportHandler = async (req: Request, res: Response): Pr
 };
 
 /**
- * GET /exportResultCsv?token=... -> CSV completo del snapshot, por streaming.
+ * GET /exportResult?token=... -> resultado completo del snapshot como Excel (.xlsx),
+ * por streaming. Si algún valor no cabe en una celda de Excel (más de 32 767
+ * caracteres), se entrega como CSV para no recortarlo.
  * No pasa por el middleware de auth (es una navegación del navegador, sin
  * encabezados): la autorización es el token de un solo uso de `/createResultExport`.
  */
-export const exportResultCsvHandler = async (req: Request, res: Response): Promise<void> => {
+export const exportResultHandler = async (req: Request, res: Response): Promise<void> => {
   const token = typeof req.query.token === 'string' ? req.query.token : '';
 
   let stored;
@@ -66,10 +69,16 @@ export const exportResultCsvHandler = async (req: Request, res: Response): Promi
     return;
   }
 
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="nlqp-resultado-${stored.connectionId}.csv"`);
+  const asCsv = stored.exceedsExcelCell;
+  const fileName = asCsv ? excelFileName(stored).replace(/\.xlsx$/, '.csv') : excelFileName(stored);
+  res.setHeader(
+    'Content-Type',
+    asCsv ? 'text/csv; charset=utf-8' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
   try {
-    await writeCsv(stored, res);
+    if (asCsv) await writeCsv(stored, res);
+    else await writeXlsx(stored, res);
     res.end();
   } catch {
     // Ya se enviaron encabezados: cortar la conexión hace que la descarga falle de
@@ -80,4 +89,4 @@ export const exportResultCsvHandler = async (req: Request, res: Response): Promi
 
 functions.http('getResultPage', getResultPageHandler);
 functions.http('createResultExport', createResultExportHandler);
-functions.http('exportResultCsv', exportResultCsvHandler);
+functions.http('exportResult', exportResultHandler);

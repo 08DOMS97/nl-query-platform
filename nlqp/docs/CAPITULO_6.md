@@ -496,7 +496,7 @@ Server. Al vencer, el sistema responde con un error de tiempo agotado (504).
 *Lectura y entrega del resultado.* El resultado se lee fila por fila mediante cursores o
 streaming en los cuatro controladores, sin cargarlo entero en memoria. La consulta se
 ejecuta una sola vez y el resultado completo se guarda temporalmente como una copia
-(snapshot), de la que se sirven las páginas de 1,000 filas y la descarga en CSV. Se
+(snapshot), de la que se sirven las páginas de 1,000 filas y la descarga en Excel. Se
 eligió la copia en lugar de volver a ejecutar la consulta en cada página porque, sin un
 orden estable, dos ejecuciones pueden devolver las filas en distinto orden y la
 paginación podría repetirlas o saltarlas. Así, lo que el usuario ve y lo que descarga
@@ -504,10 +504,24 @@ son los mismos datos. La copia tiene un tamaño máximo configurable (1 GB por d
 si se supera, se descarta completa y se responde con error (413). Además, vence a los 30
 minutos y solo puede leerla el usuario que ejecutó la consulta.
 
-*Descarga en CSV.* La descarga es una navegación del navegador, que no puede llevar el
-token de Firebase en el encabezado. Por eso este endpoint no usa ese token, sino uno
-aleatorio de un solo uso que vence a los dos minutos y que solo se entrega, desde un
-endpoint autenticado, al dueño del resultado.
+*Descarga en Excel.* El resultado completo se descarga como un libro de Excel (.xlsx)
+pensado para el usuario no técnico. La primera versión exportaba CSV, pero en un
+equipo con la configuración regional de Guatemala, que usa el punto y coma como
+separador de listas, Excel colocaba cada fila entera en una sola columna. El libro
+presenta cada dato en su columna, con encabezados legibles (por ejemplo, «Total
+pedido» en lugar de `total_pedido`), fijos y con filtro. Las fechas se guardan como
+fechas y los números como números, de modo que se pueden ordenar y sumar. Los
+números que Excel no puede guardar con exactitud, es decir, los de más de 15 dígitos
+o con ceros a la izquierda, se conservan como texto. Una segunda hoja registra la
+pregunta, la conexión, la fecha de la consulta y el total de filas. Como en el resto
+de la ejecución, no se trunca: si el resultado supera el máximo de filas de una hoja
+de Excel (1,048,576), continúa en hojas adicionales. Además, un texto que comienza
+con «=» se guarda como texto, por lo que Excel no lo interpreta como fórmula.
+
+La descarga es una navegación del navegador, que no puede llevar el token de Firebase
+en el encabezado. Por eso este endpoint no usa ese token, sino uno aleatorio de un
+solo uso que vence a los dos minutos y que solo se entrega, desde un endpoint
+autenticado, al dueño del resultado.
 
 **Tabla 15.** Verificación del control de ejecución en los cuatro motores. Fuente: Elaboración propia.
 
@@ -515,13 +529,14 @@ endpoint autenticado, al dueño del resultado.
 |---|---|
 | Consulta pesada con tope de 2 s | Los 4 motores cancelan en ~2 s y responden 504; en SQL Server se confirmó que la consulta no queda activa en el servidor |
 | Lectura por streaming frente a lectura completa (50 consultas × 4 motores) | 200/200 resultados idénticos |
-| 20,000 filas: 20 páginas unidas frente al resultado directo | Idénticos en los 4 motores; el CSV trae las 20,000 filas |
+| 20,000 filas: 20 páginas unidas frente al resultado directo | Idénticos en los 4 motores |
+| Descarga en Excel: tipos de dato, encabezados, valores especiales y 40,000 filas | 68/68 comprobaciones en los 4 motores; el archivo trae todas las filas en el mismo orden |
 | Tope de 100 KB con 20,000 filas | 413 en los 4 motores, sin archivos residuales y con el backend en funcionamiento |
 | Token de descarga reutilizado / resultado inexistente / sin token / sentencia DELETE | 404 / 404 / 401 / 403 |
 
 Con 400,000 filas en PostgreSQL, la primera página pasó de 8.4 s a 1.5 s tras optimizar
 el tamaño de los lotes y la escritura de la copia. Cualquier otra página se lee en unos
-5 ms y el CSV completo se genera en alrededor de 1 s.
+5 ms, y el archivo de Excel con las 400,000 filas se descargó en unos 11 s.
 
 Estas pruebas encontraron también un error grave: cuando un resultado superaba el tamaño
 máximo, el descarte de la copia dejaba escrituras pendientes que terminaban el proceso
@@ -566,7 +581,7 @@ se habilita si la sentencia fue aprobada. La ejecución reutiliza la conexión c
 se generó la sentencia, de modo que el SQL siempre se ejecuta en el dialecto para el que
 fue producido. Al ejecutarla se muestra la primera página del
 resultado con el rango y el total de filas (por ejemplo, «Filas 1–1,000 de 20,000»),
-botones para avanzar y retroceder entre páginas y la opción «Descargar CSV completo»; si
+botones para avanzar y retroceder entre páginas y la opción «Descargar Excel»; si
 la consulta no devolvió filas, se muestra un aviso.
 
 La sentencia se muestra según el rol. Al usuario no técnico se le presenta plegada y
@@ -586,7 +601,7 @@ RNF-04 se cumple solo de forma parcial.
 Con un navegador automatizado se comprobó que sin sesión se redirige a `/login`, que el
 inicio de sesión funciona contra Firebase Authentication real y que la pantalla
 principal carga sin errores de consola. También se verificó contra el backend real la
-ejecución, la paginación y la descarga del CSV completo, sustituyendo la respuesta de
+ejecución, la paginación y la descarga del resultado completo, sustituyendo la respuesta de
 generación por una sentencia fija para no generar llamadas a Vertex AI. La generación
 con el modelo desde la interfaz queda pendiente de verificar; el endpoint
 correspondiente ya se probó por separado.
@@ -802,7 +817,7 @@ en lugar de deducirlo solo de leer el código.
 | Mensajes de error del controlador expuestos al cliente | Baja | Documentado |
 | Vulnerabilidades moderadas en dependencias transitivas | Baja | Documentado |
 | Caída del backend completo ante un resultado demasiado grande | Alta | Corregido |
-| Endpoint de descarga de CSV sin autenticación de Firebase | Baja | Mitigado por diseño |
+| Endpoint de descarga del resultado sin autenticación de Firebase | Baja | Mitigado por diseño |
 | Falsos positivos por palabras reservadas dentro de textos | Baja | Corregido |
 | Funciones de lectura de archivos del servidor no bloqueadas por el validador | Baja | Corregido |
 | Batería de pruebas de seguridad no versionada | Baja | Corregido |

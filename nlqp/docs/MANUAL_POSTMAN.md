@@ -134,7 +134,8 @@ Resultados grandes, sin perder filas: la consulta se ejecuta **una sola vez** y
 el resultado completo queda guardado 30 minutos. Para ver más:
 - `GET /getResultPage?resultId=<resultId>&page=2` — otra página (no re-ejecuta).
 - `POST /createResultExport` con `{"resultId": "<resultId>"}` — devuelve un `path`;
-  `GET <path>` descarga el CSV completo (el enlace sirve una sola vez y vence en 2 min).
+  `GET <path>` descarga el resultado completo en Excel (.xlsx) (el enlace sirve una sola vez y vence en 2 min).
+  En Postman, usar «Send and Download» para guardarlo como archivo.
 
 Límites (todo o nada, nunca un resultado parcial): si la consulta tarda más de
 el tiempo máximo de su conexión (8 min por defecto; lo fija el técnico, ver §6) el propio motor la cancela y responde `504`; si el

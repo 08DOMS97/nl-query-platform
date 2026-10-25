@@ -17,7 +17,7 @@ import { handleConnectionError } from './connectionErrors.js';
  *
  * Ejecuta la consulta UNA vez, guarda el resultado completo como snapshot (ver
  * `resultStore.service.ts`) y devuelve la primera página con el total de filas.
- * El resto se pide con `/getResultPage` o se descarga completo como CSV con
+ * El resto se pide con `/getResultPage` o se descarga completo como Excel con
  * `/createResultExport`: ninguna fila se pierde ni se trunca. `rowCount` es el
  * total del resultado (igual que `totalRows`), no el de la página.
  *
@@ -102,7 +102,7 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   };
 
   try {
-    const stored = await createResult(connection.id, sql, uid);
+    const stored = await createResult(connection.id, sql, uid, { question, connectionName: connection.name });
     const firstPage = await readPage(stored.id, uid, 1);
     // Uso e historial a la vez (24/10): se esperan los dos y ninguno lanza errores.
     await Promise.all([

@@ -314,7 +314,7 @@ descarga cortada por el cliente no afecta al backend.
 
 ## 8. Endpoint de descarga de CSV sin autenticación de Firebase — BAJA (mitigado por diseño, 02/10/2026)
 
-`GET /exportResultCsv` no pasa por `verifyFirebaseAuth`: la descarga es una
+`GET /exportResult` (hasta el 24/10, `/exportResultCsv`; ahora entrega Excel) no pasa por `verifyFirebaseAuth`: la descarga es una
 navegación del navegador (para que el archivo vaya directo a disco), y una
 navegación no puede llevar el encabezado `Authorization`. Poner el ID token de
 Firebase en la URL lo expondría en el historial y en logs.

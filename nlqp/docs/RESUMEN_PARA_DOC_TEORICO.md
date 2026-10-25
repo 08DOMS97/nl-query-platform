@@ -24,15 +24,15 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-24, auditoría, Docker y tiempo de generación)
+## Contador (actualizado 2026-10-24, auditoría, Docker, tiempo de generación y descarga en Excel)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 8 | 1 | 20 |
 | 5 | 3 | 0 | 4 |
-| 6 | 10 | 0 | 39 |
+| 6 | 11 | 0 | 39 |
 | Conclusiones / limitaciones | 9 | 0 | 0 |
-| **Total** | **30** | **1** | **63** |
+| **Total** | **31** | **1** | **63** |
 
 > **19/10 — Despliegue on-premises, tope por conexión y gestión de usuarios.** Las 4
 > entradas nuevas (una por capítulo, marcadas "(19/10) On-premises") remiten a
@@ -428,6 +428,21 @@ una sola nueva (10) pendiente.
 
   Fuente: `RENDIMIENTO_E_INTEGRIDAD.md`, bug 5.
 
+- [ ] (24/10) **La descarga pasa de CSV a Excel** (pedido de David: el CSV se veía
+  desordenado). Cambios en el Word, con el texto ya listo en `CAPITULO_6.md`:
+  - 6.3.5, «Lectura y entrega del resultado»: «descarga en CSV» → «descarga en Excel».
+  - 6.3.5: reemplazar el párrafo «Descarga en CSV» por los dos de «Descarga en Excel».
+  - Tabla 15: quitar «el CSV trae las 20,000 filas» y agregar la fila de la descarga en
+    Excel (68/68).
+  - 6.3.5, último párrafo de rendimiento: «el CSV completo se genera en alrededor de
+    1 s» → «el archivo de Excel con las 400,000 filas se descargó en unos 11 s».
+  - 6.4: «Descargar CSV completo» → «Descargar Excel» y «la descarga del CSV completo»
+    → «la descarga del resultado completo».
+  - Si 6.7.2 o la tabla de hallazgos mencionan el endpoint de descarga «de CSV»,
+    cambiarlo a «de descarga del resultado».
+
+  Fuente: `RENDIMIENTO_E_INTEGRIDAD.md` §4.1.
+
 - [x] (02/10) **Reemplazar el párrafo "Tiempo máximo de ejecución"** por el de
   `CAPITULO_6.md`: el Word todavía dice "de 60 segundos por defecto", y David decidió no
   mencionar el valor. **Aplicado el 10/10** en `PG2-2026 capítulo 6 revisado
@@ -580,7 +595,8 @@ una sola nueva (10) pendiente.
 
 - [ ] (24/10) **Limitaciones**: agregar
   - la pérdida de precisión de DECIMAL/MONEY en el driver de SQL Server;
-  - que el CSV no neutraliza valores que Excel interpreta como fórmulas;
+  - ~~que el CSV no neutraliza valores que Excel interpreta como fórmulas~~: ya no va
+    (24/10), porque la descarga es un Excel que guarda el texto como texto;
   - que el control de límites no pedidos se basa en palabras de la pregunta, y puede
     dejar pasar un límite cuando la pregunta usa «más» o «mayor».
 

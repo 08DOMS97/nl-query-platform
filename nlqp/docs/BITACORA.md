@@ -6,6 +6,52 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-24 (4) — La descarga pasa de CSV a Excel
+
+Sin gasto en GCP. David: «los csv se exportan feos… que sea entendible para un usuario no
+técnico y bien ordenado».
+
+### Causa
+Windows en es-GT usa `;` como separador de listas y el CSV usaba `,`: Excel ponía cada
+fila entera en la columna A. Además, las fechas salían en ISO, los encabezados eran los
+nombres de SQL y NULL no se distinguía de un vacío.
+
+### Decisión de David
+Excel (.xlsx) en lugar de CSV, con la dependencia nueva `exceljs@4.4.0`. Se descartó usar
+`;`, que fallaría en equipos configurados con `,`.
+
+### Hecho
+- `resultExcel.service.ts`:
+  - hoja «Resultado» con encabezados legibles, fijos y con filtro, y anchos ajustados;
+  - fechas como fechas y números como números (más de 15 dígitos o `00123` quedan como
+    texto, para no perder exactitud);
+  - `=` como texto, NULL como celda vacía;
+  - hoja «Detalles» con la pregunta, la conexión, la fecha y el total;
+  - más de 1 048 575 filas → «Resultado 2»…; un valor de más de 32 767 caracteres → CSV
+    (nunca se trunca).
+- El tipo de cada columna se perfila al guardar el snapshot (`ColumnProfile` en
+  `resultStore.service.ts`). `executeQuery` pasa la pregunta y el nombre de la conexión.
+- Ruta `/exportResult` (antes `/exportResultCsv`); botón «Descargar Excel».
+- **Defecto encontrado y corregido:** exceljs no frena entre la hoja y el zip, y con
+  800 000 filas acumulaba ~130 MB de XML. Ahora la escritura espera al zip. Medido
+  aislado: pico de 143 MB con 200 000 y con 800 000 filas, con cliente rápido o lento.
+- Resuelve E8 de la auditoría (CSV con fórmulas).
+
+### Verificado (contra Docker reconstruido)
+- `api_exportacion.mjs` (nueva, en `npm run test:api`): **68/68** en los 4 motores.
+- API completa **358/358** (290 + 68). UI **102/102** (24 + 33 + 27 + 18). Seguridad
+  **57/57 + 200/200**.
+- 1 100 000 filas (aislado): 1 048 575 + 51 425 en dos hojas, todas.
+- 400 000 / 800 000 filas en Docker con un cliente lento: 11 s / 22 s.
+- No probado: abrir el archivo en Excel de escritorio. Se verificó releyéndolo con exceljs.
+
+### Visto, sin cambiar
+En Docker, `/tmp` es tmpfs: los snapshots ocupan RAM del contenedor (~230 MB con tres de
+800 000 filas, vencen a los 30 min).
+
+### Sigue
+Pasar al Word la entrada nueva de 6.3.5/6.4 (`RESUMEN_PARA_DOC_TEORICO.md`).
+
 ## 2026-10-24 (3) — Por qué una generación simple tardó 24 s, y mejoras de tiempo
 
 Sin gasto en GCP. David probó «Muéstrame las categorías que hay» (MariaDB, en Docker) y

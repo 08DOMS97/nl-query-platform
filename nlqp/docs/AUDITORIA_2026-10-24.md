@@ -51,7 +51,7 @@ la configuración, o agrega una función · **Aceptado**: riesgo conocido, con e
 | E5 | Postgres: si pg-cursor (campo privado) no daba las columnas, se entregaban filas vacías. | Baja | **Corregido** (634fde1): error explícito. |
 | E6 | SQL Server DECIMAL/MONEY pierde precisión (12.50 → 12.5; DECIMAL(38,2) redondeado). | Media | **Pendiente (David)**: implica tocar el driver. |
 | E7 | MySQL: las fechas cero llegan como NULL; el TIMESTAMP depende de la `time_zone` de la sesión. | Baja | **Pendiente (David)**. |
-| E8 | CSV: un valor que empieza con `=` se abre en Excel como fórmula. NULL y cadena vacía se exportan igual. | Media | **Pendiente (David)**: cambia el texto exportado. |
+| E8 | CSV: un valor que empieza con `=` se abre en Excel como fórmula. NULL y cadena vacía se exportan igual. | Media | **Corregido** (24/10, a pedido de David): la descarga es un Excel (.xlsx) y el texto se guarda como texto, así que `=1+1` no se vuelve fórmula (`api_exportacion.mjs`, 4 motores). NULL y la cadena vacía siguen viéndose iguales (celda vacía). Solo si un valor supera los 32 767 caracteres de una celda la descarga sale como CSV, que conserva el riesgo. `RENDIMIENTO_E_INTEGRIDAD.md` §4.1. |
 | E9 | No se cancela la consulta al cerrar la página. El plazo se calcula antes de `getConnection`. | Baja | **Pendiente (David)**. |
 
 ## 3. Robustez del servidor

@@ -9,7 +9,7 @@ import { Button, EmptyState, Notice, Panel, formatNumber } from './ui';
 /**
  * Muestra el resultado por páginas sin perder filas: cada página se lee del
  * resultado completo que guardó el backend (no se re-ejecuta la consulta), y el
- * total siempre está a la vista junto con la descarga del CSV completo.
+ * total siempre está a la vista junto con la descarga del resultado completo en Excel.
  */
 export function QueryResult({ initial, user }: { initial: ExecuteQueryResponse; user: User }) {
   const [current, setCurrent] = useState(initial);
@@ -34,7 +34,7 @@ export function QueryResult({ initial, user }: { initial: ExecuteQueryResponse; 
     }
   }
 
-  async function downloadCsv() {
+  async function downloadExcel() {
     setError(null);
     try {
       const { path } = await apiFetch<{ path: string }>('/createResultExport', user, {
@@ -91,8 +91,8 @@ export function QueryResult({ initial, user }: { initial: ExecuteQueryResponse; 
                 </Button>
               </div>
             )}
-            <Button size="sm" onClick={downloadCsv}>
-              Descargar CSV completo
+            <Button size="sm" onClick={downloadExcel}>
+              Descargar Excel
             </Button>
           </>
         }
