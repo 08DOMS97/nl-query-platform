@@ -104,29 +104,34 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
   try {
     const stored = await createResult(connection.id, sql, uid);
     const firstPage = await readPage(stored.id, uid, 1);
-    await recordUsageEvent({
-      type: 'executeQuery',
-      engine: connection.engine,
-      connectionId: connection.id,
-      uid,
-      origin,
-      success: true,
-      latencyMs: Date.now() - startedAt,
-    });
-    await recordHistory({ success: true, totalRows: firstPage.totalRows });
+    // Uso e historial a la vez (24/10): se esperan los dos y ninguno lanza errores.
+    await Promise.all([
+      recordUsageEvent({
+        type: 'executeQuery',
+        engine: connection.engine,
+        connectionId: connection.id,
+        uid,
+        origin,
+        success: true,
+        latencyMs: Date.now() - startedAt,
+      }),
+      recordHistory({ success: true, totalRows: firstPage.totalRows }),
+    ]);
     res.status(200).json({ ...firstPage, rowCount: firstPage.totalRows });
   } catch (err) {
-    await recordUsageEvent({
-      type: 'executeQuery',
-      engine: connection.engine,
-      connectionId: connection.id,
-      uid,
-      origin,
-      success: false,
-      latencyMs: Date.now() - startedAt,
-      errorReason: err instanceof Error ? err.message : String(err),
-    });
-    await recordHistory({ success: false, errorReason: err instanceof Error ? err.message : String(err) });
+    await Promise.all([
+      recordUsageEvent({
+        type: 'executeQuery',
+        engine: connection.engine,
+        connectionId: connection.id,
+        uid,
+        origin,
+        success: false,
+        latencyMs: Date.now() - startedAt,
+        errorReason: err instanceof Error ? err.message : String(err),
+      }),
+      recordHistory({ success: false, errorReason: err instanceof Error ? err.message : String(err) }),
+    ]);
     const status =
       err instanceof QueryTimeoutError ? 504 : err instanceof ResultTooLargeError ? 413 : err instanceof ResultShapeError ? 422 : 500;
     res.status(status).json({ error: err instanceof Error ? err.message : String(err) });

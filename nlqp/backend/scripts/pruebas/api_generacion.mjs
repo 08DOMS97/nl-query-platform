@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import admin from 'firebase-admin';
 import { MAX_QUESTION_CHARS, findRowLimit, looksLikeSql, questionRequestsRowLimit } from '../../lib/services/questionGuard.service.js';
+import { questionHasContent } from '../../lib/services/schemaPruning.service.js';
 
 const tec = readFileSync(process.argv[2], 'utf8').trim();
 const usr = readFileSync(process.argv[3], 'utf8').trim();
@@ -20,10 +21,17 @@ if (admin.apps.length === 0) admin.initializeApp({ projectId: process.env.FIREBA
 const inicio = new Date();
 const uidDe = (token) => JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).user_id;
 
+// Esquema real de cada conexión (lo mismo que recibe la poda), para el control de contenido.
+const esquemas = {};
+for (const m of ['postgres', 'mysql', 'mariadb', 'mssql']) {
+  esquemas[m] = await (await fetch(`${BASE}/getSchema?connectionId=${m}`, { headers: { Authorization: `Bearer ${tec}` } })).json();
+}
+
 /** POST /generateSQL solo si el control lo va a rechazar antes del modelo; si no, falla sin llamar. */
 async function generarSinCosto(token, connectionId, naturalLanguageQuery) {
   const rechazable = typeof naturalLanguageQuery !== 'string' || !naturalLanguageQuery.trim() ||
-    naturalLanguageQuery.length > MAX_QUESTION_CHARS || looksLikeSql(naturalLanguageQuery);
+    naturalLanguageQuery.length > MAX_QUESTION_CHARS || looksLikeSql(naturalLanguageQuery) ||
+    !questionHasContent(esquemas[connectionId], naturalLanguageQuery);
   if (!rechazable) return { status: 'no-enviada (llamaría al modelo)' };
   const res = await fetch(`${BASE}/generateSQL`, {
     method: 'POST',
@@ -45,6 +53,18 @@ const conLimite = consultas.filter((q) => findRowLimit(q.sql));
 check(`las referencias con límite (${conLimite.length}) se detectan`, conLimite.length === 11);
 const sinPedir = conLimite.flatMap((q) => [q.nl, parafrasis.find((p) => p.id === q.id).nl]).filter((t) => !questionRequestsRowLimit(t));
 check('toda pregunta de referencia con límite lo pide (original y paráfrasis)', sinPedir.length === 0, sinPedir.join(' | '));
+
+// --- Preguntas sin contenido («hola»): se rechazan sin llamar al modelo
+for (const m of Object.keys(esquemas)) {
+  const sinContenido = preguntas.filter((t) => !questionHasContent(esquemas[m], t));
+  check(`${m}: las ${preguntas.length} preguntas reales tienen contenido`, sinContenido.length === 0, sinContenido.join(' | '));
+}
+for (const t of ['hola', 'Hola!', 'gracias', 'asdf', '¿?', 'ok']) {
+  check(`sin contenido: ${JSON.stringify(t)}`, !questionHasContent(esquemas.postgres, t));
+}
+for (const t of ['categorías', 'clientes', 'Muéstrame las categorías que hay', '¿cuánto se vendió?']) {
+  check(`con contenido: ${JSON.stringify(t)}`, questionHasContent(esquemas.postgres, t));
+}
 
 // --- Reconocer SQL
 const SQL_DAVID = 'Select TOP 10 c.first_name, c.last_name, count(o.order_id) As pedidos  \nfrom customers c \nleft join orders o on c.customer_id = o.customer_id\ngroup by c.customer_id, c.first_name, c.last_name;';
@@ -91,6 +111,8 @@ const largo = await generarSinCosto(usr, 'postgres', `¿Cuántos clientes hay? $
 check(`pregunta de más de ${MAX_QUESTION_CHARS} caracteres → 400`, largo.status === 400 && /demasiado larga/.test(largo.json?.error ?? ''), JSON.stringify(largo));
 check('pregunta que no es texto → 400', (await generarSinCosto(usr, 'postgres', 12345)).status === 400);
 check('pregunta vacía → 400', (await generarSinCosto(usr, 'postgres', '   ')).status === 400);
+const hola = await generarSinCosto(usr, 'mariadb', 'hola');
+check('«hola» → 422 nlqp/no-content', hola.status === 422 && hola.json?.code === 'nlqp/no-content', JSON.stringify(hola));
 
 // --- Ninguna llamada llegó al modelo
 await new Promise((r) => setTimeout(r, 1500));

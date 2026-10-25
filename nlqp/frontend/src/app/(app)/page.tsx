@@ -12,6 +12,8 @@ import { SaveQueryButton } from '@/components/SaveQueryButton';
 
 const errorMessage = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
+const seconds = (ms: number) => `${(ms / 1000).toLocaleString('es-GT', { maximumFractionDigits: 1 })} s`;
+
 /** Consumo de la generación: solo lo ve el rol técnico. */
 function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
   const items: [string, string][] = [
@@ -19,7 +21,8 @@ function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
     ['Tokens', formatNumber(metrics.tokensTotal)],
     ['Entrada / salida / razonamiento', `${formatNumber(metrics.tokensInput)} / ${formatNumber(metrics.tokensOutput)} / ${formatNumber(metrics.tokensThinking)}`],
     ['Costo', formatUsd(metrics.costUsd)],
-    ['Tiempo', `${(metrics.latencyMs / 1000).toLocaleString('es-GT', { maximumFractionDigits: 1 })} s`],
+    ['Tiempo', seconds(metrics.latencyMs)],
+    ...(metrics.stages ? ([['Modelo / resto', `${seconds(metrics.stages.modelMs)} / ${seconds(metrics.latencyMs - metrics.stages.modelMs)}`]] as [string, string][]) : []),
   ];
   return (
     <dl className="tabular flex flex-wrap border-t border-line bg-surface text-[12px]">

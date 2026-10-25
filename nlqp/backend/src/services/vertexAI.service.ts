@@ -145,6 +145,23 @@ function getClient(): { ai: GoogleGenAI; model: string } {
 }
 
 /**
+ * Prepara el cliente, el token de Google y la conexión TLS al arrancar el servidor, con
+ * un `countTokens` (no se factura). Sin esto, la primera generación de cada proceso
+ * tardaba ~2,7 s más (medido el 24/10: 2,8 s el primer countTokens, 0,14 s los
+ * siguientes). Un fallo acá no impide arrancar: solo se registra.
+ */
+export async function warmUpVertex(): Promise<void> {
+  const t0 = Date.now();
+  try {
+    const { ai, model } = getClient();
+    await ai.models.countTokens({ model, contents: 'SELECT 1' });
+    console.log(`[vertexAI] cliente listo en ${Date.now() - t0} ms`);
+  } catch (err) {
+    console.warn('[vertexAI] no se pudo preparar el cliente al arrancar:', err instanceof Error ? err.message : err);
+  }
+}
+
+/**
  * Cuenta los tokens de entrada que tendría el prompt, sin generar nada. La API
  * countTokens de Vertex AI no se factura: sirve para medir cuánto ahorra el
  * pruning comparando el prompt podado contra el del esquema completo.

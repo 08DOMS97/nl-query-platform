@@ -2,6 +2,7 @@ import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
 import type { AuthedRequest } from '../middleware/auth.middleware.js';
 import { closePool, testConnectionConfig } from '../services/connectionManager.service.js';
+import { invalidateSchema } from '../services/schemaExtractor.service.js';
 import {
   assertUniqueName,
   configForEdit,
@@ -81,6 +82,7 @@ export const connectionsHandler = async (req: Request, res: Response): Promise<v
       const updated = await updateConnection(id, input);
       // El pool abierto usa los datos anteriores: se cierra y el próximo uso abre uno nuevo.
       await closePool(id);
+      invalidateSchema(id);
       res.status(200).json(updated);
       return;
     }
@@ -89,6 +91,7 @@ export const connectionsHandler = async (req: Request, res: Response): Promise<v
       const id = requireId(req, res);
       if (!id) return;
       await closePool(id);
+      invalidateSchema(id);
       await deleteConnection(id);
       res.status(204).end();
       return;

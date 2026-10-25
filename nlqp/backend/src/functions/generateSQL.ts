@@ -1,13 +1,13 @@
 import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
 import { extractSchema } from '../services/schemaExtractor.service.js';
-import { pruneSchema } from '../services/schemaPruning.service.js';
+import { pruneSchema, questionHasContent } from '../services/schemaPruning.service.js';
 import { GenerationFailedError, generateSql } from '../services/vertexAI.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { estimateCostUsd } from '../services/vertexAiPricing.service.js';
 import { recordUsageEvent, USAGE_ORIGIN_HEADER, usageOriginFrom } from '../services/usageTracking.service.js';
 import { connectionFromRequest } from '../services/connectionStore.service.js';
-import type { ConnectionDetail, GenerateSqlMetrics, GenerateSqlRequest } from '../types/index.js';
+import type { ConnectionDetail, GenerateSqlMetrics, GenerateSqlRequest, GenerationStages } from '../types/index.js';
 import { handleConnectionError } from './connectionErrors.js';
 import type { AuthedRequest } from '../middleware/auth.middleware.js';
 import { MAX_QUESTION_CHARS, findRowLimit, looksLikeSql, questionRequestsRowLimit } from '../services/questionGuard.service.js';
@@ -55,21 +55,42 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
   const uid = (req as Request & { uid?: string }).uid ?? null;
   const origin = usageOriginFrom(req.headers[USAGE_ORIGIN_HEADER], (req as AuthedRequest).role);
   const startedAt = Date.now();
+  // Tiempo de cada etapa (24/10), para separar lo que depende de NLQP de lo que tarda el
+  // servicio del modelo, que es lo que más varía.
+  const stages: Partial<GenerationStages> = {};
+  let mark = startedAt;
+  const lap = (stage: keyof GenerationStages) => {
+    const now = Date.now();
+    stages[stage] = now - mark;
+    mark = now;
+  };
 
   try {
-    const schema = await extractSchema(connection.id);
+    // Las corridas de evaluación leen siempre el esquema actual: la caché no altera la medición.
+    const schema = await extractSchema(connection.id, { fresh: origin === 'evaluacion' });
+    lap('schemaMs');
+    if (!questionHasContent(schema, body.naturalLanguageQuery)) {
+      res.status(422).json({
+        code: 'nlqp/no-content',
+        error: 'No se encontró en la pregunta qué consultar. Escriba qué datos quiere ver, por ejemplo «¿Cuántos pedidos hubo por mes?».',
+      });
+      return;
+    }
     const prunedSchema = pruneSchema(schema, body.naturalLanguageQuery);
+    lap('pruneMs');
     const { sql, tokensInput, tokensOutput, tokensThinking, tokensTotal } = await generateSql(
       connection.engine,
       prunedSchema,
       body.naturalLanguageQuery,
     );
+    lap('modelMs');
     const safety = validateQuerySafety(sql);
     // El razonamiento interno se factura como salida, aunque no sea visible.
     const costUsd = estimateCostUsd(tokensInput, tokensOutput + tokensThinking);
-    const latencyMs = Date.now() - startedAt;
     const rowLimit = findRowLimit(sql);
     const unrequestedLimit = rowLimit !== null && !questionRequestsRowLimit(body.naturalLanguageQuery);
+    lap('checkMs');
+    const latencyMs = Date.now() - startedAt;
 
     await recordUsageEvent({
       type: 'generateSQL',
@@ -85,6 +106,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       tokensTotal,
       costUsd,
       safe: safety.safe,
+      stages: stages as GenerationStages,
       ...(unrequestedLimit ? { errorReason: `límite de filas no pedido: ${rowLimit}` } : {}),
     });
 
@@ -97,6 +119,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       latencyMs,
       tablesSent: prunedSchema.tables.length,
       tablesTotal: schema.tables.length,
+      stages: stages as GenerationStages,
     };
     if (unrequestedLimit) {
       res.status(422).json({

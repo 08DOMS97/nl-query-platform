@@ -297,8 +297,37 @@ function toBool(isNullable: string): boolean {
   return String(isNullable).toUpperCase() === 'YES';
 }
 
+/**
+ * Caché del esquema por conexión (24/10). Leerlo son 5 consultas de catálogo por
+ * generación (0,12–0,45 s); el esquema casi nunca cambia entre una pregunta y la
+ * siguiente. Dura `NLQP_SCHEMA_CACHE_SEC` (60 s por defecto; 0 la apaga), se borra al
+ * editar o eliminar la conexión, y la pantalla Esquema y las corridas de evaluación
+ * siempre leen el esquema actual (`fresh`).
+ */
+const SCHEMA_CACHE_MS = Math.max(0, Number(process.env.NLQP_SCHEMA_CACHE_SEC ?? 60)) * 1000;
+const schemaCache = new Map<string, { at: number; schema: Promise<SchemaInfo> }>();
+
+export function invalidateSchema(connectionId: string): void {
+  schemaCache.delete(connectionId);
+}
+
+/** Esquema de la conexión: de la caché si es reciente; con `fresh`, siempre leído de la base. */
+export async function extractSchema(connectionId: string, options: { fresh?: boolean } = {}): Promise<SchemaInfo> {
+  const cached = schemaCache.get(connectionId);
+  if (!options.fresh && cached && Date.now() - cached.at < SCHEMA_CACHE_MS) return cached.schema;
+  const schema = readSchema(connectionId);
+  if (SCHEMA_CACHE_MS > 0) {
+    schemaCache.set(connectionId, { at: Date.now(), schema });
+    // Un error no queda guardado: la próxima solicitud lo vuelve a intentar.
+    schema.catch(() => {
+      if (schemaCache.get(connectionId)?.schema === schema) schemaCache.delete(connectionId);
+    });
+  }
+  return schema;
+}
+
 /** Extrae e introspecciona el esquema completo de la base de una conexión y lo normaliza. */
-export async function extractSchema(connectionId: string): Promise<SchemaInfo> {
+async function readSchema(connectionId: string): Promise<SchemaInfo> {
   const { engine, database } = await getConnection(connectionId);
   const q = QUERIES[engine];
 

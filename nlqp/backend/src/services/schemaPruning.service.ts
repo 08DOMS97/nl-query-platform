@@ -197,6 +197,24 @@ function connect(core: string[], foreignKeys: ForeignKeyInfo[]): Set<string> {
   return connected;
 }
 
+/**
+ * ¿La pregunta tiene algo con qué consultar la base? Es falso si no deja ninguna palabra
+ * útil (solo palabras vacías o muy cortas) o si deja una sola que no coincide con ninguna
+ * tabla ni columna («hola», «gracias», «asdf»). En esos casos la poda mandaría el esquema
+ * completo al modelo: la llamada más cara posible, para una respuesta sin sentido.
+ * Una pregunta real sin coincidencias léxicas tiene más palabras («¿cuánto se vendió el
+ * mes pasado?») y sigue pasando (lo prueba `api_generacion` con las 100 del corpus).
+ */
+export function questionHasContent(schema: SchemaInfo, naturalLanguageQuery: string): boolean {
+  const words = new Set(tokenize(naturalLanguageQuery));
+  if (words.size === 0) return false;
+  if (words.size > 1) return true;
+  const tokens = queryTokens(naturalLanguageQuery);
+  return schema.tables.some(
+    (t) => tokens.has(tableNoun(t)) || t.columns.some((c) => columnTokens(c.name).some((ct) => tokens.has(ct))),
+  );
+}
+
 export interface PruneOptions {
   /** Número máximo de tablas a conservar tras la conexión. */
   maxTables?: number;

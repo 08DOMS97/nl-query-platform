@@ -13,7 +13,7 @@ import { handleConnectionError } from './connectionErrors.js';
 export const getSchemaHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     const connection = await connectionFromRequest(req.query);
-    const schema = await extractSchema(connection.id);
+    const schema = await extractSchema(connection.id, { fresh: true });
     const nlQuery = req.query.naturalLanguageQuery;
     const result = typeof nlQuery === 'string' && nlQuery.trim() ? pruneSchema(schema, nlQuery) : schema;
     res.status(200).json(result);

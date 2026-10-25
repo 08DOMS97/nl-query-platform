@@ -1,5 +1,5 @@
 import { getFirestore } from './firebaseAdmin.service.js';
-import type { DbEngine, GetUsageStatsResponse } from '../types/index.js';
+import type { DbEngine, GenerationStages, GetUsageStatsResponse, LatencySummary } from '../types/index.js';
 
 const COLLECTION = 'usageEvents';
 
@@ -39,6 +39,16 @@ export interface UsageEvent {
   tokensTotal?: number;
   costUsd?: number;
   safe?: boolean;
+  /** Tiempo por etapa de las generaciones (desde el 24/10). */
+  stages?: GenerationStages;
+}
+
+/** Mediana, p95 y máximo (percentil por rango más cercano). */
+function summarize(values: number[]): LatencySummary | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const at = (p: number) => sorted[Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1)];
+  return { p50Ms: at(0.5), p95Ms: at(0.95), maxMs: sorted[sorted.length - 1] };
 }
 
 /**
@@ -77,7 +87,11 @@ export async function getUsageStats(
     callsByType: { generateSQL: 0, executeQuery: 0 },
     callsByEngine: { postgres: 0, mysql: 0, mariadb: 0, mssql: 0 },
     errorCount: 0,
+    generationTimes: null,
   };
+  const totals: number[] = [];
+  const models: number[] = [];
+  const schemas: number[] = [];
 
   for (const doc of snapshot.docs) {
     const data = doc.data() as UsageEvent;
@@ -87,6 +101,23 @@ export async function getUsageStats(
     stats.callsByType[data.type] += 1;
     stats.callsByEngine[data.engine] += 1;
     if (!data.success) stats.errorCount += 1;
+    if (data.type === 'generateSQL' && data.success && typeof data.latencyMs === 'number') {
+      totals.push(data.latencyMs);
+      if (data.stages) {
+        models.push(data.stages.modelMs);
+        schemas.push(data.stages.schemaMs);
+      }
+    }
+  }
+  const total = summarize(totals);
+  if (total) {
+    stats.generationTimes = {
+      count: totals.length,
+      total,
+      stagesCount: models.length,
+      model: summarize(models),
+      schema: summarize(schemas),
+    };
   }
 
   return stats;

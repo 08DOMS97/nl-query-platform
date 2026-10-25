@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFetch } from '@/lib/api';
-import { DB_ENGINES, ENGINE_LABELS, type UsageOrigin, type UsageStats } from '@/lib/types';
+import { DB_ENGINES, ENGINE_LABELS, type LatencySummary, type UsageOrigin, type UsageStats } from '@/lib/types';
 import { Notice, PageHeader, Panel, formatNumber, formatUsd } from '@/components/ui';
 
 const PERIODS = [7, 30, 90] as const;
@@ -41,6 +41,50 @@ function Segmented<T extends string | number>({
         </button>
       ))}
     </div>
+  );
+}
+
+const seconds = (ms: number) => `${(ms / 1000).toLocaleString('es-GT', { maximumFractionDigits: 1 })} s`;
+
+/**
+ * Tiempos de generación del período: total, espera al modelo (servicio externo, lo que
+ * más varía) y lectura del esquema. Mediana y p95: un valor suelto no representa el uso.
+ */
+function GenerationTimes({ times }: { times: NonNullable<UsageStats['generationTimes']> }) {
+  const rows: [string, string, LatencySummary | null][] = [
+    ['Total de la generación', 'Desde que llega la pregunta hasta tener el SQL validado', times.total],
+    ['Espera al modelo', 'Servicio externo: varía según la carga y la consulta', times.model],
+    ['Esquema y conexión', 'Lectura del esquema de la base (con caché de 60 s)', times.schema],
+  ];
+  return (
+    <Panel
+      title="Tiempos de generación"
+      meta={`${formatNumber(times.count)} generaciones${times.stagesCount < times.count ? ` · ${formatNumber(times.stagesCount)} con detalle por etapa` : ''}`}
+    >
+      <table className="tabular w-full text-[13px]">
+        <thead>
+          <tr className="border-b border-line text-left text-[12px] text-ink-3">
+            <th className="px-4 py-2 font-normal">Etapa</th>
+            <th className="w-28 px-4 py-2 text-right font-normal">Mediana</th>
+            <th className="w-28 px-4 py-2 text-right font-normal">95 % debajo de</th>
+            <th className="w-28 px-4 py-2 text-right font-normal">Máximo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([label, detail, s]) => (
+            <tr key={label} className="border-b border-line last:border-b-0">
+              <td className="px-4 py-2.5">
+                {label}
+                <span className="block text-[12px] text-ink-3">{detail}</span>
+              </td>
+              <td className="px-4 py-2.5 text-right font-mono text-[12px]">{s ? seconds(s.p50Ms) : '—'}</td>
+              <td className="px-4 py-2.5 text-right font-mono text-[12px]">{s ? seconds(s.p95Ms) : '—'}</td>
+              <td className="px-4 py-2.5 text-right font-mono text-[12px]">{s ? seconds(s.maxMs) : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Panel>
   );
 }
 
@@ -147,6 +191,7 @@ export default function UsoPage() {
             </table>
           </Panel>
 
+          {stats.generationTimes && <GenerationTimes times={stats.generationTimes} />}
         </div>
       )}
     </div>

@@ -121,6 +121,25 @@ export interface GenerateSqlRequest {
 }
 
 /** Consumo de una llamada a `/generateSQL` (el mismo que se registra en `usageEvents`). */
+/**
+ * Tiempo de cada etapa de una generación, en ms (24/10). `schemaMs` incluye abrir la
+ * conexión si es la primera; `modelMs` es la llamada al modelo (servicio externo);
+ * `checkMs`, la validación y los controles del SQL generado.
+ */
+export interface GenerationStages {
+  schemaMs: number;
+  pruneMs: number;
+  modelMs: number;
+  checkMs: number;
+}
+
+/** Mediana, percentil 95 y máximo de una serie de tiempos, en ms. */
+export interface LatencySummary {
+  p50Ms: number;
+  p95Ms: number;
+  maxMs: number;
+}
+
 export interface GenerateSqlMetrics {
   tokensInput: number;
   tokensOutput: number;
@@ -131,6 +150,7 @@ export interface GenerateSqlMetrics {
   /** Tablas enviadas al modelo tras el pruning, frente al total del esquema. */
   tablesSent: number;
   tablesTotal: number;
+  stages?: GenerationStages;
 }
 
 export interface GenerateSqlResponse {
@@ -255,6 +275,17 @@ export interface GetUsageStatsResponse {
   callsByType: { generateSQL: number; executeQuery: number };
   callsByEngine: Record<DbEngine, number>;
   errorCount: number;
+  /**
+   * Tiempos de las generaciones exitosas del período (24/10). `model` y `schema` cuentan
+   * solo las que registraron etapas (desde el 24/10). `null` si no hubo ninguna.
+   */
+  generationTimes: {
+    count: number;
+    total: LatencySummary;
+    stagesCount: number;
+    model: LatencySummary | null;
+    schema: LatencySummary | null;
+  } | null;
 }
 
 /** Estado del pool de conexiones de un motor (`GET /poolStatus`, solo rol técnico). */

@@ -14,6 +14,7 @@ import {
 } from './functions/resultPages.js';
 import { meHandler, usersHandler } from './functions/users.js';
 import { requireSuperadmin, requireTechnicalRole, verifyFirebaseAuth } from './middleware/auth.middleware.js';
+import { warmUpVertex } from './services/vertexAI.service.js';
 
 /**
  * Servidor local de desarrollo: monta todas las funciones en un único proceso Express
@@ -81,4 +82,5 @@ app.use((err: unknown, _req: Request, res: Response, next: NextFunction): void =
 const port = Number(process.env.PORT ?? 8080);
 app.listen(port, () => {
   console.log(`NLQP backend escuchando en http://localhost:${port}`);
+  void warmUpVertex();
 });

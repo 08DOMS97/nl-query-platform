@@ -85,6 +85,8 @@ export interface GenerateSqlMetrics {
   latencyMs: number;
   tablesSent: number;
   tablesTotal: number;
+  /** Tiempo por etapa en ms; `modelMs` es la espera al servicio del modelo. */
+  stages?: { schemaMs: number; pruneMs: number; modelMs: number; checkMs: number };
 }
 
 export interface GenerateSqlResponse {
@@ -255,4 +257,17 @@ export interface UsageStats {
   callsByType: { generateSQL: number; executeQuery: number };
   callsByEngine: Record<DbEngine, number>;
   errorCount: number;
+  generationTimes: {
+    count: number;
+    total: LatencySummary;
+    stagesCount: number;
+    model: LatencySummary | null;
+    schema: LatencySummary | null;
+  } | null;
+}
+
+export interface LatencySummary {
+  p50Ms: number;
+  p95Ms: number;
+  maxMs: number;
 }
