@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS customers (
     KEY ix_customers_city (city),
     KEY ix_customers_country (country),
     KEY ix_customers_registration (registration_date),
+    KEY ix_customers_name (last_name, first_name),   -- volumen: busqueda por nombre del cliente
     CONSTRAINT ck_customers_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -107,6 +108,8 @@ CREATE TABLE IF NOT EXISTS orders (
     KEY ix_orders_date (order_date),
     KEY ix_orders_status (status),
     KEY ix_orders_address (shipping_address_id),
+    KEY ix_orders_customer_status (customer_id, status, total),   -- volumen: gasto y pedidos por cliente (cubre SUM(total) sin leer la tabla)
+    KEY ix_orders_date_status (order_date, status, total),   -- volumen: ventas por periodo excluyendo estados (cubre el reporte)
     CONSTRAINT fk_orders_customer
         FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
     CONSTRAINT fk_orders_address
@@ -130,6 +133,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     PRIMARY KEY (order_item_id),
     UNIQUE KEY uq_order_items_order_product (order_id, product_id),
     KEY ix_order_items_product (product_id),
+    KEY ix_order_items_product_sales (product_id, order_id, quantity, subtotal),   -- volumen: ventas y unidades por producto (cubre el JOIN con orders)
     CONSTRAINT fk_order_items_order
         FOREIGN KEY (order_id) REFERENCES orders (order_id),
     CONSTRAINT fk_order_items_product
@@ -155,6 +159,7 @@ CREATE TABLE IF NOT EXISTS payments (
     KEY ix_payments_status (status),
     KEY ix_payments_method (payment_method),
     KEY ix_payments_date (payment_date),
+    KEY ix_payments_status_method (status, payment_method, amount),   -- volumen: recaudacion por metodo de pago
     CONSTRAINT fk_payments_order
         FOREIGN KEY (order_id) REFERENCES orders (order_id),
     CONSTRAINT ck_payments_amount CHECK (amount >= 0),

@@ -191,3 +191,10 @@ CREATE INDEX IF NOT EXISTS ix_payments_date          ON payments (payment_date);
 CREATE INDEX IF NOT EXISTS ix_shipments_order        ON shipments (order_id);
 CREATE INDEX IF NOT EXISTS ix_shipments_status       ON shipments (status);
 CREATE INDEX IF NOT EXISTS ix_shipments_date         ON shipments (shipment_date);
+
+-- Compuestos para el volumen (reportes frecuentes; ver README, "Indices")
+CREATE INDEX IF NOT EXISTS ix_customers_name ON customers (last_name, first_name);  -- busqueda por nombre del cliente
+CREATE INDEX IF NOT EXISTS ix_orders_customer_status ON orders (customer_id, status, total);  -- gasto y pedidos por cliente (cubre SUM(total) sin leer la tabla)
+CREATE INDEX IF NOT EXISTS ix_orders_date_status ON orders (order_date, status, total);  -- ventas por periodo excluyendo estados (cubre el reporte)
+CREATE INDEX IF NOT EXISTS ix_order_items_product_sales ON order_items (product_id, order_id, quantity, subtotal);  -- ventas y unidades por producto (cubre el JOIN con orders)
+CREATE INDEX IF NOT EXISTS ix_payments_status_method ON payments (status, payment_method, amount);  -- recaudacion por metodo de pago

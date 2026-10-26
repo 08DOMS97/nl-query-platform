@@ -74,7 +74,7 @@ for (const m of MOTORES) {
   check(`${m}: código con ceros a la izquierda`, f.getCell(4).value === '00123', JSON.stringify(f.getCell(4).value));
 
   // 40 000 filas: el Excel trae todas, en el mismo orden que la pantalla.
-  const big = await run(m, 'SELECT c1.customer_id AS a, c2.customer_id AS b FROM customers c1 CROSS JOIN customers c2 ORDER BY c1.customer_id, c2.customer_id');
+  const big = await run(m, 'SELECT c1.customer_id AS a, c2.customer_id AS b FROM customers c1 CROSS JOIN customers c2 WHERE c1.customer_id <= 200 AND c2.customer_id <= 200 ORDER BY c1.customer_id, c2.customer_id');
   if (big.status !== 200) { check(`${m}: consulta grande`, false, JSON.stringify(big.json).slice(0, 160)); continue; }
   const { book: book3 } = await exportar(big.json.resultId);
   const h3 = book3.getWorksheet('Resultado');

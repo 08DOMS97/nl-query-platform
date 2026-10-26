@@ -37,7 +37,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 20s
+      start_period: 15m   # la primera carga (con volumen) tarda varios minutos
 
   # ----------------------------------------------------------
   # MySQL 8.0  ->  host ${MYSQL_HOST_PORT} / cont. 3306
@@ -69,7 +69,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      start_period: 15m   # la primera carga (con volumen) tarda varios minutos
 
   # ----------------------------------------------------------
   # MariaDB 11.4 (LTS)  ->  host ${MARIADB_HOST_PORT} / cont. 3306
@@ -97,7 +97,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      start_period: 15m   # la primera carga (con volumen) tarda varios minutos
 
   # ----------------------------------------------------------
   # SQL Server 2022 (Developer)  ->  host ${MSSQL_HOST_PORT} / cont. 1433
@@ -165,6 +165,18 @@ services:
         run -d "$$TEST_DB_NAME" -v APP_USER="$$TEST_DB_USER" APP_PASSWORD="$$TEST_DB_PASSWORD" DB_NAME="$$TEST_DB_NAME" -i /init/02-users.sql
         echo "[init] insertando datos de prueba"
         run -d "$$TEST_DB_NAME" -i /init/03-seed.sql
+        # volumen: solo si existe el archivo y aun no se cargo (idempotente)
+        if [ -f /init/04-volumen.sql.gz ]; then
+          N=$$(run -d "$$TEST_DB_NAME" -h -1 -W -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM dbo.orders;" | tr -d '[:space:]')
+          if [ "$$N" -le 300 ]; then
+            echo "[init] cargando volumen (varios minutos)"
+            gunzip -c /init/04-volumen.sql.gz > /tmp/04-volumen.sql
+            run -d "$$TEST_DB_NAME" -i /tmp/04-volumen.sql
+            rm -f /tmp/04-volumen.sql
+          else
+            echo "[init] volumen ya cargado ($$N pedidos)"
+          fi
+        fi
         echo "[init] completado OK"
     volumes:
       - ./init/sqlserver:/init:ro

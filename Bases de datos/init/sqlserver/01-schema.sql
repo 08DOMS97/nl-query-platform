@@ -261,3 +261,25 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_shipments_date' AND object_id = OBJECT_ID(N'dbo.shipments'))
     CREATE INDEX ix_shipments_date ON dbo.shipments (shipment_date);
 GO
+
+-- Compuestos para el volumen (reportes frecuentes; ver README, "Indices")
+-- busqueda por nombre del cliente
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_customers_name' AND object_id = OBJECT_ID(N'dbo.customers'))
+    CREATE INDEX ix_customers_name ON dbo.customers (last_name, first_name);
+GO
+-- gasto y pedidos por cliente (cubre SUM(total) sin leer la tabla)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_orders_customer_status' AND object_id = OBJECT_ID(N'dbo.orders'))
+    CREATE INDEX ix_orders_customer_status ON dbo.orders (customer_id, status, total);
+GO
+-- ventas por periodo excluyendo estados (cubre el reporte)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_orders_date_status' AND object_id = OBJECT_ID(N'dbo.orders'))
+    CREATE INDEX ix_orders_date_status ON dbo.orders (order_date, status, total);
+GO
+-- ventas y unidades por producto (cubre el JOIN con orders)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_order_items_product_sales' AND object_id = OBJECT_ID(N'dbo.order_items'))
+    CREATE INDEX ix_order_items_product_sales ON dbo.order_items (product_id, order_id, quantity, subtotal);
+GO
+-- recaudacion por metodo de pago
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'ix_payments_status_method' AND object_id = OBJECT_ID(N'dbo.payments'))
+    CREATE INDEX ix_payments_status_method ON dbo.payments (status, payment_method, amount);
+GO

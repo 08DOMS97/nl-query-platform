@@ -365,8 +365,17 @@ Se confirma con David antes de cada corrida pagada.
      referencias viejas).
    - Para la tesis: los "200/200, 50/50 consistentes" anteriores al 10/10 eran por
      número de filas.
-3. Banco de volumen alto en los 4 motores (base separada; no toca los resultados
-   fijos del banco actual).
+3. ~~Banco de volumen alto en los 4 motores~~ — **hecho 24/10/2026**, a pedido de
+   David. No quedó como una base separada: se alimentó **el mismo banco**, que pasó de
+   2 233 a 1 485 641 filas (250 000 pedidos, 631 630 líneas, 50 000 clientes, 2 000
+   productos). Las 2 233 filas base no cambiaron y se agregaron 5 índices compuestos
+   (detalle en `Bases de datos/README.md`, «Volumen» e «Índices»). Las referencias
+   se comparan contra el resultado en vivo, así que siguen sirviendo, pero ahora dan
+   otros números (S01 = 50 000, etc.). `--modo prueba`: 200/200 exactos y 50/50 con
+   el mismo resultado en los 4 motores. El generador descarta variantes de los datos
+   con empates en el borde de un `LIMIT` de las referencias. El costo por llamada no
+   cambia: el prompt lleva el esquema, no los datos. M02 y M03 devuelven 50 000 filas
+   (~6 s cada una con la paginación).
 4. ~~Auditoría de eficiencia del SQL de referencia~~ — **hecho 09/10/2026.** S10 y
    M13 filtraban con `EXTRACT(YEAR FROM order_date) = 2025` / `YEAR(order_date) =
    2025`, que impide usar el índice `ix_orders_date`; ahora usan
@@ -377,8 +386,8 @@ Se confirma con David antes de cada corrida pagada.
    columnas en el `WHERE`: lo que aparece es legítimo (`DISTINCT` de S14 es la
    pregunta; `COUNT(DISTINCT…)` en C07/C09/C13 es la semántica; las funciones de
    fecha de M12/M13/M20 están en `SELECT`/`GROUP BY`, no en el filtro). Regresión:
-   57/57 y 200/200. La auditoría con `EXPLAIN` sobre volumen alto queda para el
-   banco grande (punto 3).
+   57/57 y 200/200. La auditoría con `EXPLAIN` sobre volumen alto ya se puede hacer:
+   el banco tiene volumen desde el 24/10 (punto 3).
 5. Paráfrasis (50): **borrador escrito 10/10/2026** (`parafrasis_50.json`,
    **aprobadas por David el 10/10 sin cambios**, `"estado": "revisada"`; el runner
    no gasta en paráfrasis sin revisar).

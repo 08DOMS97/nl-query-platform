@@ -6,6 +6,66 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-24 (5) — Banco de pruebas con volumen (1,5 M de filas)
+
+Sin gasto en GCP. David: «alimentar la base de datos… con registros que se vean muy
+reales, en los 4 motores» y, ante la propuesta de ×5, «agrega lo que veas necesario para
+que sea una buena data para medir eficiencia con explain». Pidió índices nuevos «de
+forma estratégica» y que en el README solo se sustituyan las cifras, dejando documentada
+la alimentación (no hacen falta entradas en `RESUMEN_PARA_DOC_TEORICO.md`).
+
+### Hecho
+- `generar_seed.py`, sección 8, y `catalogo_volumen.py`: de 2 233 a **1 485 641 filas**
+  (50 000 clientes, 72 038 direcciones, 2 000 productos, 250 000 pedidos, 631 630 líneas,
+  280 797 pagos, 199 161 envíos).
+  - Las 2 233 filas base quedaron idénticas: los `*-seed.sql` no cambiaron un byte. Para
+    eso, pagos y envíos se pasaron a funciones (`make_payments`, `make_shipment`) con el
+    mismo orden de llamadas.
+  - Datos con formato de cada país: nombres, dos apellidos, teléfonos, direcciones con
+    zona y código postal.
+  - Pedidos posteriores al registro del cliente y del producto, con ids cronológicos,
+    crecimiento año a año y temporada. Pagos y transportistas según el país.
+  - Se descartan variantes de los datos con empates en el borde de un `LIMIT` de las
+    referencias.
+- 5 índices compuestos en los 4 esquemas: `ix_orders_customer_status`,
+  `ix_orders_date_status`, `ix_order_items_product_sales`, `ix_payments_status_method`
+  y `ix_customers_name`.
+- El volumen sale en `NN-volumen.sql.gz` (~25 MB por motor), que **no se versiona**: lo
+  regenera `python generar_seed.py`, que es determinista.
+  - `docker-compose.yml`: SQL Server lo carga solo si `orders` tiene ≤ 300 filas, y el
+    healthcheck tiene 15 min de margen.
+  - Primera carga: ~2 min en PostgreSQL, MySQL y MariaDB; ~8 min en SQL Server.
+  - Al final se actualizan las estadísticas (`VACUUM ANALYZE` / `ANALYZE TABLE` /
+    `UPDATE STATISTICS`).
+- Pruebas que asumían el tamaño viejo:
+  - `api_integridad.mjs`: «un conteo sigue siendo número» comparaba `=== 200`; ahora pide
+    un entero positivo.
+  - `api_exportacion.mjs`: el `CROSS JOIN` de clientes pasaría de 40 000 a 2 500 millones
+    de filas; se limitó a los 200 primeros, que siguen dando las mismas 40 000 filas. En
+    la primera corrida, una de esas consultas quedó en MySQL hasta que el tope de 8 min
+    de la conexión la canceló, como debe ser.
+
+### Verificado
+- `verificar_dataset.ps1`: mismos conteos en los 4 motores, 8 FK, 0 huérfanas, 0
+  incoherencias de importes.
+- Los 5 índices nuevos están en los 4 motores.
+- `eval:gemini --modo prueba`: 200/200 exactos y 50/50 con el mismo resultado en los 4
+  motores (mediana de 257 ms por consulta; M02 y M03, de 50 000 filas, ~6 s).
+- Seguridad 57/57 + 200/200, API 358/358 (290 + 68 de exportación), UI 102/102.
+- `EXPLAIN`:
+  - PostgreSQL usa *Index Only Scan* en `ix_orders_customer_status` para el gasto de un
+    cliente, y MariaDB usa `ix_orders_date_status` como índice cubriente para las ventas
+    de un año.
+  - PostgreSQL prefiere `ix_orders_date` para ese mismo reporte, porque los pedidos están
+    en orden cronológico. Es una diferencia real entre motores.
+
+### Sigue
+El piloto con paráfrasis no cambia: el prompt lleva el esquema, no los datos, así que el
+costo por llamada es el mismo. `EXPLAIN` sobre el SQL generado ya se puede hacer con este
+banco.
+
+---
+
 ## 2026-10-24 (4) — La descarga pasa de CSV a Excel
 
 Sin gasto en GCP. David: «los csv se exportan feos… que sea entendible para un usuario no

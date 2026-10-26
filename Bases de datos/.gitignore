@@ -3,3 +3,9 @@
 
 # Nada mas de este directorio necesita ignorarse: los datos viven en
 # volumenes Docker con nombre, no en el arbol de archivos.
+
+# Volumen del banco (~25 MB por motor): lo genera `python generar_seed.py`
+# (determinista, mismos datos en cada corrida). No se versiona para no cargar
+# el historial con ~100 MB por regeneracion.
+init/*/*-volumen.sql.gz
+__pycache__/

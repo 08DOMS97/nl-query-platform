@@ -537,6 +537,20 @@
         "agregada": "2026-10-24",
         "implementada": "2026-10-24"
       }
+    },
+    {
+      "no": 53,
+      "tarea": "Banco de pruebas con volumen para medir eficiencia",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-24",
+      "fin": "2026-10-24",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 24/10 a pedido mío: el banco pasó de 2 233 a 1 485 641 filas en los 4 motores (250 000 pedidos, 631 630 líneas, 50 000 clientes, 2 000 productos) con datos que parecen reales (nombres, teléfonos y direcciones de cada país, temporada, pedidos en orden cronológico). Las filas originales no cambiaron. 5 índices compuestos nuevos para medir con EXPLAIN. Verificado: los 4 motores con los mismos datos, 0 huérfanas, las 50 referencias con el mismo resultado en los 4 (50/50), API 358/358, UI 102/102, seguridad 57/57 + 200/200.",
+      "nueva": {
+        "agregada": "2026-10-24",
+        "implementada": "2026-10-24"
+      }
     }
   ]
 }

@@ -1,8 +1,9 @@
 # Entorno LOCAL de pruebas — 4 motores · dataset e-commerce para NL2SQL
 
 Cuatro motores de base de datos, cada uno en su propio contenedor Docker, con un
-**dataset relacional de e-commerce** (8 tablas, ~2 230 filas) pensado para probar la
-generación de SQL a partir de lenguaje natural (NL2SQL) de NL-Query-Platform.
+**dataset relacional de e-commerce** (8 tablas, 1 485 641 filas) pensado para probar la
+generación de SQL a partir de lenguaje natural (NL2SQL) de NL-Query-Platform y para
+medir la eficiencia de las consultas con `EXPLAIN` (ver [Volumen](#volumen-alimentación-del-24102026)).
 
 **Esto no es parte del sistema NLQP.** Es un banco de pruebas local. No contiene código
 de NLQP. Las credenciales de `.env` son de pruebas locales, **no** son secretos del
@@ -106,17 +107,19 @@ Relaciones (8 claves foráneas por motor):
 
 ### Tablas y columnas
 
-| Tabla | Filas | Columnas principales |
-|---|---:|---|
-| `categories` | 15 | `category_id`, `name` (único), `description`, `active` |
-| `customers` | 200 | `customer_id`, `first_name`, `last_name`, `email` (único), `phone`, `date_of_birth`, `registration_date`, `status`, `country`, `city` |
-| `addresses` | 250 | `address_id`, `customer_id` FK, `address_type`, `address_line`, `city`, `state`, `postal_code`, `country`, `is_default` |
-| `products` | 100 | `product_id`, `category_id` FK, `name`, `description`, `price`, `stock`, `status`, `created_at` |
-| `orders` | 300 | `order_id`, `customer_id` FK, `order_date`, `status`, `subtotal`, `tax`, `shipping_cost`, `total`, `shipping_address_id` FK |
-| `order_items` | 798 | `order_item_id`, `order_id` FK, `product_id` FK, `quantity`, `unit_price`, `discount`, `subtotal` |
-| `payments` | 337 | `payment_id`, `order_id` FK, `payment_date`, `payment_method`, `amount`, `status`, `transaction_reference` (único) |
-| `shipments` | 233 | `shipment_id`, `order_id` FK, `shipment_date`, `delivery_date`, `carrier`, `tracking_number` (único), `status` |
-| **Total** | **~2 233** | |
+| Tabla | Filas | (base + volumen) | Columnas principales |
+|---|---:|---:|---|
+| `categories` | 15 | 15 + 0 | `category_id`, `name` (único), `description`, `active` |
+| `customers` | 50 000 | 200 + 49 800 | `customer_id`, `first_name`, `last_name`, `email` (único), `phone`, `date_of_birth`, `registration_date`, `status`, `country`, `city` |
+| `addresses` | 72 038 | 250 + 71 788 | `address_id`, `customer_id` FK, `address_type`, `address_line`, `city`, `state`, `postal_code`, `country`, `is_default` |
+| `products` | 2 000 | 100 + 1 900 | `product_id`, `category_id` FK, `name`, `description`, `price`, `stock`, `status`, `created_at` |
+| `orders` | 250 000 | 300 + 249 700 | `order_id`, `customer_id` FK, `order_date`, `status`, `subtotal`, `tax`, `shipping_cost`, `total`, `shipping_address_id` FK |
+| `order_items` | 631 630 | 802 + 630 828 | `order_item_id`, `order_id` FK, `product_id` FK, `quantity`, `unit_price`, `discount`, `subtotal` |
+| `payments` | 280 797 | 337 + 280 460 | `payment_id`, `order_id` FK, `payment_date`, `payment_method`, `amount`, `status`, `transaction_reference` (único) |
+| `shipments` | 199 161 | 229 + 198 932 | `shipment_id`, `order_id` FK, `shipment_date`, `delivery_date`, `carrier`, `tracking_number` (único), `status` |
+| **Total** | **1 485 641** | 2 233 + 1 483 408 | |
+
+Ocupa ~355 MB en PostgreSQL.
 
 ### Coherencia garantizada
 
@@ -131,15 +134,16 @@ Relaciones (8 claves foráneas por motor):
 
 ### Diversidad (para consultas con filtros reales)
 
-- **Clientes:** 55 sin pedidos · 60 con 1 · 45 con 2 · 22 con 3 · 18 con más de 3
-  (máximo 9). 163 `ACTIVE`, 37 `INACTIVE`. Ciudad con más clientes: Guatemala City (55).
-  9 países.
-- **Productos:** 20 nunca vendidos · 10 agotados (`stock = 0`) · 26 con `stock < 10` ·
-  ~8 best-sellers claros. Precios de 3,99 a 4 999,99. 3 estados
-  (`ACTIVE` / `INACTIVE` / `DISCONTINUED`).
-- **Categorías:** 15, con 2 a 14 productos cada una (más productos: *Computers*).
+- **Clientes:** 18 282 sin pedidos · 5 884 con 1 · 18 109 con más de 3 (máximo 161).
+  41 599 `ACTIVE`, 8 401 `INACTIVE`. Ciudad con más clientes: Guatemala City (11 187).
+  9 países, 45 ciudades.
+- **Productos:** 160 nunca vendidos · 103 agotados (`stock = 0`) · 321 con `stock < 10` ·
+  best-sellers claros. Precios de 3,49 a 4 999,99 (el más caro es único:
+  *Stark Graphics Card (Max)*). 3 estados (`ACTIVE` / `INACTIVE` / `DISCONTINUED`).
+- **Categorías:** 15, con 47 a 245 productos cada una (más productos: *Electronics*).
   13 `active`, 2 no.
-- **Pedidos:** repartidos 2023–2026 (51 / 81 / 104 / 64). 6 estados. ~15 % `CANCELLED`.
+- **Pedidos:** repartidos 2023–2026 (40 598 / 63 340 / 86 479 / 59 583; 2026 hasta el
+  6 de septiembre). 6 estados. 32 529 `CANCELLED` (~13 %).
 - **Pagos:** 5 métodos, 4 estados. Hay pagos `FAILED` y `PENDING`.
 - **Envíos:** 5 estados. Hay envíos `PREPARING` / `IN_TRANSIT` y `DELIVERED`.
 
@@ -172,9 +176,69 @@ Además de las PK y las restricciones `UNIQUE` (`categories.name`, `customers.em
   `payments.status`, `shipments.status`.
 - **Otras de filtro frecuente:** `customers.city`, `customers.country`,
   `products.price`, `payments.payment_method`.
+- **Compuestos (24/10/2026, para el volumen):** pensados para los reportes que hacen las
+  50 consultas de referencia; los tres primeros son *cubrientes* (la consulta se
+  responde desde el índice, sin leer la tabla).
+
+  | Índice | Columnas | Para |
+  |---|---|---|
+  | `ix_orders_customer_status` | `orders (customer_id, status, total)` | gasto y pedidos por cliente |
+  | `ix_orders_date_status` | `orders (order_date, status, total)` | ventas por período sin cancelados |
+  | `ix_order_items_product_sales` | `order_items (product_id, order_id, quantity, subtotal)` | unidades y ventas por producto |
+  | `ix_payments_status_method` | `payments (status, payment_method, amount)` | recaudación por método de pago |
+  | `ix_customers_name` | `customers (last_name, first_name)` | búsqueda de un cliente por nombre |
+
+  Que el optimizador los use o no depende del motor y de la consulta: por ejemplo,
+  PostgreSQL resuelve el gasto de un cliente con *Index Only Scan* sobre
+  `ix_orders_customer_status`, pero para las ventas de un año prefiere `ix_orders_date`.
+  Los pedidos están en orden cronológico, así que ese índice casi coincide con el orden
+  físico de la tabla. Esas diferencias son justamente lo que se mide con `EXPLAIN`.
 
 En PostgreSQL y SQL Server los índices de FK se declaran de forma explícita (esos
 motores no los crean solos); en MySQL/MariaDB InnoDB ya los exige.
+
+### Volumen (alimentación del 24/10/2026)
+
+El dataset base (2 233 filas, secciones 1–7 de `generar_seed.py`) sigue **igual, fila
+por fila**: mismos ids y mismos valores. Encima se generaron 1 483 408 filas más
+(sección 8, con datos de `catalogo_volumen.py`) para tener un banco donde `EXPLAIN`
+mida algo: con 300 pedidos cualquier plan es instantáneo. Mismos datos lógicos en los
+4 motores.
+
+Cómo se ven los datos nuevos:
+
+- **Clientes:** nombres y apellidos frecuentes en Guatemala y la región, incluidos los de
+  origen maya y los dos apellidos. Correos derivados del nombre en dominios reservados
+  (`example.*`, RFC 2606: ningún buzón real). Teléfonos con el formato de cada país
+  (`+502 5401 1270`, `+52 55 5825 0657`). Fecha de nacimiento coherente: mayores de 18
+  al registrarse. ~6 % sin teléfono y ~10 % sin fecha de nacimiento, como en una base real.
+- **Direcciones:** formato de cada país (`17a Avenida 34-05, Zona 16` con código postal
+  `01016`; `Carrera 15 # 93-47`; `Calle de Alcala 145, 3o B`). Entre 1 y 3 por cliente.
+  Algunas están en otra ciudad u otro país.
+- **Productos:** marca, línea, tipo y modelo (`Hooli Edge 24in Monitor FHD M482`), con
+  precio realista para cada tipo de artículo. Los descontinuados y los de categorías
+  inactivas dejan de venderse.
+- **Pedidos:** siempre después del registro del cliente y de la creación del producto.
+  Ids en orden cronológico. Crecimiento año a año y temporada: diciembre, Black Friday,
+  Hot Sale, quincena y menos compras el fin de semana. Más descuentos en las promociones.
+- **Pagos y envíos:** con las mismas reglas de coherencia que el base. Los métodos de pago
+  dependen del país (contra entrega sobre todo en Guatemala, PayPal en EE. UU.), y también
+  los transportistas: Guatex, Cargo Expreso y Forza solo en Guatemala. El número de guía
+  tiene el formato de cada transportista.
+- **Sin tildes ni eñes**, igual que el base, para que un filtro por nombre o ciudad
+  funcione igual en filas viejas y nuevas.
+
+Las 50 consultas de referencia se comprobaron después de la carga: dan el mismo
+resultado en los 4 motores (50/50). El generador descarta cualquier variante de los
+datos donde un `LIMIT` de esas referencias cortara en medio de un empate, porque ahí
+el resultado dependería del motor.
+
+Salida: `init/postgres/04-volumen.sql.gz`, `init/mysql/03-volumen.sql.gz`,
+`init/mariadb/03-volumen.sql.gz` e `init/sqlserver/04-volumen.sql.gz` (~25 MB cada uno).
+**No se versionan** (`.gitignore`): los genera `python generar_seed.py`, que es
+determinista. Sin esos archivos, el banco levanta solo con el dataset base. Al terminar
+la carga se actualizan las estadísticas del optimizador en los 4 motores (`VACUUM
+ANALYZE`, `ANALYZE TABLE`, `UPDATE STATISTICS`).
 
 ---
 
@@ -196,13 +260,17 @@ cuentas de `../db/esquema/usuario_lectura_*.sql`.
 # 1. Preparar credenciales (solo la primera vez)
 Copy-Item .env.example .env    # y editar valores si se desea
 
-# 2. Levantar los 4 motores
+# 2. Generar el volumen (solo la primera vez en un equipo nuevo; ~2 min, Python 3)
+python generar_seed.py
+
+# 3. Levantar los 4 motores. La primera carga tarda: ~2 min PostgreSQL, MySQL y
+#    MariaDB, ~8 min SQL Server. Mientras tanto aparecen como "starting".
 docker compose up -d
 
-# 3. Ver progreso del init de SQL Server (los otros 3 cargan sin log)
+# 4. Ver progreso del init de SQL Server (los otros 3 cargan sin log)
 docker compose logs -f sqlserver-init      # Ctrl+C al ver "[init] completado OK"
 
-# 4. Verificar
+# 5. Verificar
 .\verificar.ps1              # infraestructura + conectividad + conteo global
 .\verificar_dataset.ps1      # 8 tablas, FK, huérfanas, coherencia, consultas NL2SQL
 ```
@@ -224,11 +292,13 @@ de esquema o de datos hay que `docker compose down -v` y `docker compose up -d`.
 ### Regenerar los datos
 
 ```powershell
-python generar_seed.py         # reescribe los 4 archivos *seed*.sql (semilla fija)
+python generar_seed.py         # reescribe los 4 *seed*.sql y los 4 *-volumen.sql.gz (semillas fijas, ~2 min)
 docker compose down -v ; docker compose up -d
 ```
 
-Editar el modelo en `generar_seed.py`, **nunca** los `.sql` generados (se sobrescriben).
+Editar el modelo en `generar_seed.py` (y los catálogos en `catalogo_volumen.py`),
+**nunca** los `.sql` / `.sql.gz` generados (se sobrescriben). El dataset base no
+depende del volumen: cambiar la sección 8 no altera ni una fila de las 2 233 base.
 
 ---
 
@@ -410,12 +480,12 @@ resultado es equivalente.
 
 | Motor | Base de datos | Usuario `testuser` | Esquema + índices | Datos |
 |---|---|---|---|---|
-| PostgreSQL | var. `POSTGRES_DB` | `init/postgres/02-users.sql` (`CREATE ROLE` + `GRANT`) | `init/postgres/01-schema.sql` | `init/postgres/03-seed.sql` |
-| MySQL | var. `MYSQL_DATABASE` | la imagen (`MYSQL_USER`/`MYSQL_PASSWORD`) | `init/mysql/01-schema.sql` | `init/mysql/02-seed.sql` |
-| MariaDB | var. `MARIADB_DATABASE` | la imagen (`MARIADB_USER`/`MARIADB_PASSWORD`) | `init/mariadb/01-schema.sql` | `init/mariadb/02-seed.sql` |
-| SQL Server | `sqlserver-init` → `CREATE DATABASE` | `sqlserver-init` → `init/sqlserver/02-users.sql` (`CREATE LOGIN` + `CREATE USER` + `db_owner`) | `init/sqlserver/01-schema.sql` | `init/sqlserver/03-seed.sql` |
+| PostgreSQL | var. `POSTGRES_DB` | `init/postgres/02-users.sql` (`CREATE ROLE` + `GRANT`) | `init/postgres/01-schema.sql` | `init/postgres/03-seed.sql` + `04-volumen.sql.gz` (COPY) |
+| MySQL | var. `MYSQL_DATABASE` | la imagen (`MYSQL_USER`/`MYSQL_PASSWORD`) | `init/mysql/01-schema.sql` | `init/mysql/02-seed.sql` + `03-volumen.sql.gz` |
+| MariaDB | var. `MARIADB_DATABASE` | la imagen (`MARIADB_USER`/`MARIADB_PASSWORD`) | `init/mariadb/01-schema.sql` | `init/mariadb/02-seed.sql` + `03-volumen.sql.gz` |
+| SQL Server | `sqlserver-init` → `CREATE DATABASE` | `sqlserver-init` → `init/sqlserver/02-users.sql` (`CREATE LOGIN` + `CREATE USER` + `db_owner`) | `init/sqlserver/01-schema.sql` | `init/sqlserver/03-seed.sql` + `04-volumen.sql.gz` (si `orders` tiene ≤ 300 filas) |
 
-Los `*-seed.sql` los genera `generar_seed.py`. Los `*-schema.sql` y `02-users.sql` se
+Los `*-seed.sql` y `*-volumen.sql.gz` los genera `generar_seed.py`. Los `*-schema.sql` y `02-users.sql` se
 mantienen a mano (requieren revisión humana: autenticación, permisos y validación SQL).
 
 ---
@@ -428,15 +498,17 @@ Bases de datos/
 ├── .env                      # credenciales locales (NO se versiona)
 ├── .env.example              # plantilla
 ├── .gitignore
-├── generar_seed.py           # genera los 4 *-seed.sql (semilla 20260907)
+├── generar_seed.py           # genera los 4 *-seed.sql (semilla 20260907) y el volumen
+├── catalogo_volumen.py       # nombres, ciudades, formatos y catálogo para el volumen
 ├── verificar.ps1             # verificación de infraestructura + conectividad
 ├── verificar_dataset.ps1     # verificación profunda del dataset + consultas
 ├── README.md
 └── init/
-    ├── postgres/   01-schema.sql  02-users.sql  03-seed.sql
-    ├── mysql/      01-schema.sql  02-seed.sql
-    ├── mariadb/    01-schema.sql  02-seed.sql
-    └── sqlserver/  01-schema.sql  02-users.sql  03-seed.sql
+    ├── postgres/   01-schema.sql  02-users.sql  03-seed.sql  04-volumen.sql.gz*
+    ├── mysql/      01-schema.sql  02-seed.sql  03-volumen.sql.gz*
+    ├── mariadb/    01-schema.sql  02-seed.sql  03-volumen.sql.gz*
+    └── sqlserver/  01-schema.sql  02-users.sql  03-seed.sql  04-volumen.sql.gz*
+                    (* generados, no versionados)
 ```
 
 ---

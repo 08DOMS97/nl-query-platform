@@ -27,13 +27,14 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **31/10/2026** | **Entrega PG2** (la universidad la corrió del 17/10; en el plan se movieron solo las tareas 37 y 38) |
 | 20/10/2026 | Retiro de `gemini-2.5-pro`: ya no afecta, se cambió a `gemini-3.8-flash` el 18/10 (vigente hasta el 02/09/2027 o más) |
 
-## Estado por área (actualizado 2026-10-24: auditoría, Docker, tiempo de generación y descarga en Excel)
+## Estado por área (actualizado 2026-10-24: auditoría, Docker, tiempo de generación, descarga en Excel y banco con volumen)
 
 | Área | Estado |
 |---|---|
 | Backend M1–M3 | ✅ Completo y verificado en los 4 motores. Modelo (18/10): `gemini-3.8-flash` en `global`, razonamiento `LOW` (S10 real: correcto, $0.0012, 2,9 s). M1 (13/10): registro de conexiones en Firestore + contraseñas en Secret Manager (4 iniciales, `npm run seed:connections`), alta/edición/baja del técnico desde la pantalla Conexiones. `engine` sigue como alias de `connectionId`. **19/10: tope de ejecución por conexión** (`queryTimeoutSec`, de 10 s a 60 min, 8 min por defecto; lo fija el técnico en el formulario): con 10 s, el motor cancela en los 4 (10,4–10,8 s); una consulta de 186 s completa. API 59/59, UI 33/33 |
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 (repetido el 24/10, también contra Docker). La revisión nueva del validador en la auditoría del 24/10 quedó cortada: **pendiente** |
-| Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10). SQL escrito a mano, **no** de Gemini |
+| Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10; repetido el 24/10 con el volumen: 50/50). SQL escrito a mano, **no** de Gemini |
+| Banco de pruebas (24/10) | ✅ A pedido de David, de 2 233 a **1 485 641 filas** en los 4 motores (250 000 pedidos, 631 630 líneas, 50 000 clientes, 2 000 productos), con datos con formato real. Las 2 233 base no cambiaron. 5 índices compuestos nuevos para medir con `EXPLAIN`. El volumen (`init/*/NN-volumen.sql.gz`) **no se versiona**: lo genera `python generar_seed.py`. `Bases de datos/README.md` («Volumen») |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
 | Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). 19/10: sin `/signup`; el rol sale de `/me`; pantalla Usuarios (solo superadmin); tiempo máximo en el formulario de Conexiones. 24/10: «Cambiar contraseña» en Usuarios; auditoría de Consultar (resultados viejos, pago doble al cambiar de pantalla, error que dejaba el resultado anterior). `npm run test:ui` 24/24 + 33/33 + 27/27 + 18/18 (24/10). Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
@@ -45,7 +46,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Tiempo de generación (24/10) | 🟡 Una consulta simple tardó 24,2 s: ~20 s fueron espera al modelo (servicio de Google), ~2,7 s la preparación del cliente y ~0,5 s NLQP. Desde el 24/10: Vertex se prepara al arrancar, el esquema se guarda en caché 60 s, el tiempo se registra por etapa (Uso y costos: mediana, p95, máximo) y «hola» se rechaza sin llamar al modelo. Para la tesis (decisión de David): el tiempo depende de la consulta y del servicio, más la conexión y el proceso. `nlqp/docs/USO_Y_COSTOS.md` |
 | Gasto en Gemini | ≈ **$0.024** (5 llamadas sueltas). Con 3.8 Flash ~$0.001–0.004 por llamada (con 2.5 Pro era ~$0.012), sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 24/10) | Plan 93 % · real 93 % · **+0,3 puntos**. Tareas nuevas: 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) y 52 (descarga en Excel, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 24/10) | Plan 93 % · real 93 % · **+0,3 puntos**. Tareas nuevas: 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) 52 (descarga en Excel, 100 %) y 53 (banco con volumen, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
 ## Próximo paso (actualizado 2026-10-24)
 
@@ -170,7 +171,8 @@ Pruebas sin costo (con todo levantado): `npm run test:seguridad` y `npm run test
 (`nlqp-ci-tecnico@example.com`, `nlqp-ci-usuario@example.com`,
 `nlqp-ci-superadmin@example.com`). Al terminar borran lo que dejaron en Firestore y las
 cuentas temporales `nlqp-ci-tmp-*@example.com` (`npm run limpiar:pruebas`).
-Resultados del 24/10 (también contra Docker): API 358/358 (incluye la exportación a Excel, 68/68), UI 102/102, seguridad 57/57 + 200/200, eval modo prueba 200/200.
+Resultados del 24/10, ya con el banco de 1,5 M de filas: API 358/358 (incluye la exportación a Excel, 68/68), UI 102/102, seguridad 57/57 + 200/200, eval modo prueba 200/200 (50/50 consistentes).
+En un equipo nuevo, antes del primer `docker compose up` del banco: `python generar_seed.py` en `Bases de datos/` (~2 min). La primera carga tarda ~8 min por SQL Server.
 Si las pruebas dan resultados raros, revisar que no haya un `node` viejo en :8080
 (`Get-NetTCPConnection -LocalPort 8080`): `TaskStop` cierra la terminal pero no el
 proceso.
@@ -188,7 +190,7 @@ pendiente de David).
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
 
 - Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.001–0.004 por intento con 3.8 Flash).
-- Banco de volumen alto para medir eficiencia con `EXPLAIN`.
+- (24/10) `EXPLAIN` sobre el SQL generado, con el banco de volumen (ya existe). Se hace después de la corrida, sin volver a pagar.
 - Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.
 - Hallazgos de seguridad 4–6 (`SEGURIDAD.md`): documentados, no corregidos a propósito.
 - Firmar en el backend el SQL generado para que un no técnico no pueda mandar SQL
@@ -221,11 +223,9 @@ pendiente de David).
   - reglas de Firestore sin versionar;
   - cuenta de servicio para Docker;
   - revisión nueva del Query Safety Engine.
-- (24/10) Trabajo sin commitear de **dos sesiones en paralelo**. La exportación a Excel
-  (`resultExcel.service.ts`, `api_exportacion.mjs`, `package.json`, `resultPages.ts`,
-  `resultStore.service.ts`, `index.ts`, `QueryResult.tsx`, `ui_general.mjs` y docs) la
-  pidió David y está verificada (bitácora 24/10 (4)). `Bases de datos/` (semillas de
-  volumen) es de la otra sesión: confirmar con David antes de commitearlo.
+- (24/10) La exportación a Excel está commiteada (10f0164, sin push). El banco con
+  volumen (`Bases de datos/`, ajustes de `api_exportacion.mjs` y `api_integridad.mjs`,
+  docs y tarea 53) es de otra sesión y sigue sin commitear: confirmar con David.
 - (24/10) En Docker, `/tmp` del backend es tmpfs: los snapshots de resultados ocupan RAM
   del contenedor (~230 MB con tres de 800 000 filas, vencen a los 30 min). No se cambió.
 
