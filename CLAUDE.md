@@ -27,7 +27,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **31/10/2026** | **Entrega PG2** (la universidad la corrió del 17/10; en el plan se movieron solo las tareas 37 y 38) |
 | 20/10/2026 | Retiro de `gemini-2.5-pro`: ya no afecta, se cambió a `gemini-3.8-flash` el 18/10 (vigente hasta el 02/09/2027 o más) |
 
-## Estado por área (actualizado 2026-10-24: auditoría, Docker, tiempo de generación, descarga en Excel y banco con volumen)
+## Estado por área (actualizado 2026-10-25: cotejo del Word del 22/10; antes, 24/10: auditoría, Docker, tiempo de generación, descarga en Excel y banco con volumen)
 
 | Área | Estado |
 |---|---|
@@ -37,18 +37,18 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Banco de pruebas (24/10) | ✅ A pedido de David, de 2 233 a **1 485 641 filas** en los 4 motores (250 000 pedidos, 631 630 líneas, 50 000 clientes, 2 000 productos), con datos con formato real. Las 2 233 base no cambiaron. 5 índices compuestos nuevos para medir con `EXPLAIN`. El volumen (`init/*/NN-volumen.sql.gz`) **no se versiona**: lo genera `python generar_seed.py`. `Bases de datos/README.md` («Volumen») |
 | Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
 | Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). 19/10: sin `/signup`; el rol sale de `/me`; pantalla Usuarios (solo superadmin); tiempo máximo en el formulario de Conexiones. 24/10: «Cambiar contraseña» en Usuarios; auditoría de Consultar (resultados viejos, pago doble al cambiar de pantalla, error que dejaba el resultado anterior). `npm run test:ui` 24/24 + 33/33 + 27/27 + 18/18 (24/10). Falta probar "Generar SQL" con Gemini real desde la UI |
-| M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. Falta pasarlo al Word |
-| M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. Falta captura (Figura 11) y pasar 6.6 al Word |
+| M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. En el Word (6.5) |
+| M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. En el Word (6.6); falta la captura (Figura 11) |
 | Usuarios y superadmin | ✅ 19/10 (pedido de David): `GET/POST/PUT /users` y `/me`; alta con rol, cambio de rol y desactivar/reactivar (sin borrar). El permiso solo se asigna con `npm run set:superadmin -- <correo> [--crear]`. El rol y el estado se leen de la cuenta en cada solicitud (~150 ms; rigen al instante). Una cuenta sin rol recibe 403. **24/10:** cuenta de David (`davidmonterroso0897@gmail.com`) ya es superadmin; el superadmin pone una contraseña nueva a cualquier cuenta (`PUT /users` con `password`; la sesión en uso sigue hasta 1 h, desactivar corta al instante). API 50/50, UI 27/27. `SEGURIDAD.md` §14 |
 | Auditoría y Docker (24/10) | ✅ Auditoría a pedido de David: rechazo de SQL como pregunta y de límites no pedidos (422), el backend no se cae ante tipos inesperados, integridad de valores en los 4 motores, Consultar, origen de uso solo para el técnico, contraseña guardada solo con el mismo servidor. **Docker:** `cd nlqp; docker compose up -d --build`. Solo el frontend se publica en la red y la credencial de GCP va como secreto. Pendientes de David y estado de cada hallazgo: `nlqp/docs/AUDITORIA_2026-10-24.md`; guía: `nlqp/docs/DOCKER.md` |
 | Descarga en Excel (24/10) | ✅ A pedido de David: el CSV se veía desordenado porque Windows en es-GT separa con `;`. Ahora la descarga es un .xlsx (`exceljs@4.4.0`, `resultExcel.service.ts`, ruta `/exportResult`, botón «Descargar Excel»). Trae encabezados legibles y fijos, fechas y números con su tipo, `=` como texto (resuelve E8) y la hoja «Detalles» con la pregunta. Nunca se trunca: pasado el máximo de una hoja sigue en «Resultado 2». Memoria plana (~143 MB con 800 000 filas). Exportación 68/68 en los 4 motores. `RENDIMIENTO_E_INTEGRIDAD.md` §4.1 |
-| Texto de tesis | 🟡 31 pendientes + 1 por verificar + 63 aplicados. 24/10 (4): +1 (descarga en Excel en 6.3.5 y 6.4; texto listo en `CAPITULO_6.md`). 24/10 (2): +5 (Docker en 5.3, controles de la generación en 6.3.2, integridad en 6.3.5, hallazgos en 6.7.2 y limitaciones). 24/10: +1 (US-09, contraseña nueva: RF-16, 6.5, 6.5.1, glosario). 18/10: +3 por el cambio de modelo, incl. reemplazar "Gemini 2.5 Pro" en caps. 1–5. **19/10: +4** (una entrada por capítulo) por el on-premises, el tope por conexión y los usuarios. Instrucciones paso a paso en `nlqp/docs/CAMBIO_ON_PREMISES.md`: OP-01…OP-41, OD-01…OD-10 y Parte 6 US-01…US-08 (RF-15/16, 6.4 sin /signup, 6.5 con usuarios, Figura 1). Incluye Figura 8 nueva, 5.3.1/5.3.2 nuevas y frases en caps. 1–6. Incluye un **dato incorrecto en 6.1.4**: dice "cuentas de solo lectura", pero `testuser` tiene permisos amplios. Word vigente: `Claude outputs/PG2-2026 capítulo 6 revisado 17-10-2026 v2.docx`. Faltan: evaluación con Gemini (6.3.6), capturas de las Figuras 9–11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Texto de tesis | 🟡 **24 pendientes + 1 por verificar + 71 aplicados** (25/10). **Word vigente: `Claude outputs/PG2-2026 revisado 22-10-2026.docx`** (revisión de David del 22–23/10, registrada recién el 25/10). Ya tiene el on-premises, el tope por conexión, los usuarios (US-01…US-08), el cambio de modelo (6.3.2 y precios de 6.7.1 incluidos), 5.3.1/5.3.2, las Figuras 1, 2, 3, 4 y 8 nuevas y el dato de 6.1.4 corregido: 49 de 52 instrucciones de `nlqp/docs/CAMBIO_ON_PREMISES.md`, cotejadas frase por frase. **Quedan:** OP-13 (Tabla 4 y sus dos «Gemini Pro», con el recálculo de 1.6.3), OP-36 (6.7.4, después de verificar en red), US-09 (contraseña nueva) y lo del 24/10: Docker en 5.3, controles de la generación en 6.3.2, integridad y Excel en 6.3.5, hallazgos en 6.7.2 y limitaciones (texto en `CAPITULO_6.md`). Faltan además: evaluación con Gemini (6.3.6), capturas de las Figuras 9 y 11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Tiempo de generación (24/10) | 🟡 Una consulta simple tardó 24,2 s: ~20 s fueron espera al modelo (servicio de Google), ~2,7 s la preparación del cliente y ~0,5 s NLQP. Desde el 24/10: Vertex se prepara al arrancar, el esquema se guarda en caché 60 s, el tiempo se registra por etapa (Uso y costos: mediana, p95, máximo) y «hola» se rechaza sin llamar al modelo. Para la tesis (decisión de David): el tiempo depende de la consulta y del servicio, más la conexión y el proceso. `nlqp/docs/USO_Y_COSTOS.md` |
 | Gasto en Gemini | ≈ **$0.024** (5 llamadas sueltas). Con 3.8 Flash ~$0.001–0.004 por llamada (con 2.5 Pro era ~$0.012), sin crédito de prueba |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
 | **Plan vs. real** (corte 24/10) | Plan 93 % · real 93 % · **+0,3 puntos**. Tareas nuevas: 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) 52 (descarga en Excel, 100 %) y 53 (banco con volumen, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-24)
+## Próximo paso (actualizado 2026-10-25)
 
 David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
 
@@ -66,10 +66,10 @@ David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha lí
    generación cuesta ~$0.002) y 11 con los usuarios de la demo, que ya tienen el
    historial limpio (18/10). La Figura 10 (Conexiones) ya está en el Word (17/10).
 4. **Sin costo, en paralelo:**
-   - **Pasar al Word los cambios del 19/10** (on-premises, tope por conexión y usuarios).
-     Están en `nlqp/docs/CAMBIO_ON_PREMISES.md`, en el orden que indica el archivo;
-     conviene aplicarlos junto con el cambio de modelo en los mismos párrafos (marcados
-     [M]).
+   - **Pasar al Word (el del 22/10) lo que quedó:** US-09 (`CAMBIO_ON_PREMISES.md`) y
+     las entradas del 24/10 de `RESUMEN_PARA_DOC_TEORICO.md` (Docker, controles de la
+     generación, integridad, Excel, hallazgos y limitaciones). OP-13 va con el
+     recálculo de 1.6.3, después de la corrida.
    - Para OP-36 (6.7.4) hace falta **verificar** antes de escribir, sin costo:
      1. Backend: `npm run build` + `npm start`.
      2. Frontend: `NEXT_PUBLIC_BACKEND_URL=http://<IP-LAN>:8080`, `npm run build` +
@@ -139,7 +139,7 @@ commitear y hacer push cuando David lo pida o lo apruebe.
 | Saber qué pasó y cuándo | `nlqp/docs/BITACORA.md` |
 | Probar la API a mano | `nlqp/docs/MANUAL_POSTMAN.md` |
 | Credenciales y datos del banco de pruebas | `Bases de datos/README.md` |
-| Cambios del Word del 19/10 (on-premises, tope por conexión, usuarios) | `nlqp/docs/CAMBIO_ON_PREMISES.md` |
+| Cambios del Word del 19/10 (on-premises, tope por conexión, usuarios; aplicados el 22/10 salvo OP-13, OP-36 y US-09) | `nlqp/docs/CAMBIO_ON_PREMISES.md` |
 | Acceso remoto (no implementado) | `nlqp/docs/ACCESO_REMOTO.md` |
 | Instalar con Docker o llevarlo a otro equipo | `nlqp/docs/DOCKER.md` |
 | Hallazgos de la auditoría del 24/10 y su estado | `nlqp/docs/AUDITORIA_2026-10-24.md` |
@@ -147,7 +147,8 @@ commitear y hacer push cuando David lo pida o lo apruebe.
 Históricos (no citar como vigentes): `INSTRUCCIONES_INICIALES_CLAUDE_CODE.md` (arranque
 del 17/09) y `nlqp/docs/historico/`. Plan con fechas en Excel:
 `Claude outputs/Plan_de_Trabajo_PG2 DD-MM-AAAA.xlsx`, uno por corte (la carpeta no se
-commitea, a pedido de David; los datos de cada corte sí, en `nlqp/docs/plan/cortes/`).
+commitea, a pedido de David, y está en el `.gitignore` de la raíz desde el 25/10; los
+datos de cada corte sí, en `nlqp/docs/plan/cortes/`).
 
 ## Levantar todo
 
@@ -223,9 +224,6 @@ pendiente de David).
   - reglas de Firestore sin versionar;
   - cuenta de servicio para Docker;
   - revisión nueva del Query Safety Engine.
-- (24/10) La exportación a Excel está commiteada (10f0164, sin push). El banco con
-  volumen (`Bases de datos/`, ajustes de `api_exportacion.mjs` y `api_integridad.mjs`,
-  docs y tarea 53) es de otra sesión y sigue sin commitear: confirmar con David.
 - (24/10) En Docker, `/tmp` del backend es tmpfs: los snapshots de resultados ocupan RAM
   del contenedor (~230 MB con tres de 800 000 filas, vencen a los 30 min). No se cambió.
 

@@ -93,11 +93,11 @@ Lo que más pesa en el atraso: Presentación del prototipo funcional (0 % de 100
 | Sin los 35 participantes no se verifica la variable dependiente | Obliga a reducir la muestra y documentarlo (sección 3.6) | Convocar ya; no depende de código |
 | Mucho texto de tesis por aplicar (Cap. 1–6) en los días de cierre (15–16/10) | Entrega con texto desactualizado | Ir aplicando `RESUMEN_PARA_DOC_TEORICO.md` durante la semana |
 | La latencia de generación puede acercarse al umbral de 15 s de la sección 3.3.1.3 (con 2.5 Pro: ~14,5 s en una consulta simple; con 3.8 Flash: 2,9 s, 18/10) | La hipótesis de tiempo de respuesta puede no cumplirse en consultas complejas | Medirla en la corrida completa y discutirla en resultados |
-| El banco de pruebas es chico (200 clientes, 300 pedidos) | La eficiencia con mucho volumen no queda demostrada | Banco grande con `EXPLAIN` si sobra tiempo; si no, limitación declarada |
 | Vertex AI sin crédito de prueba | Cada llamada se factura (~$0.001–0.004 con 3.8 Flash; ~$0.012 con 2.5 Pro) | Confirmar el gasto antes de cada corrida |
 
 Riesgos cerrados (detalle en `BITACORA.md`): retiro de `gemini-2.5-pro` (20/10) →
 cambio a `gemini-3.8-flash`, vigente hasta el 02/09/2027 o más (18/10); SDK deprecado → migrado (09/10); poda que
 casi no podaba → rediseñada (09/10); referencias inconsistentes → corregidas (02/10 y
 10/10); texto de 6.3.3 inexacto → corregido (08/10); bases solo en local → se presenta
-en local (01/10); bloqueos de cuentas de nube → resueltos (21/09).
+en local (01/10); bloqueos de cuentas de nube → resueltos (21/09); banco de pruebas
+chico → 1 485 641 filas en los 4 motores, con índices para `EXPLAIN` (24/10).

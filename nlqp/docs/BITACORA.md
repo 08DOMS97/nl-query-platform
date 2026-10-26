@@ -6,6 +6,49 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-25 — Revisión de lo no commiteado y del Word del 22/10
+
+Sin gasto en GCP. David: «revisa el proyecto porque se hicieron cambios que no están
+documentados… me dices qué falta por commitear y documentar». El Word no se tocó: solo
+se leyó para cotejarlo.
+
+### Hallado
+- Sin commitear solo estaba el banco con volumen (24/10 (5)), ya documentado. Todo lo
+  demás estaba en GitHub: 10f0164 ya tenía push, aunque CLAUDE.md decía que no.
+- **Sin registrar:** el Word que David revisó el 22–23/10,
+  `Claude outputs/PG2-2026 revisado 22-10-2026.docx` (guardado por última vez el 24/10).
+  Solo aparecía en el plan (tareas 37 y 49). CLAUDE.md seguía dando como vigente el del
+  17/10 y como pendientes los cambios del 19/10 y el dato incorrecto de 6.1.4.
+- `Claude outputs/` no estaba en ningún `.gitignore`.
+
+### Hecho
+- Commits `8dcbfdc` (banco con volumen) y `59f1a32` (`.gitignore` en la raíz con
+  `Claude outputs/`).
+- Cotejo del Word del 22/10 contra `CAMBIO_ON_PREMISES.md`: por cada instrucción, una
+  frase del texto nuevo que debe estar y una del viejo que no.
+  - **Aplicados 49 de 52:** todo el on-premises, OD-01…OD-10 y US-01…US-08. OP-03
+    (5.3.2) quedó con otra redacción.
+  - **Pendientes:** OP-13 (Tabla 4, con el recálculo de 1.6.3), OP-36 (6.7.4, después
+    de verificar el acceso en red) y US-09 (posterior al Word).
+  - **Cambio de modelo:** 31 menciones a «3.8 Flash» y ninguna a «2.5 Pro». Quedan dos
+    «Gemini Pro» en la Tabla 4 y su párrafo (1.6.3). 6.3.2 (título, nivel bajo, S10) y
+    los precios de 6.7.1 están aplicados.
+  - **Figuras:** el Word tiene 5 imágenes nuevas respecto del 17/10, que coinciden con
+    las Figuras 1, 2, 3, 4 y 8 del plan. Su contenido no se revisó.
+- `RESUMEN_PARA_DOC_TEORICO.md`: contador de 31 / 1 / 63 a **24 / 1 / 71**. OP-13 pasó a
+  la entrada del recálculo de 1.6.3 y OP-36 quedó como entrada propia. La limitación del
+  «banco chico» ya no va, porque el banco tiene volumen.
+- `CAMBIO_ON_PREMISES.md`: ítems marcados y estado al inicio. `PLAN_DE_TRABAJO.md`: el
+  riesgo del banco chico pasó a cerrado.
+
+### Sigue
+Sin cambios: piloto con paráfrasis (pedir confirmación). Para el Word quedan US-09, lo
+del 24/10 (Docker, controles de la generación, integridad, Excel, hallazgos y
+limitaciones), OP-36 después de verificar y el recálculo de 1.6.3 con OP-13 después de la
+corrida.
+
+---
+
 ## 2026-10-24 (5) — Banco de pruebas con volumen (1,5 M de filas)
 
 Sin gasto en GCP. David: «alimentar la base de datos… con registros que se vean muy

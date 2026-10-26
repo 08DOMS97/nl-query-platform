@@ -24,15 +24,22 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-24, auditoría, Docker, tiempo de generación y descarga en Excel)
+## Contador (actualizado 2026-10-25, cotejo con el Word del 22/10)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
-| Preliminares y 1–4 | 8 | 1 | 20 |
-| 5 | 3 | 0 | 4 |
-| 6 | 11 | 0 | 39 |
-| Conclusiones / limitaciones | 9 | 0 | 0 |
-| **Total** | **31** | **1** | **63** |
+| Preliminares y 1–4 | 6 | 1 | 22 |
+| 5 | 2 | 0 | 5 |
+| 6 | 9 | 0 | 42 |
+| Conclusiones / limitaciones | 7 | 0 | 2 |
+| **Total** | **24** | **1** | **71** |
+
+> **25/10 — Cotejo con `PG2-2026 revisado 22-10-2026.docx`.** El Word que David revisó
+> el 22/10 ya tenía el on-premises (las 4 entradas), el cambio de modelo, 6.3.2 y 6.7.1,
+> pero no estaba registrado. Se cotejó frase por frase contra `CAMBIO_ON_PREMISES.md`.
+> Quedan sin aplicar OP-13 (Tabla 4, con el recálculo de 1.6.3), OP-36 (6.7.4, después
+> de verificar el acceso en red) y US-09. La limitación del «banco chico» ya no va. El
+> Word vigente es el del 22/10.
 
 > **19/10 — Despliegue on-premises, tope por conexión y gestión de usuarios.** Las 4
 > entradas nuevas (una por capítulo, marcadas "(19/10) On-premises") remiten a
@@ -46,26 +53,12 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Preliminares y capítulos 1 a 4
 
-- [ ] (19/10) **On-premises — caps. 1 a 4**: `CAMBIO_ON_PREMISES.md` OP-09 a OP-32
-  (Introducción, 1.3, 1.5, Tabla 1, 1.6.3 con Tabla 4, 1.7, 2.5–2.8, 2.10, 3.2.1,
-  3.3.1.4, 3.8 con Tabla 8, 3.9, 4.1, 4.3.3, RNF-11) y OD-04 (registro de cambios y
-  RF-13 en 1.5, 1.7 y 4.4). La Tabla 4 se recalcula junto con la entrada de 1.6.3 de
-  abajo. Decisión de David del 19/10. **También US-01** (superadministrador como permiso
-  del técnico, 4.2) **y US-02** (RF-14 sin registro público, RF-15 tope por conexión y
-  RF-16 gestión de usuarios).
-
-- [ ] (18/10) **Cambio de modelo en todo el documento**: Gemini 2.5 Pro se retira de
-  Vertex AI el 20/10/2026 y la plataforma pasó a **Gemini 3.8 Flash** (`gemini-3.8-flash`,
-  ubicación `global`, GA, soporte hasta el 02/09/2027 o más). Reemplazar "Gemini 2.5 Pro"
-  / "Gemini Pro" por "Gemini 3.8 Flash" en resumen, objetivos, alcance, 2.x (marco
-  tecnológico, incl. 2.5), 4.x (requerimientos) y 5.x (arquitectura y diagramas), salvo
-  donde se cuenta la historia del desarrollo (ahí: "se desarrolló con Gemini 2.5 Pro y se
-  cambió a Gemini 3.8 Flash antes de su retiro"). Si el marco teórico justifica elegir un
-  modelo "Pro" por capacidad de razonamiento, ajustar: 3.8 Flash es el reemplazo que
-  recomienda Google y razona internamente (nivel configurable). Fuente: `CAPITULO_6.md`
-  6.3.2, `BITACORA.md` 18/10.
-
-- [ ] (10/10) **1.6.3 — recalcular costos, ROI y VAN con el costo medido**. La Tabla 4
+- [ ] (10/10) **1.6.3 — recalcular costos, ROI y VAN con el costo medido**. **Al
+  recalcular, aplicar también** (25/10) lo que quedó de las entradas del on-premises y
+  del cambio de modelo, ya aplicadas en el resto del documento: OP-13 de
+  `CAMBIO_ON_PREMISES.md` (texto de 1.6.3.2, filas de la Tabla 4 y Secret Manager con un
+  secreto por conexión) y "Vertex AI Gemini Pro 2.5" en la Tabla 4 y "Vertex AI Gemini
+  Pro (98% del gasto)" en el párrafo que le sigue → Gemini 3.8 Flash. La Tabla 4
   supone ≈ $0.0087 por consulta ($91.88 / 10,500); la única medición real (09/10, con la
   poda vieja) dio $0.01188, casi todo razonamiento del modelo. **Decisión:** recalcular
   una sola vez con el **costo promedio por consulta de la corrida completa** (200
@@ -227,6 +220,27 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   RNF-02 y RNF-11 corregidos (cursiva); "Capítulo 6 -" → "Capítulo 6 —"; párrafos de
   2.2, 2.3, 2.5, 2.8 y 3.1 divididos para no pasar de 12 líneas; índices marcados para
   actualizarse al abrir (Word pregunta y se responde "Sí").
+- [x] (19/10) **On-premises — caps. 1 a 4**: `CAMBIO_ON_PREMISES.md` OP-09 a OP-32
+  (Introducción, 1.3, 1.5, Tabla 1, 1.6.3 con Tabla 4, 1.7, 2.5–2.8, 2.10, 3.2.1,
+  3.3.1.4, 3.8 con Tabla 8, 3.9, 4.1, 4.3.3, RNF-11) y OD-04 (registro de cambios y
+  RF-13 en 1.5, 1.7 y 4.4). Decisión de David del 19/10. **También US-01**
+  (superadministrador como permiso del técnico, 4.2) **y US-02** (RF-14 sin registro
+  público, RF-15 tope por conexión y RF-16 gestión de usuarios). **Aplicado el 22/10**
+  en `PG2-2026 revisado 22-10-2026.docx` (cotejado el 25/10 frase por frase), **salvo
+  OP-13** (Tabla 4), que pasó a la entrada del recálculo de 1.6.3.
+- [x] (18/10) **Cambio de modelo en todo el documento**: Gemini 2.5 Pro se retira de
+  Vertex AI el 20/10/2026 y la plataforma pasó a **Gemini 3.8 Flash** (`gemini-3.8-flash`,
+  ubicación `global`, GA, soporte hasta el 02/09/2027 o más). Reemplazar "Gemini 2.5 Pro"
+  / "Gemini Pro" por "Gemini 3.8 Flash" en resumen, objetivos, alcance, 2.x (marco
+  tecnológico, incl. 2.5), 4.x (requerimientos) y 5.x (arquitectura y diagramas), salvo
+  donde se cuenta la historia del desarrollo (ahí: "se desarrolló con Gemini 2.5 Pro y se
+  cambió a Gemini 3.8 Flash antes de su retiro"). Si el marco teórico justifica elegir un
+  modelo "Pro" por capacidad de razonamiento, ajustar: 3.8 Flash es el reemplazo que
+  recomienda Google y razona internamente (nivel configurable). Fuente: `CAPITULO_6.md`
+  6.3.2, `BITACORA.md` 18/10. **Aplicado el 22/10** en `PG2-2026 revisado
+  22-10-2026.docx`: 31 menciones a "3.8 Flash" y ninguna a "2.5 Pro". **Quedan** las
+  dos menciones de la Tabla 4 y su párrafo (1.6.3), que pasaron a la entrada del
+  recálculo. El documento no cuenta la historia del cambio de modelo.
 
 ## Capítulo 5 — Diseño de la aplicación
 
@@ -241,7 +255,9 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
   Fuente: `DOCKER.md`.
 
-- [ ] (19/10) **On-premises — Cap. 5**: `CAMBIO_ON_PREMISES.md` OP-01 a OP-08. Incluye:
+- [ ] (plan 28–29/09) **Correcciones de figuras, rótulos y numeración** del capítulo
+  (actividad del plan, en 0 %).
+- [x] (19/10) **On-premises — Cap. 5**: `CAMBIO_ON_PREMISES.md` OP-01 a OP-08. Incluye:
   - reemplazar el párrafo de 5.3;
   - **5.3.1 Justificación del despliegue local** y **5.3.2 Escalamiento a la
     arquitectura sin servidor** (nuevas);
@@ -252,8 +268,10 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   - **US-03**: casos de uso "Gestionar usuarios" y "Configurar tiempo máximo de
     ejecución" en la Figura 1.
 
-- [ ] (plan 28–29/09) **Correcciones de figuras, rótulos y numeración** del capítulo
-  (actividad del plan, en 0 %).
+  **Aplicado el 22/10** en `PG2-2026 revisado 22-10-2026.docx` (cotejado el 25/10: el
+  texto de OP-01 a OP-08 y US-03 está; 5.3.2 con otra redacción). Las figuras se
+  comprobaron solo por cantidad: el Word tiene 5 imágenes nuevas, como las Figuras 1, 2,
+  3, 4 y 8 que registra el plan.
 - [x] (09/10) **5.1.5 — reducción del 71 % sobre 42 tablas** (irreproducible: el banco
   tiene 8 tablas). **Decisión:** no redibujar la Figura 5; reescribir el párrafo para
   que diga que la instantánea es ilustrativa (consulta hipotética sobre 42 tablas) y
@@ -285,24 +303,32 @@ haya resultados y la presentación como 6.8. **Tablas (17/10, pedido del asesor:
 (latencias); el resto del capítulo va en texto. **Figuras:** 9 (6.4, captura vieja) y
 una sola nueva (10) pendiente.
 
-- [ ] (19/10) **On-premises — Cap. 6**: `CAMBIO_ON_PREMISES.md`:
+- [ ] (19/10) **OP-36 — 6.7.4 nueva, "Instalación en la red de la organización"**
+  (`CAMBIO_ON_PREMISES.md`): se escribe **después** de verificar el acceso desde otro
+  equipo de la red. Es lo único de la entrada "On-premises — Cap. 6" que no está en el
+  Word del 22/10.
+
+- [ ] (24/10) **Contraseña nueva por el superadministrador**: `CAMBIO_ON_PREMISES.md`
+  **US-09**. RF-16 (Tabla 12, cap. 4), párrafo de 6.5, cifras de 6.5.1 (API 50/50, UI
+  27/27) y glosario. Se cuenta en este capítulo, aunque RF-16 y el glosario estén en
+  otros. Pedido de David del 24/10. El Word del 22/10 tiene US-02 y US-06 (35/35 y
+  20/20): se edita ese texto.
+
+- [x] (19/10) **On-premises — Cap. 6**: `CAMBIO_ON_PREMISES.md`:
   - **OD-01**: 6.1.4 dice "cuentas con permisos exclusivamente de lectura", pero
     `testuser` tiene permisos amplios a propósito. **Dato incorrecto.**
   - OD-02: tope de 60 s frente a los 8 min; hay que verificarlo antes.
   - OP-33: 6.3.5.
   - OP-34: 6.7.1.
   - OP-35: Tabla 14 y su párrafo.
-  - **OP-36**: 6.7.4 nueva, "Instalación en la red de la organización". Se escribe
-    **después** de verificar el acceso desde otro equipo de la red.
   - **US-04 a US-07**: tope en el formulario de conexiones (6.1.2 y 6.1.4, 59/59 y
     33/33); 6.4 sin `/signup`; 6.5 con la gestión de usuarios (35/35 y 20/20); y
     hallazgo nuevo en la Tabla 14. **OD-02** ahora describe el tope por conexión
     (8 min por defecto).
 
-- [ ] (24/10) **Contraseña nueva por el superadministrador**: `CAMBIO_ON_PREMISES.md`
-  **US-09**. RF-16 (Tabla 12, cap. 4), párrafo de 6.5, cifras de 6.5.1 (API 50/50, UI
-  27/27) y glosario. Se cuenta en este capítulo, aunque RF-16 y el glosario estén en
-  otros. Pedido de David del 24/10.
+  **Aplicado el 22/10** en `PG2-2026 revisado 22-10-2026.docx` (cotejado el 25/10 frase
+  por frase), incluido el dato incorrecto de 6.1.4. OP-36 quedó como entrada aparte,
+  arriba.
 
 ### Introducción
 - [x] (25/09) **Reemplazar el segundo párrafo** por el de `CAPITULO_6.md`: el Word
@@ -361,13 +387,16 @@ una sola nueva (10) pendiente.
   24/10) y `AUDITORIA_2026-10-24.md` §1. En 6.3.6, el veredicto `limite_no_pedido` va
   como categoría propia.
 
-- [ ] (18/10) **Actualizar por el cambio de modelo**: título → "Integración con Gemini en
+- [x] (18/10) **Actualizar por el cambio de modelo**: título → "Integración con Gemini en
   Vertex AI"; modelo por defecto `gemini-3.8-flash` en `global` (no `gemini-2.5-pro` en
   `us-central1`); párrafo nuevo sobre el retiro de 2.5 Pro (20/10/2026) y el cambio sin
   tocar arquitectura ni prompt; temperatura: 3.8 Flash la ignora, el determinismo se
   controla con el nivel de razonamiento; razonamiento en nivel bajo (`LOW`) en vez del
   presupuesto de 1,024 tokens; verificación con S10 en ambos modelos (Flash: 621 / 39 / 0
-  tokens, 2.9 s, USD 0.0012, 104 = referencia). Texto en `CAPITULO_6.md`.
+  tokens, 2.9 s, USD 0.0012, 104 = referencia). Texto en `CAPITULO_6.md`. **Aplicado
+  el 22/10** en `PG2-2026 revisado 22-10-2026.docx` (título, nivel bajo, sin el
+  presupuesto de 1,024, S10 con 621 / 39 / 0 tokens, 2.9 s y USD 0.0012). No está el
+  párrafo sobre el retiro de 2.5 Pro: el documento no cuenta el cambio de modelo.
 - [x] (10/10) **Actualizar** (no redactar: el Word ya tiene el texto del 25/09). Estaba en
   espera desde el 03/10; David pidió el 10/10 aplicar los cambios del proyecto. Cambios: SDK `@google/genai`
   (migrado el 09/10 desde `@google-cloud/vertexai`, deprecado); salida máxima **4096**
@@ -535,10 +564,11 @@ una sola nueva (10) pendiente.
   Actualizar también las cifras de pruebas: API 275/275, interfaz 102/102 y seguridad
   57/57 + 200/200.
 
-- [ ] (18/10) **6.7.1 — precios y razonamiento del modelo nuevo**: precio de lista de
+- [x] (18/10) **6.7.1 — precios y razonamiento del modelo nuevo**: precio de lista de
   Gemini 3.8 Flash (global): USD 1.50 / M entrada y USD 7.50 / M salida y razonamiento
   (catálogo de Cloud Billing, 18/10); razonamiento en el nivel más bajo; ~USD 0.001 por
-  consulta simple (con 2.5 Pro, ~USD 0.012). Texto en `CAPITULO_6.md`.
+  consulta simple (con 2.5 Pro, ~USD 0.012). Texto en `CAPITULO_6.md`. **Aplicado el
+  22/10** en `PG2-2026 revisado 22-10-2026.docx`.
 - [x] (10/10) **Renumerar la integración a 6.7** (6.7.1 uso y costos, 6.7.2 seguridad,
   6.7.3 tiempos) al entrar 6.5 (M4) y 6.6 (M5); las referencias son hipervínculos, solo
   cambia el número escrito. Las tablas 16–18 pasan a 18–20 (numeración automática). **Aplicado el 16/10** en `PG2-2026 capítulo 6 revisado 16-10-2026.docx`.
@@ -602,16 +632,6 @@ una sola nueva (10) pendiente.
 
   Fuente: `AUDITORIA_2026-10-24.md`.
 
-- [ ] (19/10) **On-premises — Conclusiones, recomendaciones, glosario y bibliografía**:
-  `CAMBIO_ON_PREMISES.md` OP-37 a OP-41 y la recomendación de OD-04:
-  - tres frases de las Conclusiones (se aplican también si se reescriben);
-  - dos recomendaciones nuevas: instalación segura y migración a serverless;
-  - glosario: Cloud Firestore, Cloud Functions y GCP, más Despliegue híbrido,
-    On-premises y VPN;
-  - referencia de Microsoft (on-premises data gateway), que hay que verificar;
-  - índice;
-  - **US-08**: "Superadministrador" en el glosario.
-
 - [ ] (25/09) **Reescribir las Conclusiones actuales**: afirman resultados que todavía
   no se midieron (mejora de precisión por la poda, Q712 al mes, ROI de 39,2 %).
   Reescribirlas con los datos de la evaluación y el costo medido.
@@ -627,9 +647,6 @@ una sola nueva (10) pendiente.
   sesgar el resultado.
 - [ ] (10/10) **Limitación**: las 50 consultas y sus paráfrasis las redactó el mismo
   asistente que conoce el esquema, no usuarios reales.
-- [ ] (02/10) **Limitación**: el banco de pruebas es chico (200 clientes, 300 pedidos);
-  la eficiencia con mucho volumen se evaluará con `EXPLAIN` sobre un banco grande o
-  queda como trabajo futuro.
 - [ ] (08/10) **Limitación / riesgo**: dependencia de un modelo con fecha de retiro.
   **Actualizado 18/10:** ya pasó una vez (`gemini-2.5-pro`, retirado el 20/10/2026) y se
   resolvió cambiando a `gemini-3.8-flash` por configuración, antes de la evaluación; el
@@ -640,3 +657,22 @@ una sola nueva (10) pendiente.
   la poda reduce poco el costo total (~$0.0007 por consulta). **Actualizado 18/10:** con
   Gemini 3.8 Flash en nivel bajo, S10 no razonó (0 tokens), costó $0.0012 y tardó 2.9 s;
   usar las cifras de la corrida.
+- [x] (19/10) **On-premises — Conclusiones, recomendaciones, glosario y bibliografía**:
+  `CAMBIO_ON_PREMISES.md` OP-37 a OP-41 y la recomendación de OD-04:
+  - tres frases de las Conclusiones (se aplican también si se reescriben);
+  - dos recomendaciones nuevas: instalación segura y migración a serverless;
+  - glosario: Cloud Firestore, Cloud Functions y GCP, más Despliegue híbrido,
+    On-premises y VPN;
+  - referencia de Microsoft (on-premises data gateway), que hay que verificar;
+  - índice;
+  - **US-08**: "Superadministrador" en el glosario.
+
+  **Aplicado el 22/10** en `PG2-2026 revisado 22-10-2026.docx` (cotejado el 25/10). La
+  referencia quedó como "Microsoft Corporation. (2025)". Si se reescriben las
+  Conclusiones, conservar las tres frases.
+- [x] (02/10) ~~**Limitación**: el banco de pruebas es chico (200 clientes, 300
+  pedidos); la eficiencia con mucho volumen se evaluará con `EXPLAIN` sobre un banco
+  grande o queda como trabajo futuro.~~ **Ya no va (25/10):** desde el 24/10 el banco
+  tiene 1 485 641 filas en los 4 motores (`Bases de datos/README.md`, «Volumen»). El Word
+  del 22/10 no menciona el tamaño viejo. Por decisión de David (24/10), el volumen no
+  necesita entradas nuevas acá.

@@ -7,6 +7,17 @@
 >
 > Todo se pasa al Word en una sola revisión.
 
+> **Estado (cotejado el 25/10/2026):** David aplicó todo en `PG2-2026 revisado
+> 22-10-2026.docx` (marcado `[x]`), salvo tres puntos:
+> - **OP-13**: Tabla 4 y 1.6.3.2. Va con el recálculo de 1.6.3, que también cambia ahí
+>   "Gemini Pro 2.5".
+> - **OP-36**: 6.7.4. Se escribe después de verificar el acceso desde otro equipo de la
+>   red.
+> - **US-09**: posterior al Word. Se edita el texto de US-02 y US-06 que ya está.
+>
+> El cotejo se hizo por frases del texto nuevo y del viejo. OP-03 (5.3.2) quedó con otra
+> redacción, y las figuras se comprobaron solo por cantidad de imágenes nuevas (5).
+
 **Decisión de David (19/10/2026):** NLQP se instala **en la red de la organización
 (on-premises)**: el frontend y el backend corren en un servidor de la empresa, junto a
 sus bases de datos, y se accede por la red local o por VPN. Vertex AI, Firebase Auth,
@@ -68,7 +79,7 @@ Las instrucciones de abajo salen de leer ese Word completo y compararlo con el c
 
 ## Parte 1 — Capítulo 5 (núcleo del cambio)
 
-### [ ] OP-01 · 5.3 Diagramas de Infraestructura — Reemplazar el párrafo después de la Figura 8
+### [x] OP-01 · 5.3 Diagramas de Infraestructura — Reemplazar el párrafo después de la Figura 8
 **Ubicar:** el párrafo que empieza "La totalidad de los componentes de la plataforma se
 despliega sobre servicios gestionados…". **Reemplazarlo completo por:**
 
@@ -86,7 +97,7 @@ despliega sobre servicios gestionados…". **Reemplazarlo completo por:**
 > sale de su red es el que el backend inicia hacia las APIs de Google, cifrado mediante
 > TLS.
 
-### [ ] OP-02 · 5.3.1 (nuevo) — Agregar después de OP-01
+### [x] OP-02 · 5.3.1 (nuevo) — Agregar después de OP-01
 **Agregar** el subtítulo **"5.3.1 Justificación del despliegue local"** y este texto:
 
 > El diseño de los capítulos anteriores, que ubica el backend en funciones de Cloud
@@ -129,7 +140,7 @@ despliega sobre servicios gestionados…". **Reemplazarlo completo por:**
 
 > **Bibliografía:** agregar la referencia de Microsoft (OP-40).
 
-### [ ] OP-03 · 5.3.2 (nuevo) — Agregar después de OP-02
+### [x] OP-03 · 5.3.2 (nuevo) — Agregar después de OP-02
 **Agregar** el subtítulo **"5.3.2 Escalamiento a la arquitectura sin servidor"** y:
 
 > La migración a la arquitectura de referencia no requiere modificar los módulos
@@ -155,7 +166,7 @@ despliega sobre servicios gestionados…". **Reemplazarlo completo por:**
 > `src/index.ts`, el servidor Express, aplica la autenticación. Por eso el primer ajuste
 > es obligatorio.
 
-### [ ] OP-04 · Figura 8 — Redibujar
+### [x] OP-04 · Figura 8 — Redibujar
 **Leyenda nueva:** "Figura 8. Diagrama de despliegue de NLQP. Fuente: Elaboración
 propia." (actualizar también el **índice de figuras**).
 
@@ -176,7 +187,7 @@ Quitar "proyecto nlqp-prod": ese nombre no es el del proyecto real
 (`proyectog-340d3`), y no hace falta poner ninguno. Quitar también "us-central1": hoy
 la ubicación es `global`.
 
-### [ ] OP-05 · 5.1.3 Diagrama de secuencias — Texto y Figura 3
+### [x] OP-05 · 5.1.3 Diagrama de secuencias — Texto y Figura 3
 - **Reemplazar** "La secuencia confirma que toda la interacción con servicios sensibles
   ocurre desde la Cloud Function y nunca desde el frontend." **por** "La secuencia
   confirma que toda la interacción con servicios sensibles ocurre desde el backend y
@@ -193,7 +204,7 @@ la ubicación es `global`.
   son dos solicitudes separadas, con la revisión del usuario entre ambas (sección
   6.4)."
 
-### [ ] OP-06 · 5.1.4 Diagrama de componentes — Texto y Figura 4
+### [x] OP-06 · 5.1.4 Diagrama de componentes — Texto y Figura 4
 - **Reemplazar** "toda comunicación con esos elementos se canaliza obligatoriamente a
   través de la capa de lógica desplegada en Cloud Functions." **por** "toda comunicación
   con esos elementos se canaliza obligatoriamente a través de la capa de lógica del
@@ -203,7 +214,7 @@ la ubicación es `global`.
   Backend Node.js"**. "Vertex AI Gemini Pro" → **"Vertex AI Gemini 3.8 Flash"** [M]. La
   estructura de capas no cambia.
 
-### [ ] OP-07 · 5.1.6 Diagrama de clases — Agregar una oración (OD-05)
+### [x] OP-07 · 5.1.6 Diagrama de clases — Agregar una oración (OD-05)
 **Ubicar:** el párrafo que empieza "La estructura se organiza en cuatro agrupaciones.".
 **Agregar después de** "…sin modificar los componentes de generación ni de validación."
 lo siguiente:
@@ -216,7 +227,7 @@ lo siguiente:
 (En el código no hay clase `AdaptadorMotor`: `schemaExtractor.service.ts` y
 `connectionManager.service.ts` usan `switch (engine)`.)
 
-### [ ] OP-08 · 5.2 Modelo Entidad-Relación — Reemplazar el párrafo después de la Figura 7 (OD-06)
+### [x] OP-08 · 5.2 Modelo Entidad-Relación — Reemplazar el párrafo después de la Figura 7 (OD-06)
 **Ubicar:** el párrafo que empieza "El modelo comprende cinco colecciones.".
 **Reemplazarlo completo por:**
 
@@ -248,7 +259,7 @@ Las colecciones reales son `connections`, `users/{uid}/history`, `users/{uid}/sa
 
 ## Parte 2 — Introducción y capítulos 1 a 4
 
-### [ ] OP-09 · Introducción [M]
+### [x] OP-09 · Introducción [M]
 - Párrafo que empieza "El presente trabajo de graduación documenta…": **reemplazar**
   "dentro de una arquitectura sin servidor sobre Google Cloud Platform, garantizando
   seguridad, escalabilidad y eficiencia operativa." **por** "con un backend que se
@@ -260,14 +271,14 @@ Las colecciones reales son `connections`, `users/{uid}/history`, `users/{uid}/sa
   lógico de datos y la infraestructura sobre Google Cloud Platform" **por** "el modelo
   lógico de datos y el modelo de despliegue".
 
-### [ ] OP-10 · 1.3 Justificación
+### [x] OP-10 · 1.3 Justificación
 Párrafo que empieza "Adicionalmente, el proyecto aborda una dimensión de seguridad…":
 **reemplazar** "toda la conectividad ocurre exclusivamente desde el backend mediante una
 arquitectura serverless sobre Google Cloud" **por** "toda la conectividad con las bases
 de datos ocurre exclusivamente desde el backend, instalado en la red de la organización,
 de modo que las bases no se exponen a internet".
 
-### [ ] OP-11 · 1.5 Alcance [M]
+### [x] OP-11 · 1.5 Alcance [M]
 Cuarto párrafo, el que empieza "La plataforma se desarrolla sobre una arquitectura sin
 servidor…". **Reemplazar** su primera oración, "La plataforma se desarrolla sobre una
 arquitectura sin servidor utilizando los servicios de Google Cloud, específicamente Cloud
@@ -288,7 +299,7 @@ Firebase Hosting para la distribución del frontend desarrollado en Next.js.", *
 En el mismo párrafo hay un espacio faltante: "…gestión de consultas de datos.El
 sistema implementa…" → "datos. El sistema".
 
-### [ ] OP-12 · 1.6.1 Factibilidad técnica — Tabla 1
+### [x] OP-12 · 1.6.1 Factibilidad técnica — Tabla 1
 - Indicador 1: **reemplazar** "¿Se dispone de los conocimientos técnicos adecuados para
   desarrollar una aplicación web con arquitectura serverless (arquitectura sin
   servidores) en Google Cloud Platform?" **por** "¿Se dispone de los conocimientos
@@ -329,7 +340,7 @@ en `RESUMEN_PARA_DOC_TEORICO.md`), para no recalcular dos veces.
 *(OP-14 descartado: una fila "Despliegue" en la Tabla 6 obligaría a afirmar cómo se
 despliegan Text2SQL.ai, Power BI y Tableau, y eso no está verificado.)*
 
-### [ ] OP-15 · 1.7 Limitaciones — Agregar la sexta
+### [x] OP-15 · 1.7 Limitaciones — Agregar la sexta
 **Agregar al final de 1.7:**
 
 > En sexto lugar, la versión inicial se instala en un servidor de la organización
@@ -347,7 +358,7 @@ dedicada", antes hay que confirmar con qué credenciales corre el backend en la 
 (`gcloud auth application-default print-access-token` / variable
 `GOOGLE_APPLICATION_CREDENTIALS`).
 
-### [ ] OP-16 · 2.5 Vertex AI y el modelo Gemini Pro — Último párrafo [M]
+### [x] OP-16 · 2.5 Vertex AI y el modelo Gemini Pro — Último párrafo [M]
 **Ubicar:** "La integración de Vertex AI Gemini Pro en NL-Query-Platform se realiza
 exclusivamente desde el backend a través de Cloud Functions de segunda generación,
 mediante @google/genai…".
@@ -358,7 +369,7 @@ mediante @google/genai…".
   Cloud, y que" **por** "que las credenciales de acceso al modelo nunca se expongan al
   cliente, que el tráfico hacia Vertex AI viaje cifrado mediante TLS, y que".
 
-### [ ] OP-17 · 2.6 Arquitectura serverless — Párrafo de seguridad aplicado a NLQP
+### [x] OP-17 · 2.6 Arquitectura serverless — Párrafo de seguridad aplicado a NLQP
 **Ubicar:** el párrafo que empieza "En el contexto de NL-Query-Platform, estas
 características se traducen en que la función encargada de conectarse…".
 **Reemplazarlo completo por:**
@@ -370,7 +381,7 @@ características se traducen en que la función encargada de conectarse…".
 > equivalente proviene de que el servidor solo es accesible dentro de la red de la
 > organización o a través de su VPN, y de que las credenciales nunca salen del backend.
 
-### [ ] OP-18 · 2.6 — Párrafos de "La elección de Cloud Functions…" (también corrige OD-10)
+### [x] OP-18 · 2.6 — Párrafos de "La elección de Cloud Functions…" (también corrige OD-10)
 **Ubicar:** el párrafo que empieza "La elección de Cloud Functions de segunda generación
 como plataforma de backend para NLQP responde a cuatro criterios técnicos verificados."
 y el que le sigue ("Tercero, el modelo de costos…").
@@ -395,7 +406,7 @@ y el que le sigue ("Tercero, el modelo de costos…").
 > las razones expuestas en la sección 5.3.1, y la migración a Cloud Functions se
 > describe en la sección 5.3.2.
 
-### [ ] OP-19 · 2.7 Firebase — Segundo párrafo
+### [x] OP-19 · 2.7 Firebase — Segundo párrafo
 **Ubicar:** "En el contexto de NL-Query-Platform, Firebase actúa como la columna vertebral
 de la infraestructura del sistema, proveyendo tres servicios fundamentales…".
 **Reemplazar** "proveyendo tres servicios fundamentales que operan de forma integrada:
@@ -407,7 +418,7 @@ base de datos interna del sistema. Un tercero, Firebase Hosting, está previsto 
 distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (sección
 5.3.2)."
 
-### [ ] OP-20 · 2.7 — Párrafo del JWT
+### [x] OP-20 · 2.7 — Párrafo del JWT
 **Ubicar:** "El mecanismo de autenticación opera mediante JSON Web Tokens (JWT)…".
 - **Reemplazar** "Cloud Functions de segunda generación verifica la validez de este
   token en cada invocación" **por** "El backend verifica la validez de este token en
@@ -421,7 +432,7 @@ distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (
   sin estado, lo que permite que el mismo backend funcione en el servidor de la
   organización y, al escalar, en funciones efímeras (sección 2.6)."
 
-### [ ] OP-21 · 2.7 — Firestore: contenido y reglas de seguridad (también corrige OD-03)
+### [x] OP-21 · 2.7 — Firestore: contenido y reglas de seguridad (también corrige OD-03)
 - Párrafo que empieza "Cloud Firestore es la base de datos NoSQL…": **reemplazar** "almacena
   los metadatos de las conexiones registradas (sin incluir credenciales, que son
   gestionadas por Secret Manager), el historial de consultas, las preferencias de usuario
@@ -441,7 +452,7 @@ distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (
   - Motivo: el repositorio no tiene `firestore.rules` y el SDK de administración no
     pasa por ellas. Así 2.7 queda consistente con 6.6.
 
-### [ ] OP-22 · 2.7 — Firebase Hosting
+### [x] OP-22 · 2.7 — Firebase Hosting
 - Párrafo que empieza "Firebase Hosting es el servicio de distribución de contenido
   estático…": **reemplazar completo por:**
 
@@ -457,7 +468,7 @@ distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (
 - Párrafo siguiente, el que empieza "El beneficio operativo más relevante es que el
   frontend no introduce costos de cómputo…": **eliminar**.
 
-### [ ] OP-23 · 2.7 — Párrafo del flujo integrado
+### [x] OP-23 · 2.7 — Párrafo del flujo integrado
 **Ubicar:** "La integración entre los tres servicios de Firebase en NLQP se materializa…".
 - "La integración entre los tres servicios" → "La integración entre los servicios".
 - **Reemplazar** "El frontend en Firebase Hosting envía ese JWT junto con cada solicitud
@@ -472,7 +483,7 @@ distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (
 - En el párrafo siguiente, **reemplazar** "exclusivamente dentro del entorno de
   ejecución de la función" **por** "exclusivamente dentro del backend".
 
-### [ ] OP-24 · 2.8 Seguridad (también corrige OD-10)
+### [x] OP-24 · 2.8 Seguridad (también corrige OD-10)
 - Párrafo "En el contexto de sistemas de acceso a bases de datos, este principio se
   concreta en dos capas…": **reemplazar** "el acceso a bases de datos ocurre
   exclusivamente desde Cloud Functions en el backend, y las credenciales configuradas
@@ -491,7 +502,7 @@ distribuir el frontend cuando el sistema escale a la arquitectura sin servidor (
 - Párrafo "La combinación de estos cuatro principios…": **reemplazar** "la verificación
   del JWT en Cloud Functions" **por** "la verificación del JWT en el backend".
 
-### [ ] OP-25 · 2.10 Democratización — Tercera condición
+### [x] OP-25 · 2.10 Democratización — Tercera condición
 **Ubicar:** "…Tercero, la arquitectura serverless elimina la necesidad de infraestructura
 propia de cómputo, reduciendo la barrera de adopción a la disponibilidad de conectividad
 y una cuenta de Google Cloud, condiciones alcanzables para la mayoría de las
@@ -506,21 +517,21 @@ organizaciones formales de la región." **Reemplazar** esa oración **por:**
 > prefiere no operar ese servidor, el sistema puede migrarse a un despliegue sin
 > servidor (sección 5.3.2).
 
-### [ ] OP-26 · 3.2.1 Variable independiente [M]
+### [x] OP-26 · 3.2.1 Variable independiente [M]
 **Reemplazar** "generación automática de SQL mediante Vertex AI Gemini Pro, arquitectura
 serverless sobre Google Cloud Platform y mecanismos de seguridad" **por** "generación
 automática de SQL mediante Vertex AI Gemini 3.8 Flash, una arquitectura que integra
 servicios gestionados de Google Cloud Platform con un servidor instalado en la red de la
 organización, y mecanismos de seguridad".
 
-### [ ] OP-27 · 3.3.1.4 Confiabilidad
+### [x] OP-27 · 3.3.1.4 Confiabilidad
 **Reemplazar** "La meta de aceptación es igual o superior al 99%, coherente con los
 acuerdos de nivel de servicio típicos de Google Cloud Platform." **por** "La meta de
 aceptación es igual o superior al 99%, medida sobre el sistema instalado en el servidor
 de la organización durante el período de prueba." Se quita la referencia al SLA de GCP:
 la disponibilidad ahora depende sobre todo del servidor propio.
 
-### [ ] OP-28 · 3.8 Recursos utilizados — Texto y Tabla 8 (también corrige OD-09) [M]
+### [x] OP-28 · 3.8 Recursos utilizados — Texto y Tabla 8 (también corrige OD-09) [M]
 - Párrafo de hardware: **reemplazar** "No se requiere infraestructura de servidores
   propios dado que toda la arquitectura de producción opera sobre Google Cloud Platform."
   **por** "Durante el desarrollo, esta estación de trabajo cumplió también el papel del
@@ -548,7 +559,7 @@ la disponibilidad ahora depende sobre todo del servidor propio.
   ajusta con el recálculo de 1.6.3 (OP-13).
 - Tabla 8, fila "Software de desarrollo": la misma lista del párrafo nuevo.
 
-### [ ] OP-29 · 3.9 Cronograma
+### [x] OP-29 · 3.9 Cronograma
 - Tabla 9, semana 12: "Análisis de resultados, documentación técnica y de usuario,
   despliegue final" → "Análisis de resultados, documentación técnica y de usuario,
   instalación en el servidor de la organización".
@@ -556,7 +567,7 @@ la disponibilidad ahora depende sobre todo del servidor propio.
   arquitectura serverless y los mecanismos de seguridad asociados" **por** "cuya
   arquitectura y los mecanismos de seguridad asociados".
 
-### [ ] OP-30 · 4.1 Descripción del Proyecto [M]
+### [x] OP-30 · 4.1 Descripción del Proyecto [M]
 **Ubicar:** "…se construye sobre una arquitectura serverless en Google Cloud Platform,
 integrando Vertex AI Gemini Pro como modelo de generación de lenguaje, Cloud Functions de
 segunda generación como capa de backend, Firestore como base de datos interna, y Firebase
@@ -572,13 +583,13 @@ final de la oración **por:**
 > backend a Cloud Functions de segunda generación y el frontend a Firebase Hosting
 > (sección 5.3.2).
 
-### [ ] OP-31 · 4.3.3 Características (RUP)
+### [x] OP-31 · 4.3.3 Características (RUP)
 **Reemplazar** "dado que su arquitectura serverless y los mecanismos de seguridad
 asociados (la cadena de capas descrita en la sección 2.6 y 2.8," **por** "dado que su
 arquitectura y los mecanismos de seguridad asociados (la cadena de capas descrita en las
 secciones 2.7 y 2.8,".
 
-### [ ] OP-32 · 4.5 Requerimientos no funcionales — Tabla 13, RNF-11
+### [x] OP-32 · 4.5 Requerimientos no funcionales — Tabla 13, RNF-11
 | Columna | Actual | Nuevo |
 |---|---|---|
 | Requerimiento | Escalado automático de la infraestructura sin intervención manual | Despliegue local con ruta de escalamiento |
@@ -588,7 +599,7 @@ secciones 2.7 y 2.8,".
 
 ## Parte 3 — Capítulo 6
 
-### [ ] OD-01 · 6.1.4 Verificación — Cuenta de base de datos (dato incorrecto)
+### [x] OD-01 · 6.1.4 Verificación — Cuenta de base de datos (dato incorrecto)
 **Reemplazar** "La conexión se estableció correctamente contra los cuatro motores del
 banco de pruebas, utilizando en todos los casos cuentas configuradas con permisos
 exclusivamente de lectura, conforme a la cuarta capa de la estrategia de defensa en
@@ -605,7 +616,7 @@ Fuente: `Bases de datos/README.md`. `testuser` tiene todos los permisos dentro d
 `testdb` "a propósito", y `init/postgres/02-users.sql` le da `GRANT ALL PRIVILEGES`. Las
 cuentas de solo lectura estaban en `../db/`, que no existe en disco.
 
-### [ ] OP-33 · 6.3.5 — Limitación del almacén de copias
+### [x] OP-33 · 6.3.5 — Limitación del almacén de copias
 **Ubicar:** "Como limitación, el almacén de copias reside en el disco del proceso del
 backend. En un despliegue con varias instancias de Cloud Functions tendría que
 trasladarse a almacenamiento compartido, como Cloud Storage. Además, reiniciar el backend
@@ -618,7 +629,7 @@ invalida los resultados vigentes." **Reemplazar completo por:**
 > (sección 5.3.2). Como limitación, reiniciar el backend invalida los resultados
 > vigentes.
 
-### [ ] OD-02 · 6.3.5 — Tope de tiempo: ahora por conexión, 8 min por defecto (código del 19/10)
+### [x] OD-02 · 6.3.5 — Tope de tiempo: ahora por conexión, 8 min por defecto (código del 19/10)
 El tope era de 60 s globales, pero RNF-01, 3.3.1.3, 3.7 y el indicador 6 de la
 factibilidad operativa aceptan reportes de hasta 8 minutos.
 
@@ -651,13 +662,13 @@ En el código:
 
 El párrafo de verificación de 6.3.5 ("Con un tope de 2 segundos…") queda igual.
 
-### [ ] OP-34 · 6.7.1 Registro de uso y costos
+### [x] OP-34 · 6.7.1 Registro de uso y costos
 **Reemplazar** "Se espera la escritura antes de responder, porque en Cloud Functions una
 operación pendiente puede perderse si la instancia se recicla." **por** "Se espera la
 escritura antes de responder, de modo que el registro no se pierda si el proceso se
 reinicia o si, al escalar a Cloud Functions, la instancia se recicla."
 
-### [ ] OP-35 · 6.7.2 Revisión de seguridad — Tabla 14 y párrafo
+### [x] OP-35 · 6.7.2 Revisión de seguridad — Tabla 14 y párrafo
 - Tabla 14: "Sin restricción de origen en el servidor de desarrollo" → "Sin restricción
   de origen en el servidor del backend". El estado sigue "Documentado". Ahora el
   servidor Express es el servidor real, no solo el de desarrollo.
@@ -700,7 +711,7 @@ Para verificarlo, sin costo salvo "Generar SQL" (~$0.001–0.004 por intento):
 Las conclusiones están pendientes de reescritura completa (entrada del 25/09 en
 `RESUMEN_PARA_DOC_TEORICO.md`). Estos cambios se aplican también si se reescriben.
 
-### [ ] OP-37 · Conclusiones
+### [x] OP-37 · Conclusiones
 - Primer párrafo: **reemplazar** "la integración de modelos de lenguaje de gran escala
   con arquitecturas serverless sobre Google Cloud Platform constituye" **por** "la
   integración de modelos de lenguaje de gran escala, consumidos como servicio gestionado
@@ -716,7 +727,7 @@ Las conclusiones están pendientes de reescritura completa (entrada del 25/09 en
   exponer las bases a internet, y la arquitectura conserva la posibilidad de migrar a un
   despliegue sin servidor cuando el volumen de uso lo justifique."
 
-### [ ] OP-38 · Recomendaciones — Agregar dos
+### [x] OP-38 · Recomendaciones — Agregar dos
 **Agregar al final:**
 
 > Se recomienda que la instalación en la organización utilice una cuenta de servicio de
@@ -732,7 +743,7 @@ Las conclusiones están pendientes de reescritura completa (entrada del 25/09 en
 > identidad y del rol en cada función desplegada, sin la cual las funciones quedarían
 > accesibles sin autenticación.
 
-### [ ] OP-39 · Glosario
+### [x] OP-39 · Glosario
 - **Cloud Firestore:** "…utilizada en NLQP como sistema de almacenamiento interno para
   metadatos, historial de consultas y configuraciones de usuario." → "…utilizada en NLQP
   como almacenamiento interno para el registro de conexiones, el historial y las
@@ -756,7 +767,7 @@ Las conclusiones están pendientes de reescritura completa (entrada del 25/09 en
     como si estuviera dentro de ella.
 - "Gemini Pro" en Token, Transformer y Vertex AI: corre el cambio de modelo [M].
 
-### [ ] OP-40 · Bibliografía
+### [x] OP-40 · Bibliografía
 - **Agregar:** Microsoft. (2025). *What is an on-premises data gateway?* Microsoft
   Learn. https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem
   - [Verificar] antes de citarla: abrir el enlace y ajustar el año a la fecha que
@@ -764,7 +775,7 @@ Las conclusiones están pendientes de reescritura completa (entrada del 25/09 en
 - Las referencias de serverless, Cloud Functions y Firebase Hosting **se mantienen**,
   porque 2.6 y 2.7 las siguen citando para la arquitectura de referencia.
 
-### [ ] OP-41 · Índice, índice de figuras y numeración
+### [x] OP-41 · Índice, índice de figuras y numeración
 - Agregar 5.3.1, 5.3.2 y 6.7.4 (esta última cuando se escriba).
 - Figura 8: leyenda nueva (OP-04).
 - Actualizar los campos del Word (clic derecho en el índice → Actualizar campos → Toda
@@ -790,7 +801,7 @@ integradas en esa instrucción.
 | OD-09 | 3.8: falta React, Express, Tailwind y Docker; Git 2.45 → 2.55 | OP-28 |
 | OD-10 | 2.6 y 2.8: credenciales "en cada invocación" frente a la lectura al abrir el pool | OP-18 y OP-24 |
 
-### [ ] OD-04 · Registro de cambios y RF-13
+### [x] OD-04 · Registro de cambios y RF-13
 - **1.5 Alcance**, final del tercer párrafo: **reemplazar** "La versión inicial no
   incluye registro de cambios sobre las ediciones realizadas a las consultas guardadas,
   funcionalidad prevista para versiones futuras del sistema." **por** "Las ediciones del
@@ -846,7 +857,7 @@ Datos del código:
 Verificado: API 35/35 (usuarios) y 59/59 (conexiones), UI 20/20 y 33/33, seguridad
 57/57 + 200/200.
 
-### [ ] US-01 · 4.2 Identificación de usuarios — Agregar una oración
+### [x] US-01 · 4.2 Identificación de usuarios — Agregar una oración
 **Ubicar** el párrafo que empieza "Es relevante señalar que, a diferencia de sistemas
 transaccionales convencionales, NLQP no define un actor de tipo «administrador del
 sistema»…". **Agregar al final:**
@@ -855,7 +866,7 @@ sistema»…". **Agregar al final:**
 > superadministrador; ese permiso no constituye un actor distinto, sino una atribución
 > adicional del Usuario Técnico, que se asigna fuera de la interfaz del sistema.
 
-### [ ] US-02 · 4.4 Requerimientos funcionales — Tabla 12
+### [x] US-02 · 4.4 Requerimientos funcionales — Tabla 12
 - **RF-14**, descripción → "El sistema debe permitir el inicio de sesión con correo y
   contraseña mediante Firebase Authentication. Las cuentas las crea el
   superadministrador, sin registro público, y el backend debe rechazar toda solicitud
@@ -878,7 +889,7 @@ sistema»…". **Agregar al final:**
   | Módulo relacionado | Transversal a todos los módulos |
   | Actor asociado | Usuario Técnico (superadministrador) |
 
-### [ ] US-03 · 5.1.1 Casos de uso — Figura 1 y su párrafo
+### [x] US-03 · 5.1.1 Casos de uso — Figura 1 y su párrafo
 - **Figura 1**, agregar dos casos de uso:
   - "Gestionar usuarios", asociado al Usuario Técnico, con la nota «superadministrador»;
   - "Configurar tiempo máximo de ejecución", que extiende "Administrar conexiones".
@@ -889,7 +900,7 @@ sistema»…". **Agregar al final:**
 > superadministrador, que crea las cuentas y asigna sus roles; el sistema no tiene
 > registro público.
 
-### [ ] US-04 · 6.1.2 y 6.1.4 — Tope en el registro de conexiones
+### [x] US-04 · 6.1.2 y 6.1.4 — Tope en el registro de conexiones
 - **6.1.2**, agregar al final del primer párrafo (el que termina "…al editar, dejarla
   vacía conserva la guardada."):
 
@@ -911,7 +922,7 @@ sistema»…". **Agregar al final:**
     de la enumeración: "; el tiempo máximo viene en 8 minutos, un valor fuera de rango
     no deja guardar y el valor editado se muestra en la lista".
 
-### [ ] US-05 · 6.4 Frontend — Pantallas y rol
+### [x] US-05 · 6.4 Frontend — Pantallas y rol
 - **Reemplazar** "Fuera de la sesión hay dos pantallas, /login y /signup." **por**
   "Fuera de la sesión hay una sola pantalla, /login: no hay registro público, porque las
   cuentas las crea el superadministrador (sección 6.5)."
@@ -922,7 +933,7 @@ sistema»…". **Agregar al final:**
   **por** "junto con el rol del usuario y su permiso de superadministrador, que el
   frontend pide al backend y este lee de la cuenta, no del token."
 
-### [ ] US-06 · 6.5 Herramientas técnicas — Roles y gestión de usuarios
+### [x] US-06 · 6.5 Herramientas técnicas — Roles y gestión de usuarios
 - **Reemplazar** "Las cuentas creadas desde el registro empiezan como no técnicas, el
   permiso menor." **por** "No hay registro público: las cuentas las crea el
   superadministrador, siempre con un rol, y el backend rechaza cualquier cuenta sin rol,
@@ -953,7 +964,7 @@ sistema»…". **Agregar al final:**
 > con su aviso al iniciar sesión, la reactivación y que el técnico no accede a la
 > pantalla.
 
-### [ ] US-07 · 6.7.2 Revisión de seguridad — Tabla 14
+### [x] US-07 · 6.7.2 Revisión de seguridad — Tabla 14
 - **Agregar la fila:** "Registro público abierto y rol leído del token | Media |
   Corregido".
 - **Agregar** al final de la sección:
@@ -964,7 +975,7 @@ sistema»…". **Agregar al final:**
 > público, se exige un rol en cada cuenta y el backend lee el rol y el estado de la
 > cuenta en cada solicitud (sección 6.5).
 
-### [ ] US-08 · Glosario
+### [x] US-08 · Glosario
 **Agregar**, en orden alfabético:
 - **Superadministrador:** Usuario técnico con permiso para gestionar las cuentas del
   sistema: crearlas con un rol, cambiar su rol y desactivarlas o reactivarlas.
