@@ -3,8 +3,9 @@
 Texto redactado para pegar en el documento de tesis. **Solo contiene texto de tesis:**
 qué falta corregir o agregar (en este capítulo y en los demás) está en
 `RESUMEN_PARA_DOC_TEORICO.md`, que es la lista de trabajo. Solo está lo que ya se
-documenta en el Word: las secciones que faltan (evaluación con Gemini, Módulos 4 y 5,
-presentación del prototipo) no llevan título ni marcador hasta tener texto.
+documenta en el Word: las secciones que faltan (presentación del prototipo) no llevan
+título ni marcador hasta tener texto. **(29/10)** Se agregaron 6.3.6 (evaluación con
+Gemini), las Conclusiones de reemplazo y la recomendación de capacitación, al final.
 
 **Versión (sincronizado con el Word el 16/10):** cada sección tiene el texto más
 reciente redactado. Si difiere de lo que ya está pegado en el Word,
@@ -12,7 +13,8 @@ reciente redactado. Si difiere de lo que ya está pegado en el Word,
 chat de Cowork (25/09 y 02/10).
 
 **Numeración:** al quitar la "Tabla 10." vacía del Cap. 3 (10/10), antes de este
-capítulo el Word llega a la Tabla 13 y a la Figura 8. Tablas del capítulo: 14 (6.3.4),
+capítulo el Word llega a la Tabla 13 y a la Figura 8. **(29/10)** 6.3.6 agrega las Tablas
+16 y 17; las siguientes corren dos números (la del Módulo 4 pasa a 18, y así hasta la 22). Tablas del capítulo: 14 (6.3.4),
 15 (6.3.5), 16 (6.5, Módulo 4), 17 (6.6, Módulo 5), 18 (6.7.1), 19 (6.7.2) y 20 (6.7.3);
 Figuras 9 (6.4), 10 (6.5) y 11 (6.6). En el Word las leyendas se numeran solas (estilos
 "Tabla 1" e "I_Figuras"): no se escribe el número a mano.
@@ -548,6 +550,120 @@ despliegue con varias instancias de Cloud Functions tendría que trasladarse a
 almacenamiento compartido, como Cloud Storage. Además, reiniciar el backend invalida los
 resultados vigentes.
 
+### 6.3.6 Evaluación de la generación con Gemini
+
+Esta sección evalúa la conversión de lenguaje natural a SQL con las métricas de
+funcionalidad y eficiencia de la sección 3.3.1. Se usó el mismo conjunto de cincuenta
+preguntas de la sección 6.3.4, distribuidas en quince simples, veinte intermedias y
+quince complejas, y una paráfrasis de cada una: la misma pregunta con otras palabras,
+redactada sin ajustar el sistema a ella. Cada pregunta y cada paráfrasis se envió al
+sistema en los cuatro motores, para un total de cuatrocientos casos, sobre el banco de
+pruebas ampliado a 1,485,641 registros. La generación usó Gemini 3.8 Flash en Vertex AI
+con el prompt descrito en la sección 6.3.1, y cada sentencia pasó por el Query Safety
+Engine antes de ejecutarse. La evaluación completa costó USD 0.81, con un promedio de
+USD 0.002 por consulta generada.
+
+La precisión se midió como precisión de ejecución (execution accuracy), el criterio de
+los benchmarks Spider y BIRD: una sentencia generada es correcta si su resultado
+coincide con el de la sentencia de referencia escrita a mano, sin importar el texto del
+SQL. La comparación automática se completó con una revisión manual de los 68 casos que
+no coincidían. La revisión mostró que la mayoría de esos casos eran correctos: la
+referencia incluía una columna informativa que la pregunta no pedía, como el conteo de
+categorías en «¿Qué clientes han comprado productos de más de 5 categorías
+distintas?», y la sentencia generada devolvía exactamente los mismos registros sin esa
+columna. También se encontraron empates válidos, donde la pregunta pide los diez
+primeros de un ordenamiento en el que miles de registros comparten el mismo valor. Los
+casos en que la pregunta admite más de una lectura válida se clasificaron como
+ambigüedad y no se cuentan como correctos.
+
+**Tabla 16.** Precisión de ejecución de la generación con Gemini 3.8 Flash. Fuente: Elaboración propia.
+
+| Grupo | Casos | Correctos | Precisión | Ambigüedad | Error de poda | Error del modelo |
+|---|---|---|---|---|---|---|
+| Preguntas originales | 200 | 196 | 98.0 % | 4 | 0 | 0 |
+| Paráfrasis | 200 | 183 | 91.5 % | 6 | 6 | 5 |
+| **Total** | **400** | **379** | **94.8 %** | **10** | **6** | **5** |
+
+La precisión global de 94.8 % supera la meta de aceptación de 75 % de la sección
+3.3.1.2. Por nivel de complejidad, las preguntas originales alcanzan el 100 % en las
+simples y en las complejas y el 95.0 % en las intermedias, donde los cuatro casos no
+correctos son una sola pregunta ambigua: el tiempo promedio entre el envío y la entrega
+«en días», que puede calcularse en días calendario o como tiempo transcurrido. En las
+paráfrasis, la precisión es de 100 % en las simples, 88.8 % en las intermedias y 86.7 %
+en las complejas. Por motor, la precisión va de 93 % en MariaDB a 96 % en MySQL.
+
+Ninguna pregunta original produjo un error; los once errores corresponden a paráfrasis.
+Seis no se deben al modelo sino a la poda de esquema: la paráfrasis usaba vocabulario
+que el diccionario de sinónimos no reconoce, como «despachado» en lugar de «enviado», y
+el modelo no recibió la tabla necesaria. Los cinco errores restantes son del modelo: en
+tres, una combinación de tablas deja fuera a los clientes sin compras cuando la pregunta
+pide «cada cliente», y en dos el ingreso se calcula sin el descuento de cada línea.
+
+La robustez lingüística, entendida como la capacidad de generar SQL correcto ante otra
+formulación de la misma pregunta, alcanza el 91.5 %, por encima de la meta de 70 % de la
+sección 3.3.1.2. La caída frente a las preguntas originales es de 6.5 puntos
+porcentuales, menor que la de hasta 20 puntos reportada por Safarzadeh et al. (2025). La
+sección 3.3.1.2 preveía diez preguntas con tres variantes cada una; se aplicó en su
+lugar una variante a cada una de las cincuenta preguntas, lo que cubre los tres niveles
+de complejidad y todos los tipos de consulta del conjunto.
+
+En cuanto a la cobertura de motores, la sección 3.3.1.2 pide verificar cada consulta en
+al menos dos motores; se verificó en los cuatro. En 94 de las 100 combinaciones de
+pregunta y variante, los cuatro motores devuelven la misma respuesta, sin contar las
+columnas que la pregunta no pide. Comparando también esas columnas, la cifra es de 77
+de 100: en esos casos el modelo agrega en algún motor un identificador o un dato de
+contacto que no se solicitó, sin que cambien los registros devueltos.
+
+El tiempo de respuesta se midió desde el envío de la pregunta hasta la obtención del
+resultado: la generación con el modelo y la ejecución en el motor. La Tabla 17 resume
+los 338 casos generados con el mecanismo de corte y reintento descrito en la sección
+6.3.2; los demás se generaron antes de incorporarlo, en horas en que el servicio de
+Google estuvo saturado.
+
+**Tabla 17.** Tiempo de respuesta por nivel de complejidad frente a las metas de la sección 3.3.1.3, en segundos. Fuente: Elaboración propia.
+
+| Nivel | Casos | Mínimo | Mediana | Media | Percentil 95 | Máximo | Meta | Dentro de la meta | Dentro de la meta, primer intento |
+|---|---|---|---|---|---|---|---|---|---|
+| Simple | 82 | 1.5 | 4.5 | 11.0 | 43.3 | 72.6 | < 15 | 79.3 % | 97.0 % |
+| Intermedio | 144 | 1.5 | 9.0 | 20.7 | 70.5 | 133.1 | < 60 | 90.3 % | 100 % |
+| Complejo | 112 | 1.7 | 6.2 | 14.1 | 42.1 | 132.5 | ≤ 480 | 100 % | 100 % |
+
+Las medianas, de 4.5 a 9.0 segundos, quedan muy por debajo de las tres metas, y los
+reportes complejos las cumplen en todos los casos. Las consultas simples e intermedias
+que las superan coinciden con los momentos en que el servicio no respondió al primer
+intento: cuando el modelo responde al primer intento, el 97.0 % de las simples y la
+totalidad de las intermedias y complejas quedan dentro de su meta. El 99.8 % del tiempo
+de generación corresponde a la espera del modelo, de modo que el tiempo depende sobre
+todo de la disponibilidad del servicio de Google y no del sistema. Sobre los
+cuatrocientos casos, incluidos los generados con el servicio saturado, quedan dentro de
+la meta el 74.2 % de las simples, el 90.0 % de las intermedias y el 100 % de las
+complejas.
+
+La eficiencia de las sentencias generadas se evaluó con el plan de ejecución estimado
+(EXPLAIN, sin ejecutar la consulta) de cada sentencia generada y de su referencia sobre
+el banco ampliado. Como cada motor expresa el costo estimado en unidades propias, se
+comparó cada sentencia con su referencia en el mismo motor. En 374 de los 400 casos
+(93.5 %) el costo estimado de la sentencia generada es, como máximo, el doble del de la
+referencia, y en 76 casos es menor; la mediana de la relación es 1.0 en los cuatro
+motores. Los casos de mayor costo corresponden a sentencias que hacen más trabajo
+porque devuelven más información, como el nombre del cliente además de su
+identificador, o a particularidades del modelo de costos de cada motor. Sus tiempos de
+ejecución medidos son similares a los de los demás motores, y en los cuatrocientos casos
+la ejecución tuvo una mediana de 415 milisegundos y un máximo de 9.6 segundos, este
+último en resultados de 50,000 registros.
+
+Por último, se probaron reportes de mayor tamaño y elaboración con el recorrido
+completo de la interfaz, desde la pregunta hasta la descarga en Excel. Cinco reportes de
+entre 16,082 y 631,630 registros, en los cuatro motores, devolvieron en todos los casos
+la totalidad de los registros, coincidieron con un conteo de control escrito a mano y
+dieron los mismos datos en los cuatro motores; la generación más la ejecución tomó de 3
+a 12 segundos, y la descarga en Excel del reporte de 631,630 registros, de 19 a 21
+segundos. Tres reportes elaborados, con funciones de ventana, clasificaciones por país y
+análisis de cohortes, dieron el resultado correcto en 11 de las 12 ejecuciones; el caso
+restante, en MySQL, contaba pedidos en lugar de clientes. Este resultado indica que en
+reportes de esa complejidad conviene que un usuario técnico revise la sentencia antes de
+usar sus cifras, revisión para la cual el sistema expone el SQL generado.
+
 ---
 
 ## 6.4 Frontend Next.js y autenticación de interfaz
@@ -873,3 +989,103 @@ despreciable frente a la latencia del modelo. La latencia casi no cambia con la
 complejidad: la mediana va de 16.0 a 16.5 ms en los tres niveles, porque el volumen del
 banco permite resolver los planes en memoria. Los umbrales diferenciados de la sección
 3.3.1.3 responden, por tanto, al costo de la generación y no al de la ejecución.
+
+---
+
+## Conclusiones (texto de reemplazo, 29/10)
+
+Reemplaza las Conclusiones actuales del Word. Mantiene la idea de los párrafos sobre
+viabilidad, defensa en profundidad y contexto guatemalteco, y sustituye las
+afirmaciones que no estaban medidas (la mejora de precisión atribuida a la poda y las
+cifras económicas, que dependen del recálculo de la sección 1.6.3) por los resultados
+de la evaluación.
+
+El desarrollo de NL-Query-Platform demuestra que la integración de un modelo de lenguaje
+de gran escala, consumido como servicio gestionado de Google Cloud, con un backend
+instalado en la red de la organización constituye una solución técnicamente viable para
+el acceso a datos relacionales en organizaciones con equipos técnicos reducidos. La
+plataforma implementa el recorrido completo, desde la autenticación del usuario hasta
+la ejecución controlada de la consulta y la descarga del resultado, y se verificó en
+los cuatro motores comprometidos en el alcance sobre un banco de pruebas de casi un
+millón y medio de registros.
+
+Los cinco módulos funcionales del alcance se implementaron y verificaron. Las
+credenciales de las bases se guardan en Secret Manager y nunca llegan al cliente
+(sección 6.1); el esquema se obtiene por inspección activa de las tablas de sistema de
+cada motor (sección 6.2); el modelo genera sentencias para el dialecto de cada motor
+(sección 6.3); los usuarios técnicos revisan y editan el SQL, administran las
+conexiones y consultan el uso y los costos (sección 6.5), y el historial y las
+consultas guardadas permiten reutilizar una consulta sin volver a invocar al modelo
+(sección 6.6).
+
+La evaluación con Gemini 3.8 Flash sobre cuatrocientos casos alcanzó una precisión de
+ejecución de 94.8 %, por encima de la meta de 75 % de la sección 3.3.1.2, con 98.0 % en
+las preguntas originales y 91.5 % en sus paráfrasis (sección 6.3.6). Ninguna pregunta
+original produjo un error, y la caída de precisión ante otra formulación de la misma
+pregunta fue de 6.5 puntos porcentuales, menor que la reportada en la literatura. Los
+cuatro motores devolvieron la misma respuesta en 94 de cada 100 preguntas, y las
+sentencias generadas resultaron tan eficientes como las escritas a mano en la gran
+mayoría de los casos: el 93.5 % tiene un costo estimado de, como máximo, el doble del
+de la referencia.
+
+El Query Safety Engine bloqueó la totalidad de las sentencias no permitidas de la
+batería de pruebas y no rechazó consultas legítimas (sección 6.3.3). La arquitectura de
+defensa en profundidad, compuesta por la autenticación con Firebase, la verificación
+del token y del rol en el backend, la validación del Query Safety Engine y, en la
+instalación, cuentas de base de datos de solo lectura, responde al principio de mínimo
+privilegio formulado por Saltzer y Schroeder (1975) y a las recomendaciones de OWASP
+para sistemas de consulta de datos. Las revisiones de seguridad encontraron y
+corrigieron defectos reales, entre ellos una evasión del validador propia del dialecto
+de SQL Server (sección 6.3.3.1), lo que confirma el valor de verificar el componente
+contra los cuatro motores y no solo contra uno.
+
+La poda de esquema redujo en 72 % los tokens con que se describe el esquema, por encima
+de la meta de 60 % de la sección 3.3.1.3. Su efecto sobre la precisión no se aisló en
+la evaluación, pero esta mostró su principal riesgo: seis de los once errores se
+debieron a que la poda no reconoció el vocabulario de una paráfrasis y omitió una tabla
+necesaria. El costo medido de la generación fue de USD 0.002 por consulta, la base del
+recálculo económico de la sección 1.6.3.
+
+De las cuatro condiciones con que la sección 3.7 define el éxito técnico del sistema,
+tres se cumplen plenamente: la precisión de ejecución, el bloqueo del Query Safety
+Engine y la reducción de tokens. La cuarta, el tiempo de respuesta, se cumple en las
+medianas, de 4.5 a 9.0 segundos, y en todos los reportes complejos, pero no en todos
+los casos simples e intermedios: cuando el servicio de Google responde al primer
+intento quedan dentro de la meta el 97.0 % de las simples y el 100 % de las intermedias,
+y los casos restantes coinciden con períodos de saturación del servicio, que concentra
+el 99.8 % del tiempo de generación. La variable dependiente de la hipótesis, que se
+verifica con la encuesta de usabilidad de la sección 3.3.2, no pudo medirse en el plazo
+del proyecto.
+
+La evaluación muestra también los límites del enfoque. La precisión depende de cómo se
+formula la pregunta: las ambigüedades y los errores de la poda se concentraron en las
+paráfrasis, y en reportes elaborados el modelo cometió un error en uno de doce casos.
+Por eso la garantía central del sistema no es que toda consulta generada sea correcta,
+sino que ninguna pueda modificar los datos, y que el SQL quede expuesto para que un
+usuario técnico lo revise antes de usar sus cifras.
+
+El contexto guatemalteco y centroamericano, caracterizado por brechas documentadas de
+adopción tecnológica en las pequeñas y medianas empresas según datos de CEPAL (2024),
+establece el marco de relevancia social del proyecto. La instalación en un único
+servidor de la organización, junto a sus bases de datos, reduce la barrera de adopción
+a un equipo con conectividad a internet y una cuenta de Google Cloud, sin exponer las
+bases a internet, y la arquitectura conserva la posibilidad de migrar a un despliegue
+sin servidor cuando el volumen de uso lo justifique. Esta característica posiciona a
+NLQP como una solución accesible para organizaciones con recursos tecnológicos
+limitados, en línea con el objetivo de democratizar el acceso a los datos que sustenta
+el proyecto.
+
+## Recomendación nueva (29/10): capacitación de los usuarios
+
+Agregar a las Recomendaciones, después de la de nomenclatura:
+
+Se recomienda que la organización receptora capacite a los usuarios en la formulación
+de sus solicitudes antes de adoptar el sistema. La evaluación mostró que la precisión
+depende de la redacción: las preguntas originales alcanzaron el 98.0 % y sus paráfrasis
+el 91.5 %, y las ambigüedades y los errores de la poda de esquema se concentraron en
+preguntas que no precisaban la medida o que usaban un vocabulario distinto al del
+esquema (sección 6.3.6). La capacitación debería enseñar a indicar la medida (monto o
+unidades), el período, si se incluyen los pedidos cancelados o los clientes sin
+compras y, en los empates, el criterio de desempate, y a usar el vocabulario del
+negocio. Para los reportes elaborados, debería incluir la revisión del SQL por un
+usuario técnico antes de usar sus cifras.

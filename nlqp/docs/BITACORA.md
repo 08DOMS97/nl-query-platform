@@ -6,6 +6,22 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-29 (4) — Texto de 6.3.6 y Conclusiones listos para pegar
+
+- `CAPITULO_6.md`: sección **6.3.6 Evaluación de la generación con Gemini** (Tablas 16 y
+  17; las siguientes corren dos números), las **Conclusiones de reemplazo** y la
+  **recomendación de capacitación**, al final del archivo.
+- Tiempo de respuesta frente a las metas de 3.3.1.3, calculado para el texto (338 casos
+  con corte y reintento): simples 79,3 % < 15 s (97,0 % al primer intento), intermedias
+  90,3 % < 60 s (100 %), complejas 100 % ≤ 8 min. Sobre los 400: 74,2 / 90,0 / 100 %.
+  El 99,8 % del tiempo de generación es espera al modelo.
+- Frente a 3.7: 3 de 4 condiciones se cumplen plenamente (precisión, Query Safety
+  Engine, tokens); la de tiempo, en las medianas y en los complejos. La encuesta no se
+  hizo: queda declarada.
+- Sin costo.
+
+---
+
 ## 2026-10-29 (3) — Reportes elaborados en los 4 motores (12 pruebas)
 
 Pedido de David: un reporte «bastante elaborado», sin procedimientos almacenados (el

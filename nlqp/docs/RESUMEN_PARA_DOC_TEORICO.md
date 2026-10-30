@@ -30,9 +30,12 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 22 |
 | 5 | 2 | 0 | 5 |
-| 6 | 15 | 0 | 42 |
-| Conclusiones / limitaciones | 9 | 0 | 2 |
-| **Total** | **32** | **1** | **71** |
+| 6 | 16 | 0 | 42 |
+| Conclusiones / limitaciones | 10 | 0 | 2 |
+| **Total** | **34** | **1** | **71** |
+
+> **29/10 (4) — Textos listos:** 6.3.6 y las Conclusiones de reemplazo en `CAPITULO_6.md`;
+> limitación nueva (métricas no medidas).
 
 > **29/10 (2) — Reportes grandes:** entrada nueva en 6.3.5 (20 pruebas, integridad 20/20).
 
@@ -549,6 +552,10 @@ una sola nueva (10) pendiente.
   Resuelve la entrada del 02/10 que la ubicaba en 6.7.
 
 ### Evaluación de la generación con Gemini (6.3.6 cuando se escriba)
+- [ ] (29/10) **Texto de 6.3.6 listo para pegar** en `CAPITULO_6.md` («6.3.6 Evaluación de la
+  generación con Gemini», con las Tablas 16 y 17; las siguientes corren dos números).
+  Reúne todo lo de abajo: precisión, robustez, consistencia, tiempos frente a las metas,
+  `EXPLAIN` y reportes grandes y elaborados.
 - [ ] (29/10) **Cifras después de la revisión a mano** (son las que van a la tesis;
   las automáticas de abajo quedan como paso intermedio y se explican en una línea):
 
@@ -740,6 +747,11 @@ una sola nueva (10) pendiente.
 
 ## Conclusiones y limitaciones
 
+- [ ] (29/10) **Limitación — métricas no medidas**: la encuesta de usabilidad (3.3.2, 35
+  participantes, variable dependiente), la consistencia por repetición (3.3.1.4: diez
+  consultas en tres ejecuciones) y la disponibilidad del 99 % (3.3.1.4, requiere el
+  período de prueba en el servidor) no se midieron en el plazo del proyecto. La
+  consistencia entre motores (94/100) cubre en parte la de 3.3.1.4. Declararlo.
 - [ ] (26/10) **Limitación**: el tiempo de generación depende de la disponibilidad del
   servicio de Google. En la corrida hubo tramos de saturación y 6 de 400 generaciones
   no recibieron respuesta tras 3 intentos. El corte con reintento acota la espera, pero
@@ -754,7 +766,8 @@ una sola nueva (10) pendiente.
 
   Fuente: `AUDITORIA_2026-10-24.md`.
 
-- [ ] (29/10) **Recomendación (David): capacitación a los usuarios** sobre cómo
+- [ ] (29/10) **Recomendación (David): capacitación a los usuarios** (texto listo al final
+  de `CAPITULO_6.md`) sobre cómo
   formular sus solicitudes. La respaldan los datos de la evaluación: las preguntas
   originales dieron 98,0 % y las paráfrasis 91,5 %. Además, las 10 ambigüedades (por
   ejemplo, «la categoría que más vende»: ¿en unidades o en dinero?) y los 6 errores de
@@ -764,7 +777,11 @@ una sola nueva (10) pendiente.
   limitaciones. Fuente: `PREPARACION_EVALUACION_GEMINI.md` §9.
 - [ ] (25/09) **Reescribir las Conclusiones actuales**: afirman resultados que todavía
   no se midieron (mejora de precisión por la poda, Q712 al mes, ROI de 39,2 %).
-  Reescribirlas con los datos de la evaluación y el costo medido.
+  Reescribirlas con los datos de la evaluación y el costo medido. **(29/10) Texto de
+  reemplazo listo** al final de `CAPITULO_6.md`. Dice que 3 de las 4 condiciones de 3.7
+  se cumplen plenamente y la de tiempo en las medianas y en los complejos, y que la
+  variable dependiente (encuesta) no se midió. Las cifras económicas se dejan para el
+  recálculo de 1.6.3.
 - [ ] (10/10) **Limitación — SQL no firmado** (reemplaza la de perfiles del 25/09, que
   ya no aplica: los roles se implementaron el 10/10, sección 6.5). Un usuario no
   técnico no puede editar el SQL en la interfaz, pero con su token puede enviar una
