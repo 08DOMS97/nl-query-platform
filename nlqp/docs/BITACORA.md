@@ -6,6 +6,159 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-29 — Reintento de los 6 errores, revisión a mano y `EXPLAIN`
+
+Gasto aprobado por David («dale»): 6 llamadas, ~$0.012, tope `--max-costo 0.05`.
+
+### Hecho
+- Docker Desktop no estaba corriendo: se levantó junto con las 4 bases (healthy). El
+  backend se levantó con `npm run build` + `npm start`.
+- `npm run eval:gemini -- --modo completa --parafrasis --reintentar-fallidas
+  --max-costo 0.05 --confirmar`: **6/6 generaron SQL, $0.0085**.
+  - 4 exactos (M08 par. mariadb, M09 par. mssql, M11 par. mariadb y M13 orig. mysql).
+  - S05 par. mysql salió con columnas extra.
+  - M08 orig. mssql salió distinto.
+  - M09 par. mssql volvió a tardar 61,6 s.
+- Resumen regenerado (400 casos, $0.8132 en total en la evaluación):
+
+  | Grupo | Exacto | Exacto + columnas extra |
+  |---|---|---|
+  | Originales | 59,5 % | 86,5 % |
+  | Paráfrasis | 56,5 % | 79,5 % |
+
+  - Consistencia entre motores: 77/100 (antes, 71/100).
+  - En 23 casos la original acierta y la paráfrasis no.
+  - 0 errores de generación, de ejecución o bloqueos.
+  - Para revisión manual: 68 filas (54 «distinto», 14 «empate posible»).
+- **Consistencia entre motores (decisión de David):** se reporta **83/100**. Las 6
+  preguntas en que los 4 motores traen lo de la referencia y solo difieren en columnas
+  no pedidas cuentan como consistentes. Se verificó el SQL de las 6: lo que sobra son
+  identificadores (`product_id`, `category_id`), `email` o, en S11, columnas del pedido.
+  `evaluacion_gemini.mjs` muestra ahora las dos medidas (`--resumen`, sin costo).
+- Gasto total en Gemini: ≈ **$0.84**. Ya no queda nada pagado por hacer en la
+  evaluación.
+- El «Período» de `resumen.md` dice «a 2026-10-30» porque las marcas de tiempo están
+  en UTC (eran las 19:24 del 29/10 en Guatemala).
+
+- **Revisión a mano** de las 68 filas (23 preguntas), sin costo. Se ejecutaron la
+  referencia y la generada por `/executeQuery` y se compararon columna por columna.
+  Clasificación en `evaluacion_gemini/revision_manual.json`:
+  - 39 correctas (33 sin una columna que la pregunta no pide; 6 empates válidos en M19);
+  - 8 correctas por decisión de David: M08 original aplica «un cancelado no es venta»,
+    y M06 paráfrasis es literal porque la paráfrasis no era equivalente;
+  - 10 ambigüedades (C03 par., C11 par., M20);
+  - 6 errores de la poda (M17 par., C08 par. mysql y mariadb);
+  - 5 errores del modelo (M03 par. ×3, C08 par. postgres y mssql).
+- **Resultado:** originales **98,0 %**, paráfrasis **91,5 %**, total **94,8 %**.
+  Consistencia entre motores 94/100. Las originales no tienen errores.
+- **David:** dará una capacitación a los usuarios sobre cómo formular las solicitudes.
+  Va a la tesis como recomendación, respaldada por los datos (ambigüedades y poda).
+- `resumen.md` sigue con las cifras automáticas: el script no lee la revisión.
+
+- **`EXPLAIN` sin `ANALYZE`** (aprobado por David el 26/10, sin costo) con el script
+  nuevo `backend/scripts/evaluacion_explain.mjs`. Revisa los 400 SQL generados y sus
+  referencias en el banco de volumen; cada uno pasó antes por `validateQuerySafety()`
+  (400/400 aprobados, 0 errores):
+  - 374/400 (93,5 %) con costo de hasta el doble de la referencia, y 76 más baratos;
+    la mediana de la razón es 1,0 en los 4 motores;
+  - los 26 casos de más del doble hacen más trabajo (nombre, regla de cancelados) o
+    son particularidades del modelo de costos. Sus tiempos reales son similares a los
+    de los otros motores (C03 en MariaDB estima 421 veces, pero tardó 1,5 s como los
+    demás);
+  - el costo de MySQL y MariaDB se corrigió para sumar las CTE materializadas (antes
+    solo contaba el bloque principal).
+  - **Índices compuestos (decisión de David):** no mandarlos ahora, pero dejarlos
+    listos. `NLQP_PROMPT_INDICES_COMPUESTOS=true` los agrega al prompt, con las
+    columnas en orden y una regla de rendimiento. Viene apagado: el prompt es idéntico
+    al evaluado (verificado sin Gemini; build OK). Documentado en `backend/.env.example`.
+  - Resultado en `evaluacion_gemini/explain.json`; detalle en
+    `PREPARACION_EVALUACION_GEMINI.md` §9.
+- Con esto la evaluación está completa (tarea 30 al 100 %).
+
+### Qué sigue
+1. Cargar las cifras en la tesis: 6.3.6, limitaciones, recomendación de capacitación,
+   conclusiones y 1.6.3.
+
+---
+
+## 2026-10-26/27 — Piloto y corrida completa con Gemini (400 casos con paráfrasis)
+
+Gasto en Vertex AI aprobado por David antes de cada paso:
+- piloto: 40 llamadas, tope $0.25;
+- corrida completa: 360 llamadas, ~$0.85, tope $2.50.
+
+Pedido explícito: gastar una sola vez («no quiero volver a gastar en otras pruebas»).
+
+### Hecho
+- **Piloto** (`--modo piloto --parafrasis`): 40 llamadas, **$0.0947**. Revisado a mano:
+  37/40 correctos. Los 3 errores son paráfrasis de M03, donde el `INNER JOIN` deja
+  afuera a los clientes sin compras.
+- **Nombres legibles para expresiones sin alias** (pedido de David), en
+  `columnNames.service.ts`:
+  - `COUNT(*)` → `cantidad`, `SUM(o.total)` → `suma_total`, etc.;
+  - SQL Server ya no rechaza un `COUNT(*)` sin alias (lo daba E1).
+
+  Las filas se leen por posición en los 4 motores. Los alias propios no se tocan y los
+  nombres duplicados siguen dando 422. `RENDIMIENTO_E_INTEGRIDAD.md` §2.1.
+- **Referencias alineadas** con «un pedido cancelado no es una venta ni una compra»: C02,
+  M04, M06, C07 y C09 (`consultas_prueba_50.json`), con 0 inconsistencias entre motores.
+  El piloto, reevaluado gratis, sigue en 37/40. Esto se declara en la tesis.
+- **Runner** (`evaluacion_gemini.mjs`):
+  - `--reevaluar` vuelve a ejecutar el SQL ya pagado sin llamar a Gemini;
+  - el *headers timeout* de undici se reintenta en lugar de cortar la corrida.
+- **Generación por partes con corte y reintento.** Durante la corrida Vertex AI estuvo
+  saturado: esperas de 2 a 5 min y un 429. Cambios:
+  - `vertexAI.service.ts` usa `generateContentStream`. Si no llega la primera parte en
+    20 / 40 / 80 s, reintenta; el tope por intento es 120 s. Un 429 o 503 se reintenta
+    a los 2 s.
+  - `attempts` y `firstChunkMs` se registran en las métricas y en el evento de uso.
+  - En Consultar, a los 20 s aparece un aviso de demora y el técnico ve «Intentos».
+
+  Antes estaba decidido no hacerlo (AUDITORIA G8); se cambió con el «dale» de David.
+- **Corrida completa terminada: 400/400**, en `evaluacion_gemini/resultados.jsonl` y
+  `resumen.md`. Costo según las métricas: **$0.8046** (incluye el piloto). En total en
+  Gemini van **≈ $0.83**.
+- Docker Desktop se cerró solo a mitad de la sesión. Al reiniciar, levantó también los
+  contenedores `nlqp-*`, que chocaban en :8080; se detuvieron. Al final, Claude Code
+  cerró las tareas en segundo plano por falta de memoria, pero la corrida ya había
+  escrito su resumen.
+
+### Verificado
+- API **369/369** (integridad 30/30), seguridad **57/57 + 200/200**.
+- Frontend: `tsc` y lint OK. **`npm run test:ui` no se corrió.**
+- Resultados de la corrida, **antes de la revisión a mano**:
+
+  | | Exacto | Exacto + columnas extra |
+  |---|---|---|
+  | Originales | 59,0 % | 86,0 % |
+  | Paráfrasis | 55,0 % | 77,5 % |
+
+  - Por nivel, en exacto + columnas extra: simple 100 %, intermedio 83,8 %, complejo
+    75,0 %.
+  - Consistencia entre motores: 71/100.
+  - Bloqueadas por el Query Safety Engine: 0. Límites no pedidos: 0. Errores de
+    ejecución: 0. Antipatrones: 0.
+  - **6 errores de generación**: Vertex no respondió en los 3 intentos. Son S05 par.
+    mysql, M08 par. mariadb, M08 orig. mssql, M09 par. mssql, M11 par. mariadb y M13
+    orig. mysql.
+- Latencia de generación con corte y reintento (332 casos): mediana **4,9 s**, p95
+  **61 s**, máximo 133 s. 233 de 332 casos (70 %) tardaron 15 s o menos.
+  - Intentos: 247 con uno, 68 con dos y 17 con tres.
+  - Sin corte (los 22 casos del tramo saturado): p95 279 s y máximo 303 s.
+
+### Qué sigue (próxima sesión)
+1. Reintentar los 6 errores de generación: `--reintentar-fallidas`, 6 llamadas,
+   ~$0.012. **Confirmar con David antes.**
+2. Revisar a mano las 73 filas de «Para revisión manual»: 53 «distinto», 14 «empate
+   posible» y 6 errores. Regenerar `resumen.md` con `--resumen`.
+3. `EXPLAIN` sin `ANALYZE` de los 400 SQL contra el banco de volumen (aprobado por David,
+   gratis), validando antes con el Query Safety Engine.
+4. `npm run test:ui` por el aviso nuevo de Consultar.
+5. Cargar las cifras en la tesis: 6.3.6, 1.6.3 / OP-13 y conclusiones.
+6. Commit, cuando David lo apruebe: nada de esto está commiteado.
+
+---
+
 ## 2026-10-25 — Revisión de lo no commiteado y del Word del 22/10
 
 Sin gasto en GCP. David: «revisa el proyecto porque se hicieron cambios que no están

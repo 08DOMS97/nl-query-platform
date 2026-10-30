@@ -13,13 +13,14 @@
  *
  * Opciones: --parafrasis (agrega las de parafrasis_50.json; exige "estado": "revisada"),
  * --ids S10,M03, --motores postgres,mssql, --max-costo 2.5, --reintentar-fallidas,
- * --url http://localhost:8080.
+ * --reevaluar, --url http://localhost:8080.
  *
  * Nunca repite una llamada pagada: cada resultado se agrega a
  * `nlqp/docs/evaluacion_gemini/resultados.jsonl` apenas se obtiene, y al volver a
  * correr se saltan las generaciones ya hechas (el piloto cuenta para la corrida
  * completa). Si solo falló la ejecución o la comparación, se rehacen con el SQL ya
- * guardado, sin llamar a Gemini. Una generación fallida no se reintenta salvo con
+ * guardado, sin llamar a Gemini; con --reevaluar se rehacen también las ya comparadas.
+ * Una generación fallida no se reintenta salvo con
  * --reintentar-fallidas (puede haberse facturado).
  *
  * Requiere el backend corriendo con `npm run build` + `npm start` (no `dev`: `node --watch`
@@ -156,7 +157,19 @@ const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function generar(caso) {
   for (let intento = 0; ; intento++) {
-    const { status, data } = await api('POST', '/generateSQL', { engine: caso.motor, naturalLanguageQuery: caso.nl });
+    let respuesta;
+    try {
+      respuesta = await api('POST', '/generateSQL', { engine: caso.motor, naturalLanguageQuery: caso.nl });
+    } catch (err) {
+      // 26/10: una llamada a Vertex quedó colgada 303 s y terminó en «fetch failed» sin
+      // respuesta del modelo (no se cobró); `fetch` corta a los 300 s. Se reintenta como
+      // los demás errores pasajeros en lugar de detener la corrida.
+      if (err?.cause?.code !== 'UND_ERR_HEADERS_TIMEOUT' || intento >= ESPERAS_REINTENTO_MS.length) throw err;
+      console.log(`    ${caso.motor}: sin respuesta del backend en 300 s, reintento en ${ESPERAS_REINTENTO_MS[intento] / 1000} s`);
+      await esperar(ESPERAS_REINTENTO_MS[intento]);
+      continue;
+    }
+    const { status, data } = respuesta;
     if (status === 200) return { ok: true, sql: data.sql, safety: data.safety, metrics: data.metrics, intentos: intento + 1 };
     if (esPasajero(data.error) && intento < ESPERAS_REINTENTO_MS.length) {
       console.log(`    ${caso.motor}: error pasajero, reintento en ${ESPERAS_REINTENTO_MS[intento] / 1000} s`);
@@ -313,7 +326,9 @@ async function correr() {
   for (const caso of casos) {
     hechos++;
     const previo = previos.get(clave(caso));
-    if (previo?.comparacion && !necesitaGenerar(caso)) continue;
+    // --reevaluar (26/10): vuelve a ejecutar y comparar el SQL ya pagado (por ejemplo,
+    // después de corregir la ejecución o una referencia), sin llamar a Gemini.
+    if (previo?.comparacion && !necesitaGenerar(caso) && !flag('reevaluar')) continue;
 
     // La referencia se ejecuta antes de pagar la generación: si falla, no se gasta.
     const claveRef = `${caso.id}|${caso.motor}`;
@@ -434,6 +449,8 @@ function resumen() {
   }
   const completas = [...porPregunta.values()].filter((g) => g.length === MOTORES.length);
   const consistentes = completas.filter((g) => g.every((r) => r.ejecucion?.ok) && new Set(g.map((r) => r.ejecucion.huella)).size === 1);
+  // Sin columnas extra: también cuenta si los 4 traen lo de la referencia y solo difieren en columnas no pedidas.
+  const consistentesPedido = completas.filter((g) => consistentes.includes(g) || g.every(correcto));
 
   // Robustez: paráfrasis vs. original del mismo motor.
   const pares = rs
@@ -465,6 +482,8 @@ function resumen() {
     '## Consistencia entre motores',
     '',
     `${consistentes.length} de ${completas.length} preguntas (${pct(consistentes.length, completas.length)}) dan el mismo resultado en los 4 motores.`,
+    '',
+    `Sin contar columnas extra: ${consistentesPedido.length} de ${completas.length} (${pct(consistentesPedido.length, completas.length)}). Suma las preguntas en que los 4 motores traen lo de la referencia y solo difieren en columnas no pedidas.`,
     '',
     '## Robustez lingüística',
     '',

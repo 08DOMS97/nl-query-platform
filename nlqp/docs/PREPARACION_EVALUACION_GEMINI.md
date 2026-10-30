@@ -5,8 +5,10 @@ Trabajo previo a correr las 50 consultas de prueba **generando el SQL con Gemini
 que la corrida mida al modelo y al sistema, y no fallas de configuración o de las
 propias referencias — y no pagar dos veces la misma corrida por errores evitables.
 
-Estado (18/10/2026): **runner listo y probado gratis; el piloto y la corrida
-completa todavía no se ejecutaron.** Modelo: **`gemini-3.8-flash`** en `global`
+Estado (29/10/2026): **piloto, corrida completa, reintento de los 6 errores y revisión
+a mano y `EXPLAIN` hechos (400/400, $0.8132; 94,8 % correcto; 93,5 % con costo ≤ 2 veces el
+de la referencia) (§9).**
+Antes, al 18/10: runner listo y probado gratis. Modelo: **`gemini-3.8-flash`** en `global`
 desde el 18/10 (Gemini 2.5 Pro se retira el 20/10, §8 punto 2c). Llamadas pagadas
 para verificar la integración: 09/10 con 2.5 Pro ($0.01188) y 18/10 con 3.8 Flash
 ($0.0012), ambas S10 en Postgres.
@@ -434,3 +436,199 @@ Se confirma con David antes de cada corrida pagada.
    `npm run eval:gemini -- --modo piloto --parafrasis --confirmar` (40 llamadas,
    ~$0.10–0.16 con 3.8 Flash, tope automático $0.25) y luego
    `npm run eval:gemini -- --modo completa --parafrasis --confirmar`.
+   **Hecho el 26–27/10: ver §9.**
+
+## 9. Piloto y corrida completa (26–27/10/2026)
+
+Gasto aprobado por David antes de cada paso. Pidió gastar **una sola vez**: todo lo que
+se pueda rehacer se rehace sin llamar a Gemini (`--reevaluar`, `--resumen`).
+
+### Piloto
+`--modo piloto --parafrasis`: 40 llamadas, **$0.0947**. Revisado a mano: **37/40
+correctos**. Los 3 errores son paráfrasis de M03, en las que el `INNER JOIN` deja
+afuera a los clientes sin compras.
+
+El piloto destapó dos problemas que no eran del modelo:
+- **SQL Server rechazaba `COUNT(*)` sin alias** (lo daba E1 de la auditoría). Ahora las
+  expresiones sin alias reciben un nombre legible en los 4 motores
+  (`columnNames.service.ts`, `RENDIMIENTO_E_INTEGRIDAD.md` §2.1).
+- **Referencias que contaban pedidos cancelados como ventas o compras.** Se alinearon
+  con la regla de dominio del prompt («un pedido cancelado no es una venta ni una
+  compra»):
+  - C02;
+  - M04, con su override de mssql;
+  - M06, ahora `NOT EXISTS` sobre pedidos no cancelados;
+  - C07, con su override de mssql;
+  - C09.
+
+  En todas cambiaba el resultado y no hay empates en los bordes. `test:seguridad` dio
+  200/200 con 0 inconsistencias entre motores, y el piloto reevaluado sin costo siguió
+  en 37/40. **Hay que declararlo en la tesis**: es la tercera corrección del conjunto de
+  referencia (§3).
+
+### Cambios durante la corrida
+- **Vertex AI saturado.** Hubo esperas de 2 a 5 min, un 429 `RESOURCE_EXHAUSTED` y una
+  llamada que cortó la corrida a los 303 s. Ninguna de esas fallas aparece cobrada en
+  `usageEvents`.
+- **Runner:**
+  - `--reevaluar` vuelve a ejecutar y comparar el SQL guardado sin llamar a Gemini;
+  - `UND_ERR_HEADERS_TIMEOUT` se reintenta en lugar de cortar la corrida.
+- **Generación por partes con corte y reintento** (`vertexAI.service.ts`, con el «dale»
+  de David). La espera depende de la complejidad de la consulta, no del volumen de
+  datos; la ejecución mantiene su tope por conexión.
+  - Usa `generateContentStream` con `includeThoughts`. El razonamiento solo se usa como
+    señal de vida y nunca entra en el SQL.
+  - Si no llega la primera parte en 20 / 40 / 80 s, reintenta, con un tope de 120 s por
+    intento. Un 429 o 503 se reintenta a los 2 s.
+  - `attempts` y `firstChunkMs` se guardan en las métricas y en el evento de uso.
+  - En Consultar, a los 20 s aparece un aviso de demora.
+  - Verificado: API 369/369, seguridad 57/57 + 200/200. Falta `test:ui`.
+
+### Resultado automático (antes de la revisión a mano)
+Fuente: `evaluacion_gemini/resumen.md`, con 400 casos y $0.8132 (incluye el piloto y
+los 6 reintentos del 29/10).
+
+| Grupo | Exacto | Exacto + columnas extra |
+|---|---|---|
+| Originales (200) | 59,5 % | 86,5 % |
+| Paráfrasis (200) | 56,5 % | 79,5 % |
+| Simple / intermedio / complejo (originales) | 73,3 / 60,0 / 45,0 % | 100 / 85,0 / 75,0 % |
+| Postgres / MySQL / MariaDB / SQL Server | 60 / 58 / 55 / 59 % | 84 / 82 / 80 / 86 % |
+
+- **Consistencia entre motores:** 77 de 100 preguntas dan el mismo resultado en los 4
+  (71 antes del reintento). Sin contar columnas extra: **83/100**.
+  **Decisión de David (29/10):** la consistencia del sistema se reporta como **83/100**. Se cuentan como consistentes las 6 preguntas en que los 4 motores traen lo de la referencia y solo difieren en columnas no pedidas (C08, C14, M01 par., M05 par., M07, S11). La medida estricta, por huella del resultado completo, da 77/100.
+  Las otras 17: en 12 unos motores aciertan y otros no (M19 es «empate posible»), y en
+  5 ningún motor acierta (C08 par., C13 orig. y par., M14 par., M20 orig.).
+  En 23 casos la original acierta y la paráfrasis no.
+- **Seguridad:** el Query Safety Engine no bloqueó ninguna consulta, no hubo límites no
+  pedidos ni errores de ejecución, y la detección estática no encontró antipatrones.
+- **Tokens:** en promedio, 712 de entrada, 70 de salida y 60 de razonamiento. Se
+  enviaron 2,31 de 8 tablas.
+- **Latencia de generación** (de `metrics.latencyMs`):
+
+  | Tramo | Casos | Mediana | p95 | Máximo |
+  |---|---|---|---|---|
+  | Con corte y reintento | 332 | 4,9 s | 61 s | 133 s |
+  | Piloto | 40 | 7,9 s | 80 s | 101 s |
+  | Sin corte, con el servicio saturado | 22 | 11,6 s | 279 s | 303 s |
+
+  - Con corte y reintento, 233 de 332 casos (70 %) tardaron 15 s o menos.
+  - Intentos: 247 con uno, 68 con dos y 17 con tres.
+  - El promedio general del resumen (19,3 s) mezcla los tres tramos: no usarlo solo.
+- **6 errores de generación**, en los que Vertex no respondió en los 3 intentos:
+
+  | ID | Variante | Motor |
+  |---|---|---|
+  | S05 | paráfrasis | mysql |
+  | M08 | paráfrasis | mariadb |
+  | M08 | original | mssql |
+  | M09 | paráfrasis | mssql |
+  | M11 | paráfrasis | mariadb |
+  | M13 | original | mysql |
+
+  Son fallas del servicio, no del modelo. **Reintentados el 29/10** (6 llamadas,
+  $0.0085, aprobado por David): los 6 generaron SQL. Quedaron 4 exactos, 1 con
+  columnas extra (S05 par. mysql) y 1 distinto (M08 original mssql). M09 par. mssql
+  volvió a tardar 61,6 s. Errores de generación: 0.
+
+### Revisión a mano (29/10)
+Se revisaron las 68 filas no correctas (54 «distinto», 14 «empate posible»), agrupadas en
+23 preguntas. Se ejecutaron la referencia y la generada por `/executeQuery` (Query Safety
+Engine) y se compararon columna por columna. Sin llamadas a Gemini. La clasificación de
+cada fila, con su causa, está en `evaluacion_gemini/revision_manual.json`.
+
+**Por qué tantos «distinto» eran correctos:** si la referencia trae una columna
+informativa que la pregunta no pide (el conteo de categorías en C09, de países en C13,
+de pedidos en M14 y C15, el porcentaje en C05) y la generada no la trae, la comparación
+automática da «distinto» aunque las filas sean las mismas (`comparar()`, caso
+`gen.columnas.length <= ref.columnas.length`).
+
+| Clasificación | Filas | Preguntas |
+|---|---|---|
+| Correcto: falta una columna no pedida (mismas filas y valores) | 33 | C15 ×8, C13 ×8, C09 ×6, M14 ×5, C05 ×4, C10 ×2 |
+| Correcto: empate válido | 6 | M19: 4 010 clientes con el máximo de 3 direcciones; la pregunta no fija desempate |
+| Correcto por decisión de David | 8 | M08 original ×4 (aplica «un cancelado no es venta» del prompt; la referencia no se alineó) y M06 paráfrasis ×4 («no aparecen en ninguna orden» es literal; la paráfrasis no era equivalente a «nunca se han vendido») |
+| Ambigüedad: otra lectura válida | 10 | C03 par. ×2 (promedio con los que no compraron), C11 par. ×2 (categoría que más vende en unidades), M20 ×6 (días exactos o de calendario; filtro por DELIVERED) |
+| Error de la poda | 6 | M17 par. ×4 (solo `orders`), C08 par. mysql y mariadb (sin `order_items`) |
+| Error del modelo | 5 | M03 par. ×3 (`INNER JOIN` deja afuera a los clientes sin compras), C08 par. postgres y mssql (ingreso sin descuento) |
+
+**Resultado después de la revisión** (correcto = exacto, columnas extra o correcto en la
+revisión; las ambigüedades no se cuentan como correctas):
+
+| Grupo | Correcto | Ambigüedad | Error de poda | Error del modelo |
+|---|---|---|---|---|
+| Originales (200) | **98,0 %** | 4 | 0 | 0 |
+| Paráfrasis (200) | **91,5 %** | 6 | 6 | 5 |
+| Total (400) | **94,8 %** | 10 (2,5 %) | 6 (1,5 %) | 5 (1,25 %) |
+| Simple / intermedio / complejo, originales | 100 / 95,0 / 100 % | | | |
+| Simple / intermedio / complejo, paráfrasis | 100 / 88,8 / 86,7 % | | | |
+| Postgres / MySQL / MariaDB / SQL Server | 95 / 96 / 93 / 95 % | | | |
+
+- **Consistencia entre motores** con el criterio de David (no cuentan las columnas no
+  pedidas): **94/100** preguntas dan la misma respuesta en los 4 (los 4 correctos, o la
+  misma huella). Antes de la revisión, 83/100; con la huella estricta, 77/100.
+- **Robustez:** en 15 casos la original acierta y la paráfrasis no (23 antes de la
+  revisión). Las preguntas originales no tienen errores; todos los errores son de
+  paráfrasis, y 6 de 11 son de la poda (vocabulario que el diccionario no conoce), no
+  del modelo.
+- **Mitigación (David, 29/10):** se dará una capacitación a los usuarios sobre cómo
+  formular las solicitudes. Los datos la respaldan: las 10 ambigüedades y los 6
+  errores de poda vienen de cómo está redactada la pregunta.
+- `resumen.md` sigue mostrando las cifras automáticas: el script no lee
+  `revision_manual.json` (no se cambió).
+
+### Eficiencia: `EXPLAIN` sin `ANALYZE` (29/10)
+`backend/scripts/evaluacion_explain.mjs` pide el plan estimado de los 400 SQL generados y
+de sus referencias en el banco de volumen (1,5 M de filas), sin ejecutarlos: Postgres
+`EXPLAIN (FORMAT JSON)`, MySQL y MariaDB `EXPLAIN FORMAT=JSON`, SQL Server
+`SHOWPLAN_XML`. Cada SQL pasó antes por `validateQuerySafety()`: 400/400 aprobados, 0
+errores. Resultado en `evaluacion_gemini/explain.json`. Sin costo.
+
+Como el costo estimado de cada motor está en unidades propias, se compara el del SQL
+generado con el de su referencia en el mismo motor (razón generado / referencia).
+
+| Razón de costo | Casos | % |
+|---|---|---|
+| ≤ 1,1 (igual o más barato) | 333 | 83,3 % |
+| 1,1 a 2 | 41 | 10,3 % |
+| 2 a 10 | 23 | 5,8 % |
+| > 10 | 3 | 0,8 % |
+
+- **374 de 400 (93,5 %)** cuestan como mucho el doble que la referencia, y 76 (19 %)
+  son más baratos (< 0,9). La mediana es 1,0 en los 4 motores. Originales y paráfrasis
+  dan casi lo mismo (≤ 2: 185 y 189 de 200).
+- **Los 26 casos de más del doble** tienen tres causas:
+  1. hacen más trabajo porque traen más información o aplican una regla: M14 y M02
+     unen `customers` para mostrar el nombre; M08 original une `orders` para descontar
+     los cancelados; C10 trae los dos montos por separado;
+  2. son una particularidad del modelo de costos con SQL casi idéntico a la referencia:
+     M09, M11 y M01 en MariaDB (sin `ORDER BY`, 5 veces el costo), S13 paráfrasis en
+     Postgres (`COUNT(shipment_id)` en lugar de `COUNT(*)`), y S11 y M19 en SQL Server,
+     con costos absolutos ínfimos;
+  3. C03 original en MariaDB estima 421 veces el costo de la referencia, pero tardó
+     1 461 ms, igual que en los otros motores (1 390–1 708 ms).
+- **El costo estimado no anticipa el tiempo real.** Los tiempos de ejecución medidos en
+  la corrida, en el mismo banco, son similares a los de los otros motores en los 26
+  casos (por ejemplo, M14: 2,6–3,6 s en los 4). En los 400, la ejecución por HTTP tuvo
+  una mediana de 415 ms, un p95 de 3,5 s y un máximo de 9,6 s (resultados de 50 000 filas
+  con paginación).
+- **Barridos completos de tabla:** 41 generados tienen alguno que la referencia no tiene,
+  y 26 tienen menos. Los agregados son sobre tablas temporales de CTE (MySQL), tablas
+  chicas (`categories`, 15 filas) o el `JOIN` con `customers` para traer el nombre.
+- La detección estática de antipatrones no encontró ninguno (resumen automático).
+- **Cálculo del costo:** en MySQL y MariaDB, el costo del bloque principal no incluye las
+  CTE ni las subconsultas materializadas. Se suman todos los bloques del plan (sin eso,
+  la referencia de C05 en MariaDB marcaba 0,19 en lugar de 1 210). MySQL estima sus
+  estadísticas por muestreo, así que dos corridas dan costos levemente distintos (en 38
+  de 400 cambió la razón, sin mover las conclusiones).
+- **Índices compuestos en el prompt:** no hay evidencia de consultas ineficientes, así
+  que no se mandan. **Decisión de David (29/10):** no mandarlos ahora, pero dejar el
+  sistema listo por si una base los requiere. Desde el 29/10 se activan con
+  `NLQP_PROMPT_INDICES_COMPUESTOS=true` (`vertexAI.service.ts`): cada tabla lista sus
+  índices compuestos con las columnas en orden, más una regla de rendimiento. Apagado
+  (por defecto), el prompt es idéntico al evaluado: verificado sin llamar a Gemini (2
+  líneas de diferencia al encenderlo, ninguna apagado).
+
+### Pendiente
+Nada de la evaluación. Queda cargar las cifras en la tesis (`RESUMEN_PARA_DOC_TEORICO.md`).

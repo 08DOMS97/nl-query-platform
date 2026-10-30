@@ -77,6 +77,36 @@ consulta se cancela en el motor (cursor cerrado, socket destruido o ATTENTION). 
 un cursor, el timeout del motor aplica por lote, así que además se exige un plazo
 total igual al tope de la conexión desde el inicio.
 
+### 2.1 Nombres de las columnas (`columnNames.service.ts`, 26/10/2026)
+
+Hallado en el piloto con Gemini: el modelo escribió `SELECT COUNT(*) FROM orders` sin
+alias. SQL Server deja esa columna sin nombre, y desde la auditoría del 24/10 (E1) eso
+daba 422, así que un SQL correcto no se podía mostrar. Los otros motores sí la
+nombraban, pero con nombres poco claros para el usuario: `count` (Postgres) o
+`COUNT(shipment_id)` (MySQL/MariaDB). A pedido de David, se reemplaza por un nombre
+legible:
+
+| Expresión sin alias | Nombre |
+|---|---|
+| `COUNT(*)`, `COUNT(x)`, `COUNT(DISTINCT x)` | `cantidad` |
+| `SUM(o.total)`, `AVG(price)`, `MAX(x)`, `MIN(x)` | `suma_total`, `promedio_price`, `maximo_x`, `minimo_x` |
+| Lo mismo envuelto en `ROUND`, `COALESCE`, `CAST`, etc. | igual que la de adentro |
+| Otra expresión | `valor` |
+
+- Solo se toca un nombre que inventó el motor: vacío, `?column?`, el texto de la
+  expresión o el nombre de la función. Los alias y las columnas (`c.name`) quedan como
+  están, y también el `total` que Postgres da a `total::numeric`.
+- Los nombres generados no se repiten: `cantidad`, `cantidad_2`.
+- Los drivers entregan las filas **por posición** (`rowMode: 'array'`, `rowsAsArray`,
+  `arrayRowMode`), así que dos expresiones que el motor nombró igual no se pisan.
+- Dos columnas con el mismo nombre propio siguen dando 422 (E1).
+- Se lee la lista del SELECT exterior, después de los CTE. Si no se puede alinear con
+  el resultado (por ejemplo, con un `*`), solo se nombran las columnas sin nombre.
+
+Verificado: 15/15 casos del nombrador y `api_integridad` 30/30 en los 4 motores (las
+mismas cuatro expresiones dan `cantidad, cantidad_2, suma_total, maximo_order_date`).
+Excel 68/68, API 369/369 y seguridad 57/57 + 200/200.
+
 ### 3. Snapshot del resultado (`resultStore.service.ts`)
 
 La consulta se ejecuta **una sola vez** y el resultado completo se vuelca por

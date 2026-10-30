@@ -1,0 +1,278 @@
+{
+ "fecha": "2026-10-29",
+ "nota": "Revisión a mano de los casos que la comparación automática no dio como correctos (resumen.md, «Para revisión manual»). Clave: id|variante|motor. Los demás casos quedan con su veredicto automático (exacto o columnas_extra = correcto).",
+ "casos": {
+  "C03|parafrasis|mariadb": {
+   "clasificacion": "ambiguedad",
+   "causa": "«El promedio de todos los clientes» incluye a los que no compraron (gasto 0): promedio más bajo, 13 934 clientes en lugar de 9 573."
+  },
+  "C03|parafrasis|mysql": {
+   "clasificacion": "ambiguedad",
+   "causa": "«El promedio de todos los clientes» incluye a los que no compraron (gasto 0): promedio más bajo, 13 934 clientes en lugar de 9 573."
+  },
+  "C05|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismas 2 categorías; no trae el porcentaje (ni, en mariadb, el monto), que la pregunta no pide."
+  },
+  "C05|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismas 2 categorías; no trae el porcentaje (ni, en mariadb, el monto), que la pregunta no pide."
+  },
+  "C05|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismas 2 categorías; no trae el porcentaje (ni, en mariadb, el monto), que la pregunta no pide."
+  },
+  "C05|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismas 2 categorías; no trae el porcentaje (ni, en mariadb, el monto), que la pregunta no pide."
+  },
+  "C08|parafrasis|mariadb": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `products` y `categories` (sin `order_items`): mysql devuelve 0 como ingreso y mariadb ordena por precio × stock."
+  },
+  "C08|parafrasis|mssql": {
+   "clasificacion": "error_modelo",
+   "causa": "Top 5 correcto, pero calcula el ingreso como cantidad × precio, sin el descuento (`subtotal`). La poda tampoco envió `order_items`; el modelo adivinó la tabla."
+  },
+  "C08|parafrasis|mysql": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `products` y `categories` (sin `order_items`): mysql devuelve 0 como ingreso y mariadb ordena por precio × stock."
+  },
+  "C08|parafrasis|postgres": {
+   "clasificacion": "error_modelo",
+   "causa": "Top 5 correcto, pero calcula el ingreso como cantidad × precio, sin el descuento (`subtotal`). La poda tampoco envió `order_items`; el modelo adivinó la tabla."
+  },
+  "C09|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C09|original|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C09|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C09|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C09|parafrasis|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C09|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 279 clientes; no trae el conteo de categorías, que la pregunta no pide."
+  },
+  "C10|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 10 635 clientes y montos; muestra el pagado vacío (NULL) en lugar de 0 cuando no hay pagos."
+  },
+  "C10|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 10 635 clientes; no trae los montos, que la pregunta no pide."
+  },
+  "C11|parafrasis|mariadb": {
+   "clasificacion": "ambiguedad",
+   "causa": "«La categoría que más vende» medida en unidades (gana Libros) en lugar de en dinero."
+  },
+  "C11|parafrasis|mssql": {
+   "clasificacion": "ambiguedad",
+   "causa": "«La categoría que más vende» medida en unidades (gana Libros) en lugar de en dinero."
+  },
+  "C13|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|original|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|parafrasis|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C13|parafrasis|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 200 clientes; no trae el conteo de países, que la pregunta no pide."
+  },
+  "C15|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|original|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|parafrasis|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "C15|parafrasis|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 5 clientes y promedios; no trae la columna «pedidos», que la pregunta no pide. No hay empate en el corte."
+  },
+  "M03|parafrasis|mariadb": {
+   "clasificacion": "error_modelo",
+   "causa": "`INNER JOIN` deja afuera a los clientes sin compras (30 897 de 50 000); «cada cliente» los incluye con 0. Mismo error que en el piloto."
+  },
+  "M03|parafrasis|mssql": {
+   "clasificacion": "error_modelo",
+   "causa": "`INNER JOIN` deja afuera a los clientes sin compras (30 897 de 50 000); «cada cliente» los incluye con 0. Mismo error que en el piloto."
+  },
+  "M03|parafrasis|postgres": {
+   "clasificacion": "error_modelo",
+   "causa": "`INNER JOIN` deja afuera a los clientes sin compras (30 897 de 50 000); «cada cliente» los incluye con 0. Mismo error que en el piloto."
+  },
+  "M06|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): «no aparecen en ninguna orden» es literalmente correcto (160); la referencia, de «nunca se han vendido», excluye 2 productos que solo están en órdenes canceladas. La paráfrasis no era equivalente."
+  },
+  "M06|parafrasis|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): «no aparecen en ninguna orden» es literalmente correcto (160); la referencia, de «nunca se han vendido», excluye 2 productos que solo están en órdenes canceladas. La paráfrasis no era equivalente."
+  },
+  "M06|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): «no aparecen en ninguna orden» es literalmente correcto (160); la referencia, de «nunca se han vendido», excluye 2 productos que solo están en órdenes canceladas. La paráfrasis no era equivalente."
+  },
+  "M06|parafrasis|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): «no aparecen en ninguna orden» es literalmente correcto (160); la referencia, de «nunca se han vendido», excluye 2 productos que solo están en órdenes canceladas. La paráfrasis no era equivalente."
+  },
+  "M08|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): descuenta los pagos de pedidos cancelados, aplicando la regla «un cancelado no es venta» del prompt. La referencia (pagos COMPLETED) no se alineó; la paráfrasis («dinero cobrado») sí debe contar todo."
+  },
+  "M08|original|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): descuenta los pagos de pedidos cancelados, aplicando la regla «un cancelado no es venta» del prompt. La referencia (pagos COMPLETED) no se alineó; la paráfrasis («dinero cobrado») sí debe contar todo."
+  },
+  "M08|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): descuenta los pagos de pedidos cancelados, aplicando la regla «un cancelado no es venta» del prompt. La referencia (pagos COMPLETED) no se alineó; la paráfrasis («dinero cobrado») sí debe contar todo."
+  },
+  "M08|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Decisión de David (29/10): descuenta los pagos de pedidos cancelados, aplicando la regla «un cancelado no es venta» del prompt. La referencia (pagos COMPLETED) no se alineó; la paráfrasis («dinero cobrado») sí debe contar todo."
+  },
+  "M14|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 109 clientes; no trae el conteo de pedidos, que la pregunta no pide."
+  },
+  "M14|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 109 clientes; no trae el conteo de pedidos, que la pregunta no pide."
+  },
+  "M14|parafrasis|mssql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 109 clientes; no trae el conteo de pedidos, que la pregunta no pide."
+  },
+  "M14|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 109 clientes; no trae el conteo de pedidos, que la pregunta no pide."
+  },
+  "M14|parafrasis|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Mismos 18 109 clientes; no trae el conteo de pedidos, que la pregunta no pide."
+  },
+  "M17|parafrasis|mariadb": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `orders` (sin `payments` ni `shipments`): cuenta por estado del pedido, 23 101 en lugar de 16 188."
+  },
+  "M17|parafrasis|mssql": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `orders` (sin `payments` ni `shipments`): cuenta por estado del pedido, 23 101 en lugar de 16 188."
+  },
+  "M17|parafrasis|mysql": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `orders` (sin `payments` ni `shipments`): cuenta por estado del pedido, 23 101 en lugar de 16 188."
+  },
+  "M17|parafrasis|postgres": {
+   "clasificacion": "error_poda",
+   "causa": "La poda envió solo `orders` (sin `payments` ni `shipments`): cuenta por estado del pedido, 23 101 en lugar de 16 188."
+  },
+  "M19|original|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M19|original|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M19|original|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M19|parafrasis|mariadb": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M19|parafrasis|mysql": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M19|parafrasis|postgres": {
+   "clasificacion": "correcto",
+   "causa": "Empate válido: 4 010 clientes tienen el máximo (3 direcciones); la pregunta no fija desempate."
+  },
+  "M20|original|mariadb": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  },
+  "M20|original|mssql": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  },
+  "M20|original|mysql": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  },
+  "M20|original|postgres": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  },
+  "M20|parafrasis|mariadb": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  },
+  "M20|parafrasis|postgres": {
+   "clasificacion": "ambiguedad",
+   "causa": "«Días» como tiempo exacto (5,35) o con filtro de estado DELIVERED (5,25), en lugar de días de calendario (5,45)."
+  }
+ }
+}

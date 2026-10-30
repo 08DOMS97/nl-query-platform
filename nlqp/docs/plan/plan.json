@@ -319,8 +319,8 @@
       "padre": 26,
       "inicio": "2026-10-01",
       "fin": "2026-10-02",
-      "real": 0.7,
-      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado sin costo, 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates y M20 corregidos) y 50 paráfrasis revisadas. Falta: piloto, corrida completa con Gemini y análisis de resultados. 18/10: sigue en 70 %. Con Gemini 3.8 Flash (tarea 46) el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60."
+      "real": 1.0,
+      "comentario": "10/10: 70 %. Hecho: runner de evaluación por HTTP (probado sin costo, 400/400), 50 referencias con resultado idéntico en los 4 motores (C10, empates y M20 corregidos) y 50 paráfrasis revisadas. Falta: piloto, corrida completa con Gemini y análisis de resultados. 18/10: sigue en 70 %. Con Gemini 3.8 Flash (tarea 46) el piloto cuesta ~$0.10–0.16 y la corrida completa ~$0.80–1.60. 27/10: 90 %. Piloto (37/40 revisado a mano) y corrida completa con Gemini hechos: 400 generaciones, $0.80. Resultado automático: 86,0 % de las originales y 77,5 % de las paráfrasis correctas (exacto o con columnas extra), 0 consultas bloqueadas y 0 errores de ejecución. Se alinearon 5 referencias con la regla de los pedidos cancelados. Falta: reintentar 6 generaciones sin respuesta del servicio (~$0.012), la revisión a mano y el EXPLAIN. 29/10: 95 %. Reintento de las 6 ($0.0085, 6/6 con SQL) y revisión a mano hechos: originales 98,0 %, paráfrasis 91,5 %, total 94,8 % correcto; consistencia entre motores 94/100; 6 errores de la poda y 5 del modelo, todos en paráfrasis. Falta: el EXPLAIN. 29/10: 100 %. EXPLAIN sin ANALYZE de los 400 SQL en el banco de volumen (sin costo, 400/400 validados por el Query Safety Engine): 93,5 % con costo hasta 2 veces el de la referencia, mediana 1,0 en los 4 motores, tiempos reales similares en los casos más caros."
     },
     {
       "no": 40,
@@ -550,6 +550,20 @@
       "nueva": {
         "agregada": "2026-10-24",
         "implementada": "2026-10-24"
+      }
+    },
+    {
+      "no": 54,
+      "tarea": "Generación con corte y reintento y nombres legibles de columnas",
+      "nivel": 2,
+      "padre": 21,
+      "inicio": "2026-10-26",
+      "fin": "2026-10-26",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 26/10 a pedido mío, durante la evaluación. (1) El servicio de Google estuvo saturado (esperas de hasta 5 min y un 429): la respuesta del modelo ahora llega por partes; si no empieza en 20/40/80 s se reintenta, y a los 20 s el usuario ve un aviso. Con eso, mediana 4,9 s y p95 61 s, frente a 279 s sin corte. (2) Las columnas sin alias reciben un nombre legible igual en los 4 motores (SQL Server rechazaba un COUNT(*) sin nombre). Verificado: API 369/369, seguridad 57/57 + 200/200.",
+      "nueva": {
+        "agregada": "2026-10-26",
+        "implementada": "2026-10-26"
       }
     }
   ]

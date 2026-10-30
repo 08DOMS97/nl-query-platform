@@ -5,6 +5,7 @@ import type { Connection as MysqlCoreConnection } from 'mysql2';
 import mssql from 'mssql';
 import type { DbEngine, EngineConnectionConfig, PoolStatus, TestConnectionResult } from '../types/index.js';
 import { DEFAULT_QUERY_TIMEOUT_SEC, listConnections, resolveConnectionConfig } from './connectionStore.service.js';
+import { readableColumnNames } from './columnNames.service.js';
 
 const { Pool: PgPool } = pg;
 
@@ -92,10 +93,11 @@ export class QueryTimeoutError extends Error {
 
 /**
  * El resultado no se puede mostrar sin confundir valores: dos columnas con el mismo
- * nombre (los drivers devuelven cada fila como objeto por nombre, así que una pisa a
- * la otra; mssql las junta en un arreglo) o una columna sin nombre (`COUNT(*)` sin
- * alias en SQL Server). Se rechaza entero, como el resto de los límites (auditoría
- * del 24/10): mostrar un valor en lugar de otro sería peor que no mostrar nada.
+ * nombre propio (alias o columna; las filas se entregan como objeto por nombre, así que
+ * una pisaría a la otra). Se rechaza entero, como el resto de los límites (auditoría
+ * del 24/10): mostrar un valor en lugar de otro sería peor que no mostrar nada. Las
+ * expresiones sin alias ya no llegan acá sin nombre: `readableColumnNames` les da uno
+ * (26/10); la verificación de nombre vacío queda como resguardo.
  */
 export class ResultShapeError extends Error {
   constructor(message: string) {
@@ -353,14 +355,20 @@ export async function streamQuery(
   let rowCount = 0;
   // Solo devuelve promesa si el consumidor pidió pausa: esperar en cada fila
   // (cientos de miles) cuesta más que leerlas.
-  const onRow: RowFn = (row) => {
+  // Los drivers entregan cada fila como arreglo (por posición): así dos columnas que el
+  // motor nombró igual no se pisan, y se arma el objeto con los nombres legibles.
+  let names: string[] = [];
+  const onRow: RowFn = (values) => {
     if (Date.now() > deadline) throw new QueryTimeoutError(engine, timeoutMs);
     rowCount++;
+    const row: Record<string, unknown> = {};
+    for (let k = 0; k < names.length; k++) row[names[k]] = values[k];
     return handlers.onRow(row);
   };
-  const onColumns = (columns: string[]) => {
-    assertUsableColumns(columns);
-    handlers.onColumns(columns);
+  const onColumns = (reported: string[]) => {
+    names = readableColumnNames(sql, reported);
+    assertUsableColumns(names);
+    handlers.onColumns(names);
   };
 
   try {
@@ -383,10 +391,10 @@ export async function streamQuery(
   return { rowCount };
 }
 
-type RowFn = (row: Record<string, unknown>) => void | Promise<void>;
+type RowFn = (values: unknown[]) => void | Promise<void>;
 
 /** Llama a `onRow` convirtiendo una excepción síncrona en promesa rechazada. */
-function callRow(onRow: RowFn, row: Record<string, unknown>): Promise<void> | void {
+function callRow(onRow: RowFn, row: unknown[]): Promise<void> | void {
   try {
     return onRow(row);
   } catch (err) {
@@ -396,7 +404,7 @@ function callRow(onRow: RowFn, row: Record<string, unknown>): Promise<void> | vo
 
 async function streamPostgres(pool: pg.Pool, sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
   const client = await pool.connect();
-  const cursor = client.query(new Cursor(sql));
+  const cursor = client.query(new Cursor(sql, undefined, { rowMode: 'array' }));
   let failed = false;
   try {
     let first = true;
@@ -454,7 +462,7 @@ async function streamMysqlFamily(
         reject(err);
       };
       raw
-        .query(sql)
+        .query({ sql, rowsAsArray: true })
         .on('fields', (fields: { name: string }[]) => {
           // Un error dentro del evento se lanzaría fuera de la promesa (y tumbaría el proceso).
           try {
@@ -463,7 +471,7 @@ async function streamMysqlFamily(
             fail(err);
           }
         })
-        .on('result', (row: Record<string, unknown>) => {
+        .on('result', (row: unknown[]) => {
           const wait = callRow(onRow, row);
           if (!wait) return;
           raw.pause();
@@ -490,6 +498,7 @@ async function streamMysqlFamily(
 async function streamMssql(pool: mssql.ConnectionPool, sql: string, onColumns: (c: string[]) => void, onRow: RowFn) {
   const request = pool.request();
   request.stream = true;
+  request.arrayRowMode = true;
   await new Promise<void>((resolve, reject) => {
     let settled = false;
     let pending: Promise<void> = Promise.resolve();
@@ -499,23 +508,15 @@ async function streamMssql(pool: mssql.ConnectionPool, sql: string, onColumns: (
       request.cancel(); // envía ATTENTION: el servidor aborta la sentencia.
       reject(err);
     };
-    request.on('recordset', (columns: Record<string, unknown>) => {
+    request.on('recordset', (columns: { name: string }[]) => {
       try {
-        onColumns(Object.keys(columns));
+        onColumns(columns.map((c) => c.name));
       } catch (err) {
         fail(err);
       }
     });
-    request.on('row', (row: Record<string, unknown>) => {
+    request.on('row', (row: unknown[]) => {
       if (settled) return;
-      // mssql junta en un arreglo los valores de columnas con el mismo nombre (y su
-      // descripción de columnas trae una sola): SQL Server no tiene tipos que devuelvan
-      // arreglos, así que un arreglo es siempre una columna repetida.
-      const repeated = Object.keys(row).find((k) => Array.isArray(row[k]));
-      if (repeated !== undefined) {
-        fail(duplicateColumnError(repeated));
-        return;
-      }
       const wait = callRow(onRow, row);
       if (!wait) return;
       request.pause();

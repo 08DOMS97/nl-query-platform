@@ -1,4 +1,10 @@
-import { FinishReason, GoogleGenAI, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
+import {
+  FinishReason,
+  GoogleGenAI,
+  ThinkingLevel,
+  type GenerateContentConfig,
+  type GenerateContentResponseUsageMetadata,
+} from '@google/genai';
 import type { DbEngine, SchemaInfo } from '../types/index.js';
 import { DOMAIN_RULES } from './domainRules.service.js';
 
@@ -44,7 +50,22 @@ const PERFORMANCE_RULES: string[] = [
     '("los 5...", "el que más..."); nunca recortes un listado completo.',
 ];
 
+/**
+ * Índices compuestos en el prompt: apagado por defecto. El `EXPLAIN` de la evaluación
+ * (29/10/2026) no mostró consultas ineficientes sin ellos, y con la variable apagada el
+ * prompt es idéntico al evaluado. Se activa con NLQP_PROMPT_INDICES_COMPUESTOS=true si
+ * una base real lo requiere (ver PREPARACION_EVALUACION_GEMINI.md §9).
+ */
+const COMPOSITE_INDEX_RULE =
+  'Los índices compuestos se listan por tabla con sus columnas en orden: filtra por la ' +
+  'primera columna (y las siguientes) sin funciones para que el motor pueda usarlos.';
+
+function compositeIndexesEnabled(): boolean {
+  return process.env.NLQP_PROMPT_INDICES_COMPUESTOS === 'true';
+}
+
 function formatSchemaForPrompt(schema: SchemaInfo): string {
+  const withComposite = compositeIndexesEnabled();
   const lines: string[] = [];
   for (const table of schema.tables) {
     const cols = table.columns
@@ -59,6 +80,10 @@ function formatSchemaForPrompt(schema: SchemaInfo): string {
       })
       .join(', ');
     lines.push(`- ${table.name}: ${cols}`);
+    const composite = withComposite ? (table.indexes ?? []).filter((ix) => ix.columns.length > 1) : [];
+    if (composite.length) {
+      lines.push(`  índices compuestos: ${composite.map((ix) => `(${ix.columns.join(', ')})`).join(', ')}`);
+    }
   }
   return lines.join('\n');
 }
@@ -78,7 +103,7 @@ Reglas del dominio:
 ${DOMAIN_RULES.map((r) => `- ${r}`).join('\n')}
 
 Reglas de rendimiento (la base puede tener millones de filas):
-${PERFORMANCE_RULES.map((r) => `- ${r}`).join('\n')}
+${[...PERFORMANCE_RULES, ...(compositeIndexesEnabled() ? [COMPOSITE_INDEX_RULE] : [])].map((r) => `- ${r}`).join('\n')}
 
 Esquema disponible (base de datos "${schema.database}"):
 ${formatSchemaForPrompt(schema)}
@@ -198,6 +223,85 @@ export interface GenerateSqlResult {
   /** Tokens de razonamiento interno — no visibles, pero se facturan como salida. */
   tokensThinking: number;
   tokensTotal: number;
+  /** Intentos hasta obtener respuesta (1 = sin reintentos; ver FIRST_CHUNK_TIMEOUTS_MS). */
+  attempts: number;
+  /** Cuánto tardó en llegar la primera parte de la respuesta en el intento que funcionó. */
+  firstChunkMs: number | null;
+}
+
+/**
+ * Espera a Vertex AI (26/10, pedido de David). Con pago por uso la capacidad es
+ * compartida: cuando Google está saturado encola la solicitud (minutos) o responde 429.
+ * En la corrida del 26/10 una consulta de una tabla tardó hasta 4,5 min, y la misma
+ * solicitud reenviada respondió en 2–4 s. Por eso la respuesta se pide por partes
+ * (streaming) y se distingue:
+ * - **Encolada** (no llegó nada, ni siquiera el razonamiento): se corta y se reintenta.
+ *   El plazo crece en cada intento para no cortar dos veces una consulta compleja que
+ *   razona mucho antes de escribir.
+ * - **Respondiendo** (ya llegó algo): se espera a que termine, con un máximo por intento.
+ * El volumen de datos no influye acá: el modelo ve el esquema, no las filas. La
+ * ejecución tiene su propio tope por conexión.
+ */
+const FIRST_CHUNK_TIMEOUTS_MS = [20_000, 40_000, 80_000];
+const ATTEMPT_TIMEOUT_MS = 120_000;
+/** Espera antes de reintentar un 429/503 de Vertex AI (no se facturan). */
+const BUSY_RETRY_WAIT_MS = 2_000;
+
+class AttemptTimeoutError extends Error {
+  constructor(readonly stage: 'cola' | 'respuesta', ms: number) {
+    super(
+      stage === 'cola'
+        ? `Vertex AI no empezó a responder en ${ms / 1000} s.`
+        : `Vertex AI no terminó de responder en ${ms / 1000} s.`,
+    );
+    this.name = 'AttemptTimeoutError';
+  }
+}
+
+const isBusyError = (err: unknown) =>
+  /429|RESOURCE_EXHAUSTED|503|UNAVAILABLE|overloaded/i.test(err instanceof Error ? err.message : String(err));
+
+/** Un intento por streaming. El razonamiento se pide resumido solo como señal de vida. */
+async function generateOnce(ai: GoogleGenAI, model: string, prompt: string, firstChunkTimeoutMs: number) {
+  const controller = new AbortController();
+  let timedOut: AttemptTimeoutError | null = null;
+  const abortWith = (err: AttemptTimeoutError) => {
+    timedOut = err;
+    controller.abort();
+  };
+  const firstTimer = setTimeout(() => abortWith(new AttemptTimeoutError('cola', firstChunkTimeoutMs)), firstChunkTimeoutMs);
+  const totalTimer = setTimeout(() => abortWith(new AttemptTimeoutError('respuesta', ATTEMPT_TIMEOUT_MS)), ATTEMPT_TIMEOUT_MS);
+  const config: GenerateContentConfig = {
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
+    thinkingConfig: { thinkingLevel: THINKING_LEVEL, includeThoughts: true },
+    abortSignal: controller.signal,
+  };
+  let text = '';
+  let usageMetadata: GenerateContentResponseUsageMetadata | undefined;
+  let finishReason: FinishReason | undefined;
+  let firstChunkMs: number | null = null;
+  const t0 = Date.now();
+  try {
+    const stream = await ai.models.generateContentStream({ model, contents: prompt, config });
+    for await (const chunk of stream) {
+      if (firstChunkMs === null) {
+        firstChunkMs = Date.now() - t0;
+        clearTimeout(firstTimer);
+      }
+      const candidate = chunk.candidates?.[0];
+      // El razonamiento (`thought`) no es parte del SQL.
+      for (const part of candidate?.content?.parts ?? []) if (part.text && !part.thought) text += part.text;
+      if (candidate?.finishReason) finishReason = candidate.finishReason;
+      if (chunk.usageMetadata) usageMetadata = chunk.usageMetadata;
+    }
+  } catch (err) {
+    throw timedOut ?? err;
+  } finally {
+    clearTimeout(firstTimer);
+    clearTimeout(totalTimer);
+  }
+  if (timedOut) throw timedOut;
+  return { text, usageMetadata, finishReason, firstChunkMs };
 }
 
 /**
@@ -205,36 +309,47 @@ export interface GenerateSqlResult {
  * El resultado NUNCA debe ejecutarse sin pasar antes por
  * `querySafety.service.ts` — este servicio no valida seguridad, solo genera.
  * Devuelve además los tokens consumidos (`usageMetadata` de la respuesta),
- * que usa el módulo de uso y costos para estimar el gasto de cada llamada.
+ * que usa el módulo de uso y costos para estimar el gasto de cada llamada, y los
+ * intentos que hicieron falta (los cortados pueden haberse facturado igual).
  */
 export async function generateSql(
   engine: DbEngine,
   schema: SchemaInfo,
   naturalLanguageQuery: string,
 ): Promise<GenerateSqlResult> {
-  const config: GenerateContentConfig = {
-    maxOutputTokens: MAX_OUTPUT_TOKENS,
-    thinkingConfig: { thinkingLevel: THINKING_LEVEL },
-  };
   const { ai, model } = getClient();
-
   const prompt = buildPrompt(engine, schema, naturalLanguageQuery);
-  const response = await ai.models.generateContent({ model, contents: prompt, config });
-  const candidate = response.candidates?.[0];
-  // `response.text` concatena las partes de texto de la respuesta, sin el
-  // razonamiento interno (no se pide `includeThoughts`).
-  const text = response.text;
-  const usageMetadata = response.usageMetadata;
+
+  const retries: string[] = [];
+  let result: Awaited<ReturnType<typeof generateOnce>> | null = null;
+  for (let attempt = 0; attempt < FIRST_CHUNK_TIMEOUTS_MS.length; attempt++) {
+    try {
+      result = await generateOnce(ai, model, prompt, FIRST_CHUNK_TIMEOUTS_MS[attempt]);
+      break;
+    } catch (err) {
+      const retriable = err instanceof AttemptTimeoutError || isBusyError(err);
+      if (!retriable || attempt === FIRST_CHUNK_TIMEOUTS_MS.length - 1) {
+        throw retries.length && err instanceof Error
+          ? new Error(`${err.message} (después de ${retries.length + 1} intentos: ${retries.join('; ')})`)
+          : err;
+      }
+      retries.push(err instanceof AttemptTimeoutError ? err.message : 'Vertex AI ocupado (429/503)');
+      if (!(err instanceof AttemptTimeoutError)) await new Promise((r) => setTimeout(r, BUSY_RETRY_WAIT_MS));
+    }
+  }
+  const { text, usageMetadata, finishReason, firstChunkMs } = result!;
   const usage: GenerationUsage = {
     tokensInput: usageMetadata?.promptTokenCount ?? 0,
     tokensOutput: usageMetadata?.candidatesTokenCount ?? 0,
     tokensThinking: usageMetadata?.thoughtsTokenCount ?? 0,
     tokensTotal: usageMetadata?.totalTokenCount ?? 0,
+    attempts: retries.length + 1,
+    firstChunkMs,
   };
 
   // Un SQL cortado por el tope de salida no debe llegar al Query Safety Engine
   // como si fuera una respuesta completa: se reporta como error explícito.
-  if (candidate?.finishReason === FinishReason.MAX_TOKENS) {
+  if (finishReason === FinishReason.MAX_TOKENS) {
     throw new GenerationFailedError(
       `Vertex AI cortó la respuesta al alcanzar el tope de ${MAX_OUTPUT_TOKENS} tokens de salida.`,
       usage,

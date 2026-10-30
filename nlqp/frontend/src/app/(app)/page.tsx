@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type KeyboardEvent } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { canEdit, editInfo, isEdited, useQueryDraft } from '@/hooks/useQueryDraft';
 import { connectionLabel, useConnections } from '@/hooks/useConnections';
@@ -12,6 +12,23 @@ import { SaveQueryButton } from '@/components/SaveQueryButton';
 
 const errorMessage = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
+/** Pasado este tiempo generando, se avisa que el servicio está demorando (el backend reintenta solo). */
+const SLOW_GENERATION_MS = 20_000;
+
+/** `true` cuando `active` lleva más de `ms` encendido. */
+function useTakingLong(active: boolean, ms: number) {
+  const [long, setLong] = useState(false);
+  useEffect(() => {
+    if (!active) return;
+    const timer = setTimeout(() => setLong(true), ms);
+    return () => {
+      clearTimeout(timer);
+      setLong(false);
+    };
+  }, [active, ms]);
+  return active && long;
+}
+
 const seconds = (ms: number) => `${(ms / 1000).toLocaleString('es-GT', { maximumFractionDigits: 1 })} s`;
 
 /** Consumo de la generación: solo lo ve el rol técnico. */
@@ -22,6 +39,7 @@ function MetricsStrip({ metrics }: { metrics: GenerateSqlMetrics }) {
     ['Entrada / salida / razonamiento', `${formatNumber(metrics.tokensInput)} / ${formatNumber(metrics.tokensOutput)} / ${formatNumber(metrics.tokensThinking)}`],
     ['Costo', formatUsd(metrics.costUsd)],
     ['Tiempo', seconds(metrics.latencyMs)],
+    ...(metrics.attempts && metrics.attempts > 1 ? ([['Intentos', String(metrics.attempts)]] as [string, string][]) : []),
     ...(metrics.stages ? ([['Modelo / resto', `${seconds(metrics.stages.modelMs)} / ${seconds(metrics.latencyMs - metrics.stages.modelMs)}`]] as [string, string][]) : []),
   ];
   return (
@@ -42,6 +60,7 @@ export default function ConsultarPage() {
   const { connections, error: connectionsError } = useConnections();
   const [savingChanges, setSavingChanges] = useState(false);
   const [changesSaved, setChangesSaved] = useState(false);
+  const slowGeneration = useTakingLong(draft.busy === 'generando', SLOW_GENERATION_MS);
 
   if (!user) return null;
   const isTechnical = role === 'tecnico';
@@ -218,6 +237,9 @@ export default function ConsultarPage() {
         </div>
       </Panel>
 
+      {slowGeneration && (
+        <Notice tone="warn">La generación está tardando más de lo normal porque el servicio está ocupado. Se reintenta automáticamente; puede tardar hasta dos minutos.</Notice>
+      )}
       {error && <Notice tone="bad">{error}</Notice>}
 
       {pending && (

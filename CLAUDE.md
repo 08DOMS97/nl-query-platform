@@ -27,7 +27,7 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | **31/10/2026** | **Entrega PG2** (la universidad la corrió del 17/10; en el plan se movieron solo las tareas 37 y 38) |
 | 20/10/2026 | Retiro de `gemini-2.5-pro`: ya no afecta, se cambió a `gemini-3.8-flash` el 18/10 (vigente hasta el 02/09/2027 o más) |
 
-## Estado por área (actualizado 2026-10-25: cotejo del Word del 22/10; antes, 24/10: auditoría, Docker, tiempo de generación, descarga en Excel y banco con volumen)
+## Estado por área (actualizado 2026-10-29: evaluación completa: reintento, revisión a mano y `EXPLAIN`)
 
 | Área | Estado |
 |---|---|
@@ -35,37 +35,34 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Query Safety Engine | ✅ Endurecido 08/10; `npm run test:seguridad` → 57/57 + 200/200 (repetido el 24/10, también contra Docker). La revisión nueva del validador en la auditoría del 24/10 quedó cortada: **pendiente** |
 | Referencias (50 consultas) | ✅ Contenido idéntico en los 4 motores (10/10; repetido el 24/10 con el volumen: 50/50). SQL escrito a mano, **no** de Gemini |
 | Banco de pruebas (24/10) | ✅ A pedido de David, de 2 233 a **1 485 641 filas** en los 4 motores (250 000 pedidos, 631 630 líneas, 50 000 clientes, 2 000 productos), con datos con formato real. Las 2 233 base no cambiaron. 5 índices compuestos nuevos para medir con `EXPLAIN`. El volumen (`init/*/NN-volumen.sql.gz`) **no se versiona**: lo genera `python generar_seed.py`. `Bases de datos/README.md` («Volumen») |
-| Evaluación con Gemini | 🟡 Runner listo y probado gratis (400/400), paráfrasis aprobadas, ajustado a 3.8 Flash (18/10). **Falta: piloto y corrida completa** |
+| Evaluación con Gemini | ✅ **26–27/10: piloto (37/40 a mano) y corrida completa hechos: 400/400; 29/10: los 6 errores de generación reintentados (6/6, $0.0085)**. Total $0.8132. **Revisión a mano (29/10): originales 98,0 %, paráfrasis 91,5 %, total 94,8 %**; 10 ambigüedades, 6 errores de la poda y 5 del modelo (todos en paráfrasis); consistencia entre motores **94/100** (criterio de David: las columnas no pedidas no cuentan; automática 83, estricta 77); 0 bloqueadas, 0 límites no pedidos, 0 errores de ejecución ni de generación. Capacitación a usuarios para formular solicitudes (David, como recomendación). Clasificación en `evaluacion_gemini/revision_manual.json`; `resumen.md` sigue con las cifras automáticas. Referencias C02, M04, M06, C07 y C09 alineadas con «cancelado no es venta» (declararlo). Generación por partes con corte y reintento (20/40/80 s): mediana 4,9 s, p95 61 s. **`EXPLAIN` (29/10, gratis): 93,5 % con costo ≤ 2 veces la referencia, mediana 1,0 en los 4 motores**, tiempos reales similares (`backend/scripts/evaluacion_explain.mjs`, `evaluacion_gemini/explain.json`). **Falta:** cargar en la tesis. `nlqp/docs/PREPARACION_EVALUACION_GEMINI.md` §9 |
 | Frontend | ✅ Rediseñado 10/10: pantallas por módulo, menú según el rol, blanco + naranja claro, IBM Plex. Consultar y Esquema eligen entre las conexiones registradas (13/10). 19/10: sin `/signup`; el rol sale de `/me`; pantalla Usuarios (solo superadmin); tiempo máximo en el formulario de Conexiones. 24/10: «Cambiar contraseña» en Usuarios; auditoría de Consultar (resultados viejos, pago doble al cambiar de pantalla, error que dejaba el resultado anterior). `npm run test:ui` 24/24 + 33/33 + 27/27 + 18/18 (24/10). Falta probar "Generar SQL" con Gemini real desde la UI |
 | M4 herramientas técnicas | ✅ 10/10: rol técnico (custom claim, 403 en el backend) con SQL editable, conexiones + pool, esquema y uso y costos. API 23/23. 13/10: edita la generada y las guardadas (no las del historial: se guardan antes), «Guardar cambios» y auditoría de cambios (pestaña Cambios). API 25/25, UI 23/23. En el Word (6.5) |
 | M5 historial | ✅ Versión mínima 10/10: historial automático + consultas guardadas (manual), reusar sin Gemini. API 32/32, UI 10/10. En el Word (6.6); falta la captura (Figura 11) |
 | Usuarios y superadmin | ✅ 19/10 (pedido de David): `GET/POST/PUT /users` y `/me`; alta con rol, cambio de rol y desactivar/reactivar (sin borrar). El permiso solo se asigna con `npm run set:superadmin -- <correo> [--crear]`. El rol y el estado se leen de la cuenta en cada solicitud (~150 ms; rigen al instante). Una cuenta sin rol recibe 403. **24/10:** cuenta de David (`davidmonterroso0897@gmail.com`) ya es superadmin; el superadmin pone una contraseña nueva a cualquier cuenta (`PUT /users` con `password`; la sesión en uso sigue hasta 1 h, desactivar corta al instante). API 50/50, UI 27/27. `SEGURIDAD.md` §14 |
 | Auditoría y Docker (24/10) | ✅ Auditoría a pedido de David: rechazo de SQL como pregunta y de límites no pedidos (422), el backend no se cae ante tipos inesperados, integridad de valores en los 4 motores, Consultar, origen de uso solo para el técnico, contraseña guardada solo con el mismo servidor. **Docker:** `cd nlqp; docker compose up -d --build`. Solo el frontend se publica en la red y la credencial de GCP va como secreto. Pendientes de David y estado de cada hallazgo: `nlqp/docs/AUDITORIA_2026-10-24.md`; guía: `nlqp/docs/DOCKER.md` |
 | Descarga en Excel (24/10) | ✅ A pedido de David: el CSV se veía desordenado porque Windows en es-GT separa con `;`. Ahora la descarga es un .xlsx (`exceljs@4.4.0`, `resultExcel.service.ts`, ruta `/exportResult`, botón «Descargar Excel»). Trae encabezados legibles y fijos, fechas y números con su tipo, `=` como texto (resuelve E8) y la hoja «Detalles» con la pregunta. Nunca se trunca: pasado el máximo de una hoja sigue en «Resultado 2». Memoria plana (~143 MB con 800 000 filas). Exportación 68/68 en los 4 motores. `RENDIMIENTO_E_INTEGRIDAD.md` §4.1 |
-| Texto de tesis | 🟡 **24 pendientes + 1 por verificar + 71 aplicados** (25/10). **Word vigente: `Claude outputs/PG2-2026 revisado 22-10-2026.docx`** (revisión de David del 22–23/10, registrada recién el 25/10). Ya tiene el on-premises, el tope por conexión, los usuarios (US-01…US-08), el cambio de modelo (6.3.2 y precios de 6.7.1 incluidos), 5.3.1/5.3.2, las Figuras 1, 2, 3, 4 y 8 nuevas y el dato de 6.1.4 corregido: 49 de 52 instrucciones de `nlqp/docs/CAMBIO_ON_PREMISES.md`, cotejadas frase por frase. **Quedan:** OP-13 (Tabla 4 y sus dos «Gemini Pro», con el recálculo de 1.6.3), OP-36 (6.7.4, después de verificar en red), US-09 (contraseña nueva) y lo del 24/10: Docker en 5.3, controles de la generación en 6.3.2, integridad y Excel en 6.3.5, hallazgos en 6.7.2 y limitaciones (texto en `CAPITULO_6.md`). Faltan además: evaluación con Gemini (6.3.6), capturas de las Figuras 9 y 11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
+| Texto de tesis | 🟡 **30 pendientes + 1 por verificar + 71 aplicados** (contador del 29/10). **Word vigente: `Claude outputs/PG2-2026 revisado 22-10-2026.docx`** (revisión de David del 22–23/10, registrada recién el 25/10). Ya tiene el on-premises, el tope por conexión, los usuarios (US-01…US-08), el cambio de modelo (6.3.2 y precios de 6.7.1 incluidos), 5.3.1/5.3.2, las Figuras 1, 2, 3, 4 y 8 nuevas y el dato de 6.1.4 corregido: 49 de 52 instrucciones de `nlqp/docs/CAMBIO_ON_PREMISES.md`, cotejadas frase por frase. **Quedan:** OP-13 (Tabla 4 y sus dos «Gemini Pro», con el recálculo de 1.6.3), OP-36 (6.7.4, después de verificar en red), US-09 (contraseña nueva) y lo del 24/10: Docker en 5.3, controles de la generación en 6.3.2, integridad y Excel en 6.3.5, hallazgos en 6.7.2 y limitaciones (texto en `CAPITULO_6.md`). Faltan además: evaluación con Gemini (6.3.6), capturas de las Figuras 9 y 11, presentación (6.8), conclusiones → `nlqp/docs/RESUMEN_PARA_DOC_TEORICO.md` |
 | Tiempo de generación (24/10) | 🟡 Una consulta simple tardó 24,2 s: ~20 s fueron espera al modelo (servicio de Google), ~2,7 s la preparación del cliente y ~0,5 s NLQP. Desde el 24/10: Vertex se prepara al arrancar, el esquema se guarda en caché 60 s, el tiempo se registra por etapa (Uso y costos: mediana, p95, máximo) y «hola» se rechaza sin llamar al modelo. Para la tesis (decisión de David): el tiempo depende de la consulta y del servicio, más la conexión y el proceso. `nlqp/docs/USO_Y_COSTOS.md` |
-| Gasto en Gemini | ≈ **$0.024** (5 llamadas sueltas). Con 3.8 Flash ~$0.001–0.004 por llamada (con 2.5 Pro era ~$0.012), sin crédito de prueba |
+| Gasto en Gemini | ≈ **$0.84** (29/10): $0.024 de llamadas sueltas + $0.8132 de piloto, corrida y los 6 reintentos (según las métricas; verificar en la facturación de GCP si los intentos cortados se cobran). Promedio $0.002 por llamada con 3.8 Flash, sin crédito de prueba. David: gastar una sola vez; **no queda nada pagado por hacer en la evaluación** |
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
-| **Plan vs. real** (corte 24/10) | Plan 93 % · real 93 % · **+0,3 puntos**. Tareas nuevas: 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) 52 (descarga en Excel, 100 %) y 53 (banco con volumen, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
+| **Plan vs. real** (corte 29/10) | Plan 98 % · real 94 % · **−4,8 puntos** (27/10: −2,7; el plan sigue avanzando hacia el 31/10). La tarea 30, de evaluación, está al 100 % (29/10). Tareas nuevas: 54 (corte y reintento de la generación + nombres legibles, 100 %, 26/10), 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) 52 (descarga en Excel, 100 %) y 53 (banco con volumen, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-25)
+## Próximo paso (actualizado 2026-10-29)
 
-David decidió (10/10): **lo que cuesta dinero va al final**, pero con fecha límite.
+La evaluación con Gemini está completa (29/10): corrida, reintentos, revisión a mano y `EXPLAIN`. Para la próxima sesión, en este orden. Antes de
+empezar: Docker con las bases levantado, y el backend con `npm run build` +
+**`npm start`** (no `dev`). Si quedó un `node` viejo en :8080, cerrarlo.
 
-1. **Piloto con paráfrasis** ← **SIGUIENTE** (Gemini 3.8 Flash): propuesto **a más tardar el 21/10**.
-   40 llamadas, ~$0.10–0.16, tope automático $0.25. **Pedir confirmación a David antes.**
-   Incluye la primera verificación real del 422 de límite no pedido (24/10). Requiere Docker y el
-   backend con `npm run build` + **`npm start`** (no `dev`: `node --watch` se
-   reinicia solo en Windows y puede cortar una llamada ya cobrada). Comando:
-   `PREPARACION_EVALUACION_GEMINI.md` §8 punto 7.
-2. **Corrida completa con paráfrasis**: propuesto **a más tardar el 22/10** (~$0.80–1.60
-   en total, tope $2.50; lo del piloto no se repite). **Confirmación aparte.** Después:
-   revisar a mano "Para revisión manual" de `nlqp/docs/evaluacion_gemini/resumen.md` y
-   cargar las cifras en la tesis (6.3.6, 1.6.3 y conclusiones) con margen antes del 30/10.
-3. Después del piloto: capturas de las figuras 9 (Consultar con una pregunta real; la
+1. **Cargar las cifras en la tesis** ← **SIGUIENTE**: 6.3.6, 1.6.3 / OP-13, limitaciones,
+   recomendación de capacitación y conclusiones (`RESUMEN_PARA_DOC_TEORICO.md`), con
+   margen antes del 30/10.
+2. `npm run test:ui` en `nlqp/frontend` (aviso de demora y «Intentos» en Consultar).
+3. **Commit** de todo lo del 26–29/10, cuando David lo apruebe.
+4. Capturas de las figuras 9 (Consultar con una pregunta real; la
    generación cuesta ~$0.002) y 11 con los usuarios de la demo, que ya tienen el
    historial limpio (18/10). La Figura 10 (Conexiones) ya está en el Word (17/10).
-4. **Sin costo, en paralelo:**
+5. **Sin costo, en paralelo:**
    - **Pasar al Word (el del 22/10) lo que quedó:** US-09 (`CAMBIO_ON_PREMISES.md`) y
      las entradas del 24/10 de `RESUMEN_PARA_DOC_TEORICO.md` (Docker, controles de la
      generación, integridad, Excel, hallazgos y limitaciones). OP-13 va con el
@@ -191,7 +188,10 @@ pendiente de David).
 ## Abierto (no es el próximo paso; no hacerlo sin que David lo pida)
 
 - Probar "Generar SQL" con Gemini real desde la UI (cuesta ~$0.001–0.004 por intento con 3.8 Flash).
-- (24/10) `EXPLAIN` sobre el SQL generado, con el banco de volumen (ya existe). Se hace después de la corrida, sin volver a pagar.
+- (26/10) Los intentos cortados por el reintento (sin primera parte en 20/40/80 s) podrían facturarse igual: verificar en la facturación de GCP que el gasto real coincida con ≈ $0.83.
+- (26/10) Docker Desktop, al reiniciarse, levanta solos los contenedores `nlqp-backend-1` y `nlqp-frontend-1`, que chocan en :8080 con `npm start`. Si molesta, ponerles `restart: "no"` en `nlqp/docker-compose.yml` (decisión de David).
+- (26/10) El prompt marca `IDX` solo en la primera columna de cada índice (`schemaExtractor.service.ts:361`): Gemini no ve los compuestos del 24/10 como tales. **(29/10) Decisión de David: no mandarlos ahora**, porque el `EXPLAIN` no muestra consultas ineficientes. Quedan listos para encenderse con `NLQP_PROMPT_INDICES_COMPUESTOS=true` (apagado por defecto: el prompt es idéntico al evaluado).
+- (29/10) `resumen.md` dice «Latencia de ejecución (HTTP, banco chico)», pero la corrida fue en el banco de volumen (desde el 24/10): la etiqueta de `evaluacion_gemini.mjs:505` quedó vieja. No se cambió.
 - Confirmar si `../db/` (fuera del repo, no existe en disco) es relevante.
 - Hallazgos de seguridad 4–6 (`SEGURIDAD.md`): documentados, no corregidos a propósito.
 - Firmar en el backend el SQL generado para que un no técnico no pueda mandar SQL

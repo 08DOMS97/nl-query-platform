@@ -1,0 +1,7164 @@
+[
+ {
+  "clave": "S10|original|postgres",
+  "id": "S10",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 3499.67,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3499.67,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S10|parafrasis|postgres",
+  "id": "S10",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 3499.67,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3499.67,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S10|original|mysql",
+  "id": "S10",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25046.12,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25041.61,
+   "barridos": []
+  },
+  "razon": 0.9998199321890976
+ },
+ {
+  "clave": "S10|parafrasis|mysql",
+  "id": "S10",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25046.12,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25041.61,
+   "barridos": []
+  },
+  "razon": 0.9998199321890976
+ },
+ {
+  "clave": "S10|original|mariadb",
+  "id": "S10",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 24.91699389,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 24.91699389,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S10|parafrasis|mariadb",
+  "id": "S10",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 24.91699389,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 24.91699389,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S10|original|mssql",
+  "id": "S10",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.299657,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.299657,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S10|parafrasis|mssql",
+  "id": "S10",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.299657,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.299657,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S13|original|postgres",
+  "id": "S13",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 172.6,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 172.6,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S13|parafrasis|postgres",
+  "id": "S13",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 172.6,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2261,
+   "barridos": []
+  },
+  "razon": 13.09965237543453
+ },
+ {
+  "clave": "S13|original|mysql",
+  "id": "S13",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1425.31,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1422.29,
+   "barridos": []
+  },
+  "razon": 0.9978811626944314
+ },
+ {
+  "clave": "S13|parafrasis|mysql",
+  "id": "S13",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1425.31,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1422.29,
+   "barridos": []
+  },
+  "razon": 0.9978811626944314
+ },
+ {
+  "clave": "S13|original|mariadb",
+  "id": "S13",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 2.23377057,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.23377057,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S13|parafrasis|mariadb",
+  "id": "S13",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 2.23377057,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.23377057,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S13|original|mssql",
+  "id": "S13",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0371883,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0371883,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S13|parafrasis|mssql",
+  "id": "S13",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0371883,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0371883,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M03|original|postgres",
+  "id": "M03",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 21526.24,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 17498.83,
+   "barridos": []
+  },
+  "razon": 0.8129069451980467
+ },
+ {
+  "clave": "M03|parafrasis|postgres",
+  "id": "M03",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 21526.24,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 17493.35,
+   "barridos": []
+  },
+  "razon": 0.812652372174611
+ },
+ {
+  "clave": "M03|original|mysql",
+  "id": "M03",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M03|parafrasis|mysql",
+  "id": "M03",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M03|original|mariadb",
+  "id": "M03",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 304.0137979,
+   "barridos": []
+  },
+  "razon": 2.9755608080759544
+ },
+ {
+  "clave": "M03|parafrasis|mariadb",
+  "id": "M03",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 304.0137979,
+   "barridos": []
+  },
+  "razon": 2.9755608080759544
+ },
+ {
+  "clave": "M03|original|mssql",
+  "id": "M03",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.92331,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.12825,
+   "barridos": []
+  },
+  "razon": 0.6353956992348644
+ },
+ {
+  "clave": "M03|parafrasis|mssql",
+  "id": "M03",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.92331,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.11466,
+   "barridos": []
+  },
+  "razon": 0.6326353611696197
+ },
+ {
+  "clave": "M05|original|postgres",
+  "id": "M05",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 7851.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 8948.51,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1.13974737973663
+ },
+ {
+  "clave": "M05|parafrasis|postgres",
+  "id": "M05",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 7851.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 8948.51,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1.13974737973663
+ },
+ {
+  "clave": "M05|original|mysql",
+  "id": "M05",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 60391.16,
+   "barridos": [
+    "c"
+   ]
+  },
+  "razon": 0.7826064869950381
+ },
+ {
+  "clave": "M05|parafrasis|mysql",
+  "id": "M05",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 60391.16,
+   "barridos": [
+    "c"
+   ]
+  },
+  "razon": 0.7826064869950381
+ },
+ {
+  "clave": "M05|original|mariadb",
+  "id": "M05",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.97177214,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 8.47252263,
+   "barridos": [
+    "c"
+   ]
+  },
+  "razon": 0.0901602942783452
+ },
+ {
+  "clave": "M05|parafrasis|mariadb",
+  "id": "M05",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.97177214,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 8.988991925,
+   "barridos": []
+  },
+  "razon": 0.09565629891078481
+ },
+ {
+  "clave": "M05|original|mssql",
+  "id": "M05",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.50796,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 2.01876,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 0.8049410676406321
+ },
+ {
+  "clave": "M05|parafrasis|mssql",
+  "id": "M05",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.50796,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 2.01876,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 0.8049410676406321
+ },
+ {
+  "clave": "C02|original|postgres",
+  "id": "C02",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 31456.07,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 30238.49,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9612926853227375
+ },
+ {
+  "clave": "C02|parafrasis|postgres",
+  "id": "C02",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 31456.07,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 30238.49,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9612926853227375
+ },
+ {
+  "clave": "C02|original|mysql",
+  "id": "C02",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 1040609.9299999999,
+   "barridos": [
+    "ranked"
+   ]
+  },
+  "gen": {
+   "costo": 936370.35,
+   "barridos": [
+    "ranked_products"
+   ]
+  },
+  "razon": 0.8998283823795531
+ },
+ {
+  "clave": "C02|parafrasis|mysql",
+  "id": "C02",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 1040609.9299999999,
+   "barridos": [
+    "ranked"
+   ]
+  },
+  "gen": {
+   "costo": 936370.35,
+   "barridos": [
+    "ranked_products"
+   ]
+  },
+  "razon": 0.8998283823795531
+ },
+ {
+  "clave": "C02|original|mariadb",
+  "id": "C02",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 762.5839551800001,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 762.59039278,
+   "barridos": []
+  },
+  "razon": 1.0000084418246098
+ },
+ {
+  "clave": "C02|parafrasis|mariadb",
+  "id": "C02",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 762.5839551800001,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 762.59039278,
+   "barridos": []
+  },
+  "razon": 1.0000084418246098
+ },
+ {
+  "clave": "C02|original|mssql",
+  "id": "C02",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.72131,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.43724,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.9236639785451898
+ },
+ {
+  "clave": "C02|parafrasis|mssql",
+  "id": "C02",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.72131,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.43724,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.9236639785451898
+ },
+ {
+  "clave": "S01|original|postgres",
+  "id": "S01",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1043.3,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1043.3,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|parafrasis|postgres",
+  "id": "S01",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1043.3,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1431.3,
+   "barridos": []
+  },
+  "razon": 1.3718968657145596
+ },
+ {
+  "clave": "S01|original|mysql",
+  "id": "S01",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|parafrasis|mysql",
+  "id": "S01",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|original|mariadb",
+  "id": "S01",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7.323025095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7.323025095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|parafrasis|mariadb",
+  "id": "S01",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7.323025095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7.323025095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|original|mssql",
+  "id": "S01",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.170505,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.170505,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S01|parafrasis|mssql",
+  "id": "S01",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.170505,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.170505,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|original|postgres",
+  "id": "S02",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 979,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 979,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|parafrasis|postgres",
+  "id": "S02",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 979,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 979,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|original|mysql",
+  "id": "S02",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 2629.68,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2608.67,
+   "barridos": []
+  },
+  "razon": 0.9920104347297011
+ },
+ {
+  "clave": "S02|parafrasis|mysql",
+  "id": "S02",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 2629.68,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2608.67,
+   "barridos": []
+  },
+  "razon": 0.9920104347297011
+ },
+ {
+  "clave": "S02|original|mariadb",
+  "id": "S02",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7.450519095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7.450519095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|parafrasis|mariadb",
+  "id": "S02",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7.450519095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7.450519095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|original|mssql",
+  "id": "S02",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.175575,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.175575,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S02|parafrasis|mssql",
+  "id": "S02",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.175575,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.175575,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|original|postgres",
+  "id": "S03",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.55,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.55,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|parafrasis|postgres",
+  "id": "S03",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.55,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.55,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|original|mysql",
+  "id": "S03",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|parafrasis|mysql",
+  "id": "S03",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|original|mariadb",
+  "id": "S03",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.3530524,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|parafrasis|mariadb",
+  "id": "S03",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.3530524,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|original|mssql",
+  "id": "S03",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0370671,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0370671,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S03|parafrasis|mssql",
+  "id": "S03",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0370671,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0370671,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|original|postgres",
+  "id": "S04",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 70.27,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70.27,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|parafrasis|postgres",
+  "id": "S04",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 70.27,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70.27,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|original|mysql",
+  "id": "S04",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|parafrasis|mysql",
+  "id": "S04",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|original|mariadb",
+  "id": "S04",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|parafrasis|mariadb",
+  "id": "S04",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|original|mssql",
+  "id": "S04",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0583562,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0583562,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S04|parafrasis|mssql",
+  "id": "S04",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0583562,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0583562,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S05|original|postgres",
+  "id": "S05",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 84.17,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8316502316739931
+ },
+ {
+  "clave": "S05|parafrasis|postgres",
+  "id": "S05",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 84.17,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8316502316739931
+ },
+ {
+  "clave": "S05|original|mysql",
+  "id": "S05",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 882.67,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.2508298684672641
+ },
+ {
+  "clave": "S05|parafrasis|mysql",
+  "id": "S05",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 882.67,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.2508298684672641
+ },
+ {
+  "clave": "S05|original|mariadb",
+  "id": "S05",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.65676,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.2130980950771385
+ },
+ {
+  "clave": "S05|parafrasis|mariadb",
+  "id": "S05",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.65676,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.3530524,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.2130980950771385
+ },
+ {
+  "clave": "S05|original|mssql",
+  "id": "S05",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0738248,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0573339,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.7766211354449996
+ },
+ {
+  "clave": "S05|parafrasis|mssql",
+  "id": "S05",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0738248,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0573339,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.7766211354449996
+ },
+ {
+  "clave": "S06|original|postgres",
+  "id": "S06",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.2,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.2,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|parafrasis|postgres",
+  "id": "S06",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.2,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.2,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|original|mysql",
+  "id": "S06",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.75,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|parafrasis|mysql",
+  "id": "S06",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.75,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|original|mariadb",
+  "id": "S06",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.008846195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.008846195,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|parafrasis|mariadb",
+  "id": "S06",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.008846195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.008846195,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|original|mssql",
+  "id": "S06",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.003308,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.003308,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S06|parafrasis|mssql",
+  "id": "S06",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.003308,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.003308,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S07|original|postgres",
+  "id": "S07",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.42,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.15,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.8098591549295775
+ },
+ {
+  "clave": "S07|parafrasis|postgres",
+  "id": "S07",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.42,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.15,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.8098591549295775
+ },
+ {
+  "clave": "S07|original|mysql",
+  "id": "S07",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 3.25,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.75,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.5384615384615384
+ },
+ {
+  "clave": "S07|parafrasis|mysql",
+  "id": "S07",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 3.25,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 1.75,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.5384615384615384
+ },
+ {
+  "clave": "S07|original|mariadb",
+  "id": "S07",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.022874306,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 0.0132998,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.5814296617348741
+ },
+ {
+  "clave": "S07|parafrasis|mariadb",
+  "id": "S07",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.022874306,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 0.0132998,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.5814296617348741
+ },
+ {
+  "clave": "S07|original|mssql",
+  "id": "S07",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0088577,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0032985,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.37238786592456286
+ },
+ {
+  "clave": "S07|parafrasis|mssql",
+  "id": "S07",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0088577,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0032985,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.37238786592456286
+ },
+ {
+  "clave": "S08|original|postgres",
+  "id": "S08",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 4360.6,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4360.6,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|parafrasis|postgres",
+  "id": "S08",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 4360.6,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4360.6,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|original|mysql",
+  "id": "S08",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|parafrasis|mysql",
+  "id": "S08",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|original|mariadb",
+  "id": "S08",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|parafrasis|mariadb",
+  "id": "S08",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|original|mssql",
+  "id": "S08",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.869764,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.869764,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S08|parafrasis|mssql",
+  "id": "S08",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.869764,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.869764,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|original|postgres",
+  "id": "S09",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 759.8,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 759.8,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|parafrasis|postgres",
+  "id": "S09",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 759.8,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 759.8,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|original|mysql",
+  "id": "S09",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 6678.08,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6668.79,
+   "barridos": []
+  },
+  "razon": 0.9986088815947098
+ },
+ {
+  "clave": "S09|parafrasis|mysql",
+  "id": "S09",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 6678.08,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6668.79,
+   "barridos": []
+  },
+  "razon": 0.9986088815947098
+ },
+ {
+  "clave": "S09|original|mariadb",
+  "id": "S09",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 10.1641692,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 10.1641692,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|parafrasis|mariadb",
+  "id": "S09",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 10.1641692,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 10.1641692,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|original|mssql",
+  "id": "S09",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.153063,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.153063,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S09|parafrasis|mssql",
+  "id": "S09",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.153063,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.153063,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S11|original|postgres",
+  "id": "S11",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.64,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.64,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S11|parafrasis|postgres",
+  "id": "S11",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.64,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.64,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S11|original|mysql",
+  "id": "S11",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S11|parafrasis|mysql",
+  "id": "S11",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S11|original|mariadb",
+  "id": "S11",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 36.71551331,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 40.5968096,
+   "barridos": []
+  },
+  "razon": 1.105712706703269
+ },
+ {
+  "clave": "S11|parafrasis|mariadb",
+  "id": "S11",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 36.71551331,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 40.5968096,
+   "barridos": []
+  },
+  "razon": 1.105712706703269
+ },
+ {
+  "clave": "S11|original|mssql",
+  "id": "S11",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.00330657,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0229967,
+   "barridos": []
+  },
+  "razon": 6.954850494621314
+ },
+ {
+  "clave": "S11|parafrasis|mssql",
+  "id": "S11",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.00330657,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0229967,
+   "barridos": []
+  },
+  "razon": 6.954850494621314
+ },
+ {
+  "clave": "S12|original|postgres",
+  "id": "S12",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 861.61,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 861.61,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S12|parafrasis|postgres",
+  "id": "S12",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 861.61,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 861.61,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S12|original|mysql",
+  "id": "S12",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7233.57,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7223.41,
+   "barridos": []
+  },
+  "razon": 0.9985954376607955
+ },
+ {
+  "clave": "S12|parafrasis|mysql",
+  "id": "S12",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 7233.57,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 7223.41,
+   "barridos": []
+  },
+  "razon": 0.9985954376607955
+ },
+ {
+  "clave": "S12|original|mariadb",
+  "id": "S12",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 11.26701722,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 11.26701722,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S12|parafrasis|mariadb",
+  "id": "S12",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 11.26701722,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 11.26701722,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S12|original|mssql",
+  "id": "S12",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.1731,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.1731,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S12|parafrasis|mssql",
+  "id": "S12",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.1731,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.1731,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|original|postgres",
+  "id": "S14",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 4771.97,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4771.97,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|parafrasis|postgres",
+  "id": "S14",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 4771.97,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4771.97,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|original|mysql",
+  "id": "S14",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 6.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6.75,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|parafrasis|mysql",
+  "id": "S14",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 6.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6.75,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|original|mariadb",
+  "id": "S14",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.011640391,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.008468025,
+   "barridos": []
+  },
+  "razon": 0.7274691202383151
+ },
+ {
+  "clave": "S14|parafrasis|mariadb",
+  "id": "S14",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.011640391,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.008468025,
+   "barridos": []
+  },
+  "razon": 0.7274691202383151
+ },
+ {
+  "clave": "S14|original|mssql",
+  "id": "S14",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.39552,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.39552,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S14|parafrasis|mssql",
+  "id": "S14",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 1.39552,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.39552,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S15|original|postgres",
+  "id": "S15",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 70.02,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70.01,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.9998571836618111
+ },
+ {
+  "clave": "S15|parafrasis|postgres",
+  "id": "S15",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "simple",
+  "ref": {
+   "costo": 70.02,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 70.01,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.9998571836618111
+ },
+ {
+  "clave": "S15|original|mysql",
+  "id": "S15",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S15|parafrasis|mysql",
+  "id": "S15",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 221.4,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S15|original|mariadb",
+  "id": "S15",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.29852376,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.29852376,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S15|parafrasis|mariadb",
+  "id": "S15",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.29852376,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.29852376,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "S15|original|mssql",
+  "id": "S15",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0126085,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0126084,
+   "barridos": []
+  },
+  "razon": 0.9999920688424476
+ },
+ {
+  "clave": "S15|parafrasis|mssql",
+  "id": "S15",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "simple",
+  "ref": {
+   "costo": 0.0126085,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.0126084,
+   "barridos": []
+  },
+  "razon": 0.9999920688424476
+ },
+ {
+  "clave": "M01|original|postgres",
+  "id": "M01",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 83.55,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 83.22,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960502692998204
+ },
+ {
+  "clave": "M01|parafrasis|postgres",
+  "id": "M01",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 83.55,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 83.22,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960502692998204
+ },
+ {
+  "clave": "M01|original|mysql",
+  "id": "M01",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 204.38,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 204.38,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M01|parafrasis|mysql",
+  "id": "M01",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 204.38,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 204.38,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M01|original|mariadb",
+  "id": "M01",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.313321695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.614385268,
+   "barridos": []
+  },
+  "razon": 5.152484790432402
+ },
+ {
+  "clave": "M01|parafrasis|mariadb",
+  "id": "M01",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.313321695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.614385268,
+   "barridos": []
+  },
+  "razon": 5.152484790432402
+ },
+ {
+  "clave": "M01|original|mssql",
+  "id": "M01",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.029332,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 0.0178792,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.609545888449475
+ },
+ {
+  "clave": "M01|parafrasis|mssql",
+  "id": "M01",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.029332,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 0.0178792,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.609545888449475
+ },
+ {
+  "clave": "M02|original|postgres",
+  "id": "M02",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 13628.72,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 9601.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 0.7044909573312828
+ },
+ {
+  "clave": "M02|parafrasis|postgres",
+  "id": "M02",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 13628.72,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 9601.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 0.7044909573312828
+ },
+ {
+  "clave": "M02|original|mysql",
+  "id": "M02",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M02|parafrasis|mysql",
+  "id": "M02",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 77166.7,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M02|original|mariadb",
+  "id": "M02",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.97177214,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 295.815318,
+   "barridos": []
+  },
+  "razon": 3.1479167761068894
+ },
+ {
+  "clave": "M02|parafrasis|mariadb",
+  "id": "M02",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.97177214,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 295.815318,
+   "barridos": []
+  },
+  "razon": 3.1479167761068894
+ },
+ {
+  "clave": "M02|original|mssql",
+  "id": "M02",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.39197,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.59691,
+   "barridos": []
+  },
+  "razon": 0.4707913100646527
+ },
+ {
+  "clave": "M02|parafrasis|mssql",
+  "id": "M02",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.39197,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.59691,
+   "barridos": []
+  },
+  "razon": 0.4707913100646527
+ },
+ {
+  "clave": "M04|original|postgres",
+  "id": "M04",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 18229.75,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 18229.75,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|parafrasis|postgres",
+  "id": "M04",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 18229.75,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 18229.75,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|original|mysql",
+  "id": "M04",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 326357.18,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 326357.18,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|parafrasis|mysql",
+  "id": "M04",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 326357.18,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 326357.18,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|original|mariadb",
+  "id": "M04",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 735.1092809,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 735.1092809,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|parafrasis|mariadb",
+  "id": "M04",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 735.1092809,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 735.1092809,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M04|original|mssql",
+  "id": "M04",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.39773,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.37366,
+   "barridos": []
+  },
+  "razon": 0.9929158585290767
+ },
+ {
+  "clave": "M04|parafrasis|mssql",
+  "id": "M04",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.39773,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.37366,
+   "barridos": []
+  },
+  "razon": 0.9929158585290767
+ },
+ {
+  "clave": "M06|original|postgres",
+  "id": "M06",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 35035.97,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 35035.97,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M06|parafrasis|postgres",
+  "id": "M06",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 35035.97,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 1025.88,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.02928076488249077
+ },
+ {
+  "clave": "M06|original|mysql",
+  "id": "M06",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 119639.13,
+   "barridos": [
+    "p",
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 119639.13,
+   "barridos": [
+    "p",
+    "o"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M06|parafrasis|mysql",
+  "id": "M06",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 119639.13,
+   "barridos": [
+    "p",
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 73457.44,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.613991760053755
+ },
+ {
+  "clave": "M06|original|mariadb",
+  "id": "M06",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.01325337,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 1.01325337,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M06|parafrasis|mariadb",
+  "id": "M06",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.01325337,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 0.40662481,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.40130615109624557
+ },
+ {
+  "clave": "M06|original|mssql",
+  "id": "M06",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.10819,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 4.10819,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M06|parafrasis|mssql",
+  "id": "M06",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.10819,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.395664,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.0963110274841232
+ },
+ {
+  "clave": "M07|original|postgres",
+  "id": "M07",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 18326.83,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 18326.47,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9999803566683382
+ },
+ {
+  "clave": "M07|parafrasis|postgres",
+  "id": "M07",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 18326.83,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 18326.47,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9999803566683382
+ },
+ {
+  "clave": "M07|original|mysql",
+  "id": "M07",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 326340.15,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 326340.15,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M07|parafrasis|mysql",
+  "id": "M07",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 326340.15,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 326340.15,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M07|original|mariadb",
+  "id": "M07",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 733.5920103,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1210.219248,
+   "barridos": []
+  },
+  "razon": 1.6497170511781951
+ },
+ {
+  "clave": "M07|parafrasis|mariadb",
+  "id": "M07",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 733.5920103,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1210.219248,
+   "barridos": []
+  },
+  "razon": 1.6497170511781951
+ },
+ {
+  "clave": "M07|original|mssql",
+  "id": "M07",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.35001,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.34947,
+   "barridos": []
+  },
+  "razon": 0.9998388064513241
+ },
+ {
+  "clave": "M07|parafrasis|mssql",
+  "id": "M07",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 3.35001,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.34947,
+   "barridos": []
+  },
+  "razon": 0.9998388064513241
+ },
+ {
+  "clave": "M08|original|postgres",
+  "id": "M08",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 6104.53,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "gen": {
+   "costo": 12459,
+   "barridos": [
+    "payments",
+    "orders"
+   ]
+  },
+  "razon": 2.0409433650092637
+ },
+ {
+  "clave": "M08|parafrasis|postgres",
+  "id": "M08",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 6104.53,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "gen": {
+   "costo": 6104.44,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "razon": 0.9999852568502406
+ },
+ {
+  "clave": "M08|original|mysql",
+  "id": "M08",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 15930.5,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 65622.15,
+   "barridos": []
+  },
+  "razon": 4.119277486582342
+ },
+ {
+  "clave": "M08|parafrasis|mysql",
+  "id": "M08",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 15930.5,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 15930.5,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M08|original|mariadb",
+  "id": "M08",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 43.76801714,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 487.0924671,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 11.128958973442773
+ },
+ {
+  "clave": "M08|parafrasis|mariadb",
+  "id": "M08",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 43.76801714,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 43.76801714,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M08|original|mssql",
+  "id": "M08",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.23275,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.66386,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "razon": 1.6409629380808421
+ },
+ {
+  "clave": "M08|parafrasis|mssql",
+  "id": "M08",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.23275,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.22889,
+   "barridos": []
+  },
+  "razon": 0.9982711902362558
+ },
+ {
+  "clave": "M09|original|postgres",
+  "id": "M09",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4622.48,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4622.39,
+   "barridos": []
+  },
+  "razon": 0.9999805299319847
+ },
+ {
+  "clave": "M09|parafrasis|postgres",
+  "id": "M09",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4622.48,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4622.39,
+   "barridos": []
+  },
+  "razon": 0.9999805299319847
+ },
+ {
+  "clave": "M09|original|mysql",
+  "id": "M09",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M09|parafrasis|mysql",
+  "id": "M09",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M09|original|mariadb",
+  "id": "M09",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 200.6116877,
+   "barridos": []
+  },
+  "razon": 5.491822142953985
+ },
+ {
+  "clave": "M09|parafrasis|mariadb",
+  "id": "M09",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 200.6116877,
+   "barridos": []
+  },
+  "razon": 5.491822142953985
+ },
+ {
+  "clave": "M09|original|mssql",
+  "id": "M09",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.1603,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.15643,
+   "barridos": []
+  },
+  "razon": 0.9966646556924933
+ },
+ {
+  "clave": "M09|parafrasis|mssql",
+  "id": "M09",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.1603,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.15643,
+   "barridos": []
+  },
+  "razon": 0.9966646556924933
+ },
+ {
+  "clave": "M10|original|postgres",
+  "id": "M10",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1221.5,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1582.21,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.295300859598854
+ },
+ {
+  "clave": "M10|parafrasis|postgres",
+  "id": "M10",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1221.5,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1582.21,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.295300859598854
+ },
+ {
+  "clave": "M10|original|mysql",
+  "id": "M10",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M10|parafrasis|mysql",
+  "id": "M10",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M10|original|mariadb",
+  "id": "M10",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 8.425717095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 8.425717095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M10|parafrasis|mariadb",
+  "id": "M10",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 8.425717095,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 8.425717095,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M10|original|mssql",
+  "id": "M10",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.287459,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.287459,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M10|parafrasis|mssql",
+  "id": "M10",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.287459,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.287459,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M11|original|postgres",
+  "id": "M11",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1180.55,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1581.09,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.3392825378001778
+ },
+ {
+  "clave": "M11|parafrasis|postgres",
+  "id": "M11",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1180.55,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1581.09,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.3392825378001778
+ },
+ {
+  "clave": "M11|original|mysql",
+  "id": "M11",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M11|parafrasis|mysql",
+  "id": "M11",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5297.11,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M11|original|mariadb",
+  "id": "M11",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 8.149616695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 41.44263896,
+   "barridos": []
+  },
+  "razon": 5.085225540168794
+ },
+ {
+  "clave": "M11|parafrasis|mariadb",
+  "id": "M11",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 8.149616695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 41.44263896,
+   "barridos": []
+  },
+  "razon": 5.085225540168794
+ },
+ {
+  "clave": "M11|original|mssql",
+  "id": "M11",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.249322,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.237916,
+   "barridos": []
+  },
+  "razon": 0.9542519312375162
+ },
+ {
+  "clave": "M11|parafrasis|mssql",
+  "id": "M11",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.249322,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.237916,
+   "barridos": []
+  },
+  "razon": 0.9542519312375162
+ },
+ {
+  "clave": "M12|original|postgres",
+  "id": "M12",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 37064.59,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 36521.02,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 0.9853345200904691
+ },
+ {
+  "clave": "M12|parafrasis|postgres",
+  "id": "M12",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 37064.59,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 36521.02,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 0.9853345200904691
+ },
+ {
+  "clave": "M12|original|mysql",
+  "id": "M12",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 149748.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 0.1683174928588481
+ },
+ {
+  "clave": "M12|parafrasis|mysql",
+  "id": "M12",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 149748.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 149748.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M12|original|mariadb",
+  "id": "M12",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 200.7980341,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 200.7980341,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M12|parafrasis|mariadb",
+  "id": "M12",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 200.7980341,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 200.7980341,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M12|original|mssql",
+  "id": "M12",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.63359,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.63359,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M12|parafrasis|mssql",
+  "id": "M12",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.63359,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.63359,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|original|postgres",
+  "id": "M13",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 14783.95,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 14853.22,
+   "barridos": []
+  },
+  "razon": 1.0046854866256987
+ },
+ {
+  "clave": "M13|parafrasis|postgres",
+  "id": "M13",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 14783.95,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 14853.22,
+   "barridos": []
+  },
+  "razon": 1.0046854866256987
+ },
+ {
+  "clave": "M13|original|mysql",
+  "id": "M13",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 88144.81,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 88144.81,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|parafrasis|mysql",
+  "id": "M13",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 88144.81,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 88144.81,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|original|mariadb",
+  "id": "M13",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 136.0572673,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 136.0572673,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|parafrasis|mariadb",
+  "id": "M13",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 136.0572673,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 136.0572673,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|original|mssql",
+  "id": "M13",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.21522,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.21522,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M13|parafrasis|mssql",
+  "id": "M13",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.21522,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.21522,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M14|original|postgres",
+  "id": "M14",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 7168.96,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 9726.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1.3567253827612373
+ },
+ {
+  "clave": "M14|parafrasis|postgres",
+  "id": "M14",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 7168.96,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 9726.31,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1.3567253827612373
+ },
+ {
+  "clave": "M14|original|mysql",
+  "id": "M14",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 239953.47,
+   "barridos": []
+  },
+  "razon": 9.519979766120153
+ },
+ {
+  "clave": "M14|parafrasis|mysql",
+  "id": "M14",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 239953.47,
+   "barridos": []
+  },
+  "razon": 9.519979766120153
+ },
+ {
+  "clave": "M14|original|mariadb",
+  "id": "M14",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 295.815318,
+   "barridos": []
+  },
+  "razon": 8.273858070356832
+ },
+ {
+  "clave": "M14|parafrasis|mariadb",
+  "id": "M14",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 35.75300851,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 295.2988487,
+   "barridos": [
+    "c"
+   ]
+  },
+  "razon": 8.259412592297117
+ },
+ {
+  "clave": "M14|original|mssql",
+  "id": "M14",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.77496,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.5921,
+   "barridos": []
+  },
+  "razon": 0.8969779600667057
+ },
+ {
+  "clave": "M14|parafrasis|mssql",
+  "id": "M14",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.77496,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.5921,
+   "barridos": []
+  },
+  "razon": 0.8969779600667057
+ },
+ {
+  "clave": "M15|original|postgres",
+  "id": "M15",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 76.94,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 9.89,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.1285417208214193
+ },
+ {
+  "clave": "M15|parafrasis|postgres",
+  "id": "M15",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 76.94,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 9.89,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.1285417208214193
+ },
+ {
+  "clave": "M15|original|mysql",
+  "id": "M15",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 459.93,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 424.05,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.9219881286282695
+ },
+ {
+  "clave": "M15|parafrasis|mysql",
+  "id": "M15",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 459.93,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 424.05,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.9219881286282695
+ },
+ {
+  "clave": "M15|original|mariadb",
+  "id": "M15",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.160467795,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.07988487270238818
+ },
+ {
+  "clave": "M15|parafrasis|mariadb",
+  "id": "M15",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 0.160467795,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.07988487270238818
+ },
+ {
+  "clave": "M15|original|mssql",
+  "id": "M15",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.0897425,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.00863423,
+   "barridos": [
+    "categories",
+    "products"
+   ]
+  },
+  "razon": 0.09621115970693929
+ },
+ {
+  "clave": "M15|parafrasis|mssql",
+  "id": "M15",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.0897425,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.00863423,
+   "barridos": [
+    "categories",
+    "products"
+   ]
+  },
+  "razon": 0.09621115970693929
+ },
+ {
+  "clave": "M16|original|postgres",
+  "id": "M16",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.62,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 93.25,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960478530228584
+ },
+ {
+  "clave": "M16|parafrasis|postgres",
+  "id": "M16",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 93.62,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 93.25,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960478530228584
+ },
+ {
+  "clave": "M16|original|mysql",
+  "id": "M16",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M16|parafrasis|mysql",
+  "id": "M16",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 1235.15,
+   "barridos": []
+  },
+  "razon": 1.3487115090631143
+ },
+ {
+  "clave": "M16|original|mariadb",
+  "id": "M16",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.309801768,
+   "barridos": []
+  },
+  "razon": 1.6477019136881599
+ },
+ {
+  "clave": "M16|parafrasis|mariadb",
+  "id": "M16",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.309801768,
+   "barridos": []
+  },
+  "razon": 1.6477019136881599
+ },
+ {
+  "clave": "M16|original|mssql",
+  "id": "M16",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.10189,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0904354,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8875787614093631
+ },
+ {
+  "clave": "M16|parafrasis|mssql",
+  "id": "M16",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 0.10189,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0904354,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8875787614093631
+ },
+ {
+  "clave": "M17|original|postgres",
+  "id": "M17",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 10395.77,
+   "barridos": [
+    "shipments",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 27254.45,
+   "barridos": [
+    "shipments",
+    "orders"
+   ]
+  },
+  "razon": 2.6216865128797577
+ },
+ {
+  "clave": "M17|parafrasis|postgres",
+  "id": "M17",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 10395.77,
+   "barridos": [
+    "shipments",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 538.93,
+   "barridos": []
+  },
+  "razon": 0.05184127775046966
+ },
+ {
+  "clave": "M17|original|mysql",
+  "id": "M17",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 101277.31,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 94132.66,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.9294545836574847
+ },
+ {
+  "clave": "M17|parafrasis|mysql",
+  "id": "M17",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 101277.31,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 8406.21,
+   "barridos": []
+  },
+  "razon": 0.08300190832477679
+ },
+ {
+  "clave": "M17|original|mariadb",
+  "id": "M17",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 270.9502925,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 141.04415486000002,
+   "barridos": [
+    "s"
+   ]
+  },
+  "razon": 0.5205536172654253
+ },
+ {
+  "clave": "M17|parafrasis|mariadb",
+  "id": "M17",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 270.9502925,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6.71069955,
+   "barridos": []
+  },
+  "razon": 0.02476727184193758
+ },
+ {
+  "clave": "M17|original|mssql",
+  "id": "M17",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.37448,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 4.13814,
+   "barridos": []
+  },
+  "razon": 0.9459730070774126
+ },
+ {
+  "clave": "M17|parafrasis|mssql",
+  "id": "M17",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4.37448,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 0.110148,
+   "barridos": []
+  },
+  "razon": 0.025179678498930158
+ },
+ {
+  "clave": "M18|original|postgres",
+  "id": "M18",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4881.46,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4881.45,
+   "barridos": []
+  },
+  "razon": 0.9999979514325632
+ },
+ {
+  "clave": "M18|parafrasis|postgres",
+  "id": "M18",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 4881.46,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4881.45,
+   "barridos": []
+  },
+  "razon": 0.9999979514325632
+ },
+ {
+  "clave": "M18|original|mysql",
+  "id": "M18",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M18|parafrasis|mysql",
+  "id": "M18",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M18|original|mariadb",
+  "id": "M18",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M18|parafrasis|mariadb",
+  "id": "M18",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 36.52916691,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M18|original|mssql",
+  "id": "M18",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.18143,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.18143,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M18|parafrasis|mssql",
+  "id": "M18",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.18143,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1.15643,
+   "barridos": []
+  },
+  "razon": 0.9788392033383273
+ },
+ {
+  "clave": "M19|original|postgres",
+  "id": "M19",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5800.19,
+   "barridos": [
+    "addresses",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 5800.19,
+   "barridos": [
+    "addresses",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|parafrasis|postgres",
+  "id": "M19",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5800.19,
+   "barridos": [
+    "addresses",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 5800.19,
+   "barridos": [
+    "addresses",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|original|mysql",
+  "id": "M19",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 62199.21,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 62199.21,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|parafrasis|mysql",
+  "id": "M19",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 62199.21,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 62199.21,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|original|mariadb",
+  "id": "M19",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 57.41779787,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 57.41779787,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|parafrasis|mariadb",
+  "id": "M19",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 57.41779787,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 57.41779787,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M19|original|mssql",
+  "id": "M19",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.8434,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.80628,
+   "barridos": []
+  },
+  "razon": 2.0648150157318
+ },
+ {
+  "clave": "M19|parafrasis|mssql",
+  "id": "M19",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 1.8434,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.80628,
+   "barridos": []
+  },
+  "razon": 2.0648150157318
+ },
+ {
+  "clave": "M20|original|postgres",
+  "id": "M20",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5257.68,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 5351.34,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1.0178139407495321
+ },
+ {
+  "clave": "M20|parafrasis|postgres",
+  "id": "M20",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 5257.68,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 5209.92,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 0.9909161455242617
+ },
+ {
+  "clave": "M20|original|mysql",
+  "id": "M20",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 20686.1,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 12665.5,
+   "barridos": []
+  },
+  "razon": 0.6122710419073678
+ },
+ {
+  "clave": "M20|parafrasis|mysql",
+  "id": "M20",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 20686.1,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 20686.1,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M20|original|mariadb",
+  "id": "M20",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 33.1017442,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 33.1017442,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M20|parafrasis|mariadb",
+  "id": "M20",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 33.1017442,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 33.1017442,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "M20|original|mssql",
+  "id": "M20",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.03728,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 2.11674,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1.0390029843713187
+ },
+ {
+  "clave": "M20|parafrasis|mssql",
+  "id": "M20",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "intermedio",
+  "ref": {
+   "costo": 2.03728,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "gen": {
+   "costo": 2.11674,
+   "barridos": [
+    "shipments"
+   ]
+  },
+  "razon": 1.0390029843713187
+ },
+ {
+  "clave": "C01|original|postgres",
+  "id": "C01",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 17743.36,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 17743.36,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|parafrasis|postgres",
+  "id": "C01",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 17743.36,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 17743.36,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|original|mysql",
+  "id": "C01",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 78743.23,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 78743.23,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|parafrasis|mysql",
+  "id": "C01",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 78743.23,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 78743.23,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|original|mariadb",
+  "id": "C01",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|parafrasis|mariadb",
+  "id": "C01",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|original|mssql",
+  "id": "C01",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.24828,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.24828,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C01|parafrasis|mssql",
+  "id": "C01",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.24828,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.24828,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C03|original|postgres",
+  "id": "C03",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10492.03,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 10255.9,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 0.9774943457081231
+ },
+ {
+  "clave": "C03|parafrasis|postgres",
+  "id": "C03",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10492.03,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 20243.37,
+   "barridos": []
+  },
+  "razon": 1.9294045098994186
+ },
+ {
+  "clave": "C03|original|mysql",
+  "id": "C03",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 130689.79,
+   "barridos": [
+    "gc",
+    "gasto_cliente"
+   ]
+  },
+  "gen": {
+   "costo": 161084.75999999998,
+   "barridos": [
+    "customer_spending",
+    "cs"
+   ]
+  },
+  "razon": 1.2325734091393061
+ },
+ {
+  "clave": "C03|parafrasis|mysql",
+  "id": "C03",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 130689.79,
+   "barridos": [
+    "gc",
+    "gasto_cliente"
+   ]
+  },
+  "gen": {
+   "costo": 158421.61000000002,
+   "barridos": [
+    "customer_spending",
+    "customer_spending"
+   ]
+  },
+  "razon": 1.212195765254501
+ },
+ {
+  "clave": "C03|original|mariadb",
+  "id": "C03",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 598.693129994,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 252305.490498594,
+   "barridos": []
+  },
+  "razon": 421.4270681561397
+ },
+ {
+  "clave": "C03|parafrasis|mariadb",
+  "id": "C03",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 598.693129994,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 630.6165780399999,
+   "barridos": []
+  },
+  "razon": 1.0533218880368977
+ },
+ {
+  "clave": "C03|original|mssql",
+  "id": "C03",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 4.58485,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4.43655,
+   "barridos": []
+  },
+  "razon": 0.967654339836636
+ },
+ {
+  "clave": "C03|parafrasis|mssql",
+  "id": "C03",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 4.58485,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4.73769,
+   "barridos": []
+  },
+  "razon": 1.0333358779458433
+ },
+ {
+  "clave": "C04|original|postgres",
+  "id": "C04",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10433.43,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 10433.43,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|parafrasis|postgres",
+  "id": "C04",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10433.43,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 10433.43,
+   "barridos": [
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|original|mysql",
+  "id": "C04",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 34324.91,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 34324.91,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|parafrasis|mysql",
+  "id": "C04",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 34324.91,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 34324.91,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|original|mariadb",
+  "id": "C04",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 65.70802824,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 65.70802824,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|parafrasis|mariadb",
+  "id": "C04",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 65.70802824,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 65.70802824,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C04|original|mssql",
+  "id": "C04",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.89955,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.90266,
+   "barridos": []
+  },
+  "razon": 1.0010725802279663
+ },
+ {
+  "clave": "C04|parafrasis|mssql",
+  "id": "C04",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.89955,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.90266,
+   "barridos": []
+  },
+  "razon": 1.0010725802279663
+ },
+ {
+  "clave": "C05|original|postgres",
+  "id": "C05",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 18327.46,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 18327.37,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9999950893358927
+ },
+ {
+  "clave": "C05|parafrasis|postgres",
+  "id": "C05",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 18327.46,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 18327.37,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9999950893358927
+ },
+ {
+  "clave": "C05|original|mysql",
+  "id": "C05",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 726946.01,
+   "barridos": [
+    "ventas_categoria",
+    "vc"
+   ]
+  },
+  "gen": {
+   "costo": 407635.24,
+   "barridos": [
+    "category_sales",
+    "cs"
+   ]
+  },
+  "razon": 0.5607503643908851
+ },
+ {
+  "clave": "C05|parafrasis|mysql",
+  "id": "C05",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 726946.01,
+   "barridos": [
+    "ventas_categoria",
+    "vc"
+   ]
+  },
+  "gen": {
+   "costo": 482844.82999999996,
+   "barridos": []
+  },
+  "razon": 0.6642100284724033
+ },
+ {
+  "clave": "C05|original|mariadb",
+  "id": "C05",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2420.63825695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1867.7580564,
+   "barridos": []
+  },
+  "razon": 0.771597346706968
+ },
+ {
+  "clave": "C05|parafrasis|mariadb",
+  "id": "C05",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2420.63825695,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1867.7580564,
+   "barridos": []
+  },
+  "razon": 0.771597346706968
+ },
+ {
+  "clave": "C05|original|mssql",
+  "id": "C05",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 6.69954,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6.69901,
+   "barridos": []
+  },
+  "razon": 0.9999208900909615
+ },
+ {
+  "clave": "C05|parafrasis|mssql",
+  "id": "C05",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 6.69954,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 6.69901,
+   "barridos": []
+  },
+  "razon": 0.9999208900909615
+ },
+ {
+  "clave": "C06|original|postgres",
+  "id": "C06",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 7739,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 8357.75,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1.079952190205453
+ },
+ {
+  "clave": "C06|parafrasis|postgres",
+  "id": "C06",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 7739,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 8357.75,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1.079952190205453
+ },
+ {
+  "clave": "C06|original|mysql",
+  "id": "C06",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C06|parafrasis|mysql",
+  "id": "C06",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 25205.25,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 25205.25,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C06|original|mariadb",
+  "id": "C06",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 40.5968096,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 40.5968096,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C06|parafrasis|mariadb",
+  "id": "C06",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 40.5968096,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 40.5968096,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C06|original|mssql",
+  "id": "C06",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.27217,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 2.27217,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C06|parafrasis|mssql",
+  "id": "C06",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.27217,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 2.27217,
+   "barridos": [
+    "orders"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|original|postgres",
+  "id": "C07",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102772.88,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 102772.88,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|parafrasis|postgres",
+  "id": "C07",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102772.88,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 102772.88,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|original|mysql",
+  "id": "C07",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 209806.66,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 209806.66,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|parafrasis|mysql",
+  "id": "C07",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 209806.66,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 209806.66,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|original|mariadb",
+  "id": "C07",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 436.7857062,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 436.7857062,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|parafrasis|mariadb",
+  "id": "C07",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 436.7857062,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 436.7857062,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C07|original|mssql",
+  "id": "C07",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.29615,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.29926,
+   "barridos": []
+  },
+  "razon": 1.000943525021616
+ },
+ {
+  "clave": "C07|parafrasis|mssql",
+  "id": "C07",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.29615,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.29926,
+   "barridos": []
+  },
+  "razon": 1.000943525021616
+ },
+ {
+  "clave": "C08|original|postgres",
+  "id": "C08",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 56517.14,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 57222.64,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 1.0124829388040513
+ },
+ {
+  "clave": "C08|parafrasis|postgres",
+  "id": "C08",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 56517.14,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 58367.07,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 1.0327321941626912
+ },
+ {
+  "clave": "C08|original|mysql",
+  "id": "C08",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 327873.14,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 327873.14,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C08|parafrasis|mysql",
+  "id": "C08",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 327873.14,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1235.9,
+   "barridos": []
+  },
+  "razon": 0.00376944570695849
+ },
+ {
+  "clave": "C08|original|mariadb",
+  "id": "C08",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 735.2874268,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 735.2874268,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C08|parafrasis|mariadb",
+  "id": "C08",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 735.2874268,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 2.12844056,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 0.002894705502123241
+ },
+ {
+  "clave": "C08|original|mssql",
+  "id": "C08",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.40342,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.36274,
+   "barridos": [
+    "categories"
+   ]
+  },
+  "razon": 0.9880473171104359
+ },
+ {
+  "clave": "C08|parafrasis|mssql",
+  "id": "C08",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.40342,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 3.98135,
+   "barridos": [
+    "order_items",
+    "categories"
+   ]
+  },
+  "razon": 1.1698086042862768
+ },
+ {
+  "clave": "C09|original|postgres",
+  "id": "C09",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 104812.85,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 109233.94,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers",
+    "products"
+   ]
+  },
+  "razon": 1.0421808013044203
+ },
+ {
+  "clave": "C09|parafrasis|postgres",
+  "id": "C09",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 104812.85,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers",
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 103602.44,
+   "barridos": [
+    "order_items",
+    "orders",
+    "customers",
+    "products"
+   ]
+  },
+  "razon": 0.9884517022483407
+ },
+ {
+  "clave": "C09|original|mysql",
+  "id": "C09",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 568923.69,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 881674.36,
+   "barridos": []
+  },
+  "razon": 1.5497234084240719
+ },
+ {
+  "clave": "C09|parafrasis|mysql",
+  "id": "C09",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 568923.69,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 881674.36,
+   "barridos": []
+  },
+  "razon": 1.5497234084240719
+ },
+ {
+  "clave": "C09|original|mariadb",
+  "id": "C09",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 960.9317326,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1290.409983,
+   "barridos": []
+  },
+  "razon": 1.3428737330887475
+ },
+ {
+  "clave": "C09|parafrasis|mariadb",
+  "id": "C09",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 960.9317326,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1290.409983,
+   "barridos": []
+  },
+  "razon": 1.3428737330887475
+ },
+ {
+  "clave": "C09|original|mssql",
+  "id": "C09",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.66461,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4.1708,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.1381292961597549
+ },
+ {
+  "clave": "C09|parafrasis|mssql",
+  "id": "C09",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.66461,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 4.1708,
+   "barridos": [
+    "customers"
+   ]
+  },
+  "razon": 1.1381292961597549
+ },
+ {
+  "clave": "C10|original|postgres",
+  "id": "C10",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 40853.81,
+   "barridos": [
+    "payments",
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 26791.2,
+   "barridos": [
+    "customers",
+    "orders",
+    "payments",
+    "orders"
+   ]
+  },
+  "razon": 0.6557821657270155
+ },
+ {
+  "clave": "C10|parafrasis|postgres",
+  "id": "C10",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 40853.81,
+   "barridos": [
+    "payments",
+    "orders",
+    "customers"
+   ]
+  },
+  "gen": {
+   "costo": 26792.55,
+   "barridos": [
+    "customers",
+    "orders",
+    "payments",
+    "orders"
+   ]
+  },
+  "razon": 0.6558152103806231
+ },
+ {
+  "clave": "C10|original|mysql",
+  "id": "C10",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 317860.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 677757.99,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 2.132248130667281
+ },
+ {
+  "clave": "C10|parafrasis|mysql",
+  "id": "C10",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 317860.75,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 677757.99,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 2.132248130667281
+ },
+ {
+  "clave": "C10|original|mariadb",
+  "id": "C10",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 646.4377977,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 820.7123592779999,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1.2695921590570072
+ },
+ {
+  "clave": "C10|parafrasis|mariadb",
+  "id": "C10",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 646.4377977,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 820.7123592779999,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1.2695921590570072
+ },
+ {
+  "clave": "C10|original|mssql",
+  "id": "C10",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 5.08261,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "gen": {
+   "costo": 7.16453,
+   "barridos": [
+    "payments",
+    "customers"
+   ]
+  },
+  "razon": 1.4096163191745974
+ },
+ {
+  "clave": "C10|parafrasis|mssql",
+  "id": "C10",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 5.08261,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "gen": {
+   "costo": 6.56238,
+   "barridos": [
+    "payments"
+   ]
+  },
+  "razon": 1.291143723401953
+ },
+ {
+  "clave": "C11|original|postgres",
+  "id": "C11",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 32458.16,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 31772.39,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "orders"
+   ]
+  },
+  "razon": 0.9788721849913858
+ },
+ {
+  "clave": "C11|parafrasis|postgres",
+  "id": "C11",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 32458.16,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "categories",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 31772.39,
+   "barridos": [
+    "order_items",
+    "orders",
+    "products",
+    "orders"
+   ]
+  },
+  "razon": 0.9788721849913858
+ },
+ {
+  "clave": "C11|original|mysql",
+  "id": "C11",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 470285.9,
+   "barridos": [
+    "productos_ranked",
+    "ventas_por_categoria"
+   ]
+  },
+  "gen": {
+   "costo": 365902.08999999997,
+   "barridos": []
+  },
+  "razon": 0.7780418039324588
+ },
+ {
+  "clave": "C11|parafrasis|mysql",
+  "id": "C11",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 470285.9,
+   "barridos": [
+    "productos_ranked",
+    "ventas_por_categoria"
+   ]
+  },
+  "gen": {
+   "costo": 365902.08999999997,
+   "barridos": []
+  },
+  "razon": 0.7780418039324588
+ },
+ {
+  "clave": "C11|original|mariadb",
+  "id": "C11",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 1261.6333319250002,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 834.0555344500001,
+   "barridos": []
+  },
+  "razon": 0.6610918666657277
+ },
+ {
+  "clave": "C11|parafrasis|mariadb",
+  "id": "C11",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 1261.6333319250002,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 834.0555344500001,
+   "barridos": []
+  },
+  "razon": 0.6610918666657277
+ },
+ {
+  "clave": "C11|original|mssql",
+  "id": "C11",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10.2184,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 6.67277,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.6530151491427229
+ },
+ {
+  "clave": "C11|parafrasis|mssql",
+  "id": "C11",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 10.2184,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 6.67271,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.6530092773819776
+ },
+ {
+  "clave": "C12|original|postgres",
+  "id": "C12",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 35728.85,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 35728.85,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C12|parafrasis|postgres",
+  "id": "C12",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 35728.85,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 35728.85,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C12|original|mysql",
+  "id": "C12",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 205194.5,
+   "barridos": [
+    "items_por_pedido",
+    "ip"
+   ]
+  },
+  "gen": {
+   "costo": 205194.5,
+   "barridos": [
+    "order_item_counts",
+    "order_item_counts"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C12|parafrasis|mysql",
+  "id": "C12",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 205194.5,
+   "barridos": [
+    "items_por_pedido",
+    "ip"
+   ]
+  },
+  "gen": {
+   "costo": 205194.5,
+   "barridos": [
+    "order_item_counts",
+    "order_item_counts"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C12|original|mariadb",
+  "id": "C12",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 9207296.941445708,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 1070.70139202,
+   "barridos": []
+  },
+  "razon": 0.00011628835246969682
+ },
+ {
+  "clave": "C12|parafrasis|mariadb",
+  "id": "C12",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 9207296.941445708,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 9207296.941445708,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C12|original|mssql",
+  "id": "C12",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 5.26226,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5.26256,
+   "barridos": []
+  },
+  "razon": 1.0000570097258592
+ },
+ {
+  "clave": "C12|parafrasis|mssql",
+  "id": "C12",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 5.26226,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 5.26256,
+   "barridos": []
+  },
+  "razon": 1.0000570097258592
+ },
+ {
+  "clave": "C13|original|postgres",
+  "id": "C13",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 36638.92,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 41330.53,
+   "barridos": []
+  },
+  "razon": 1.1280498988507304
+ },
+ {
+  "clave": "C13|parafrasis|postgres",
+  "id": "C13",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 36638.92,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 41330.53,
+   "barridos": []
+  },
+  "razon": 1.1280498988507304
+ },
+ {
+  "clave": "C13|original|mysql",
+  "id": "C13",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 548283.75,
+   "barridos": [
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 822277.25,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 1.4997293828241307
+ },
+ {
+  "clave": "C13|parafrasis|mysql",
+  "id": "C13",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 548283.75,
+   "barridos": [
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 822277.25,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 1.4997293828241307
+ },
+ {
+  "clave": "C13|original|mariadb",
+  "id": "C13",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 422.2201421,
+   "barridos": [
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 639.7085251,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 1.5151066027269
+ },
+ {
+  "clave": "C13|parafrasis|mariadb",
+  "id": "C13",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 422.2201421,
+   "barridos": [
+    "o"
+   ]
+  },
+  "gen": {
+   "costo": 639.7085251,
+   "barridos": [
+    "o"
+   ]
+  },
+  "razon": 1.5151066027269
+ },
+ {
+  "clave": "C13|original|mssql",
+  "id": "C13",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.24946,
+   "barridos": [
+    "addresses",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 4.26825,
+   "barridos": [
+    "addresses",
+    "orders",
+    "customers"
+   ]
+  },
+  "razon": 1.3135259396945955
+ },
+ {
+  "clave": "C13|parafrasis|mssql",
+  "id": "C13",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 3.24946,
+   "barridos": [
+    "addresses",
+    "orders"
+   ]
+  },
+  "gen": {
+   "costo": 3.63907,
+   "barridos": [
+    "addresses",
+    "orders"
+   ]
+  },
+  "razon": 1.119899921833166
+ },
+ {
+  "clave": "C14|original|postgres",
+  "id": "C14",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 93.62,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 93.25,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960478530228584
+ },
+ {
+  "clave": "C14|parafrasis|postgres",
+  "id": "C14",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 93.62,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "gen": {
+   "costo": 93.25,
+   "barridos": [
+    "products",
+    "categories"
+   ]
+  },
+  "razon": 0.9960478530228584
+ },
+ {
+  "clave": "C14|original|mysql",
+  "id": "C14",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C14|parafrasis|mysql",
+  "id": "C14",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "gen": {
+   "costo": 915.8,
+   "barridos": [
+    "p"
+   ]
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C14|original|mariadb",
+  "id": "C14",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.309801768,
+   "barridos": []
+  },
+  "razon": 1.6477019136881599
+ },
+ {
+  "clave": "C14|parafrasis|mariadb",
+  "id": "C14",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 2.008738195,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.309801768,
+   "barridos": []
+  },
+  "razon": 1.6477019136881599
+ },
+ {
+  "clave": "C14|original|mssql",
+  "id": "C14",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 0.101662,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0902072,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8873246640829415
+ },
+ {
+  "clave": "C14|parafrasis|mssql",
+  "id": "C14",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 0.101662,
+   "barridos": [
+    "products"
+   ]
+  },
+  "gen": {
+   "costo": 0.0902072,
+   "barridos": [
+    "products"
+   ]
+  },
+  "razon": 0.8873246640829415
+ },
+ {
+  "clave": "C15|original|postgres",
+  "id": "C15",
+  "variante": "original",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 21890.83,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 21849.16,
+   "barridos": []
+  },
+  "razon": 0.9980964632222715
+ },
+ {
+  "clave": "C15|parafrasis|postgres",
+  "id": "C15",
+  "variante": "parafrasis",
+  "motor": "postgres",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 21890.83,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 21849.16,
+   "barridos": []
+  },
+  "razon": 0.9980964632222715
+ },
+ {
+  "clave": "C15|original|mysql",
+  "id": "C15",
+  "variante": "original",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 101267.87,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 101267.87,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C15|parafrasis|mysql",
+  "id": "C15",
+  "variante": "parafrasis",
+  "motor": "mysql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 101267.87,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 101267.87,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C15|original|mariadb",
+  "id": "C15",
+  "variante": "original",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C15|parafrasis|mariadb",
+  "id": "C15",
+  "variante": "parafrasis",
+  "motor": "mariadb",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 102.1702521,
+   "barridos": []
+  },
+  "razon": 1
+ },
+ {
+  "clave": "C15|original|mssql",
+  "id": "C15",
+  "variante": "original",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 4.03051,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.26675,
+   "barridos": []
+  },
+  "razon": 0.8105053702881274
+ },
+ {
+  "clave": "C15|parafrasis|mssql",
+  "id": "C15",
+  "variante": "parafrasis",
+  "motor": "mssql",
+  "categoria": "complejo",
+  "ref": {
+   "costo": 4.03051,
+   "barridos": []
+  },
+  "gen": {
+   "costo": 3.26675,
+   "barridos": []
+  },
+  "razon": 0.8105053702881274
+ }
+]

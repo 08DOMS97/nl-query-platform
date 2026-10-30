@@ -39,6 +39,9 @@ export interface UsageEvent {
   tokensTotal?: number;
   costUsd?: number;
   safe?: boolean;
+  /** Intentos hasta que Vertex AI respondió; los cortados pueden haberse facturado. */
+  attempts?: number;
+  firstChunkMs?: number | null;
   /** Tiempo por etapa de las generaciones (desde el 24/10). */
   stages?: GenerationStages;
 }

@@ -78,7 +78,7 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     }
     const prunedSchema = pruneSchema(schema, body.naturalLanguageQuery);
     lap('pruneMs');
-    const { sql, tokensInput, tokensOutput, tokensThinking, tokensTotal } = await generateSql(
+    const { sql, tokensInput, tokensOutput, tokensThinking, tokensTotal, attempts, firstChunkMs } = await generateSql(
       connection.engine,
       prunedSchema,
       body.naturalLanguageQuery,
@@ -107,6 +107,8 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       costUsd,
       safe: safety.safe,
       stages: stages as GenerationStages,
+      attempts,
+      firstChunkMs,
       ...(unrequestedLimit ? { errorReason: `límite de filas no pedido: ${rowLimit}` } : {}),
     });
 
@@ -120,6 +122,8 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
       tablesSent: prunedSchema.tables.length,
       tablesTotal: schema.tables.length,
       stages: stages as GenerationStages,
+      attempts,
+      firstChunkMs,
     };
     if (unrequestedLimit) {
       res.status(422).json({

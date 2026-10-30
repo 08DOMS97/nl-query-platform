@@ -24,15 +24,26 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
   capítulo 6.3.5 agregado`, 128 páginas). Las entradas que dicen "sigue igual" se
   comprobaron ahí.
 
-## Contador (actualizado 2026-10-25, cotejo con el Word del 22/10)
+## Contador (actualizado 2026-10-29, revisión a mano de la evaluación)
 
 | Capítulo | Pendientes `[ ]` | Por verificar `[?]` | Aplicados `[x]` |
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 22 |
 | 5 | 2 | 0 | 5 |
-| 6 | 9 | 0 | 42 |
-| Conclusiones / limitaciones | 7 | 0 | 2 |
-| **Total** | **24** | **1** | **71** |
+| 6 | 13 | 0 | 42 |
+| Conclusiones / limitaciones | 9 | 0 | 2 |
+| **Total** | **30** | **1** | **71** |
+
+> **29/10 — Revisión a mano y `EXPLAIN` de la evaluación.** Entradas nuevas: cifras revisadas en
+> 6.3.6 (94,8 % correcto, consistencia 94/100, eficiencia 93,5 % ≤ 2 veces la referencia) y la recomendación de capacitación
+> (David). La limitación de la poda suma el efecto medido.
+
+> **27/10 — Piloto y corrida completa con Gemini.**
+> - **Entradas nuevas:** 6.3.2 (corte y reintento), 6.3.4 (tercera corrección de las
+>   referencias), 6.3.5 (nombres legibles) y una limitación (disponibilidad del
+>   servicio).
+> - **Datos agregados:** en 6.3.6 y en 1.6.3, que siguen pendientes hasta cerrar la
+>   revisión a mano.
 
 > **25/10 — Cotejo con `PG2-2026 revisado 22-10-2026.docx`.** El Word que David revisó
 > el 22/10 ya tenía el on-premises (las 4 entradas), el cambio de modelo, 6.3.2 y 6.7.1,
@@ -53,7 +64,7 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 
 ## Preliminares y capítulos 1 a 4
 
-- [ ] (10/10) **1.6.3 — recalcular costos, ROI y VAN con el costo medido**. **Al
+- [ ] (10/10) **1.6.3 — recalcular costos, ROI y VAN con el costo medido**. **(27/10) Dato medido en la corrida:** 400 llamadas por $0.8046, un promedio de **$0.002 por llamada** con Gemini 3.8 Flash (`evaluacion_gemini/resumen.md`). **Al
   recalcular, aplicar también** (25/10) lo que quedó de las entradas del on-premises y
   del cambio de modelo, ya aplicadas en el resto del documento: OP-13 de
   `CAMBIO_ON_PREMISES.md` (texto de 1.6.3.2, filas de la Tabla 4 y Secret Manager con un
@@ -373,6 +384,25 @@ una sola nueva (10) pendiente.
 - [x] (25/09) Texto pegado en el Word (versión con la poda vieja).
 
 ### 6.3.2 — Integración con Vertex AI Gemini Pro (pasa a "Integración con Gemini en Vertex AI")
+- [ ] (26/10) **Agregar la generación por partes con corte y reintento.** Durante la
+  evaluación, el servicio del modelo estuvo saturado: hubo esperas de hasta 5 min y un
+  error 429. Desde el 26/10:
+  - la respuesta se recibe por partes;
+  - si no llega la primera parte en 20, 40 u 80 s, se reintenta, con un tope de 120 s
+    por intento;
+  - el razonamiento del modelo se usa solo como señal de que está trabajando;
+  - se registran los intentos y el tiempo hasta la primera parte;
+  - a los 20 s, el usuario ve un aviso de que el servicio está ocupado.
+
+  Medido en 332 generaciones:
+
+  | | Mediana | p95 | Máximo |
+  |---|---|---|---|
+  | Con corte y reintento | 4,9 s | 61 s | 133 s |
+  | Sin corte, con el servicio saturado | 11,6 s | 279 s | 303 s |
+
+  Fuente: `USO_Y_COSTOS.md` y `PREPARACION_EVALUACION_GEMINI.md` §9.
+
 - [ ] (24/10) **Agregar los controles alrededor de la llamada al modelo**, para todos
   los roles:
   - (a) si la «pregunta» ya es una sentencia SQL, se rechaza antes de llamar al modelo y
@@ -423,6 +453,14 @@ una sola nueva (10) pendiente.
   revisado 10-10-2026.docx`, versión limpia, sin control de cambios.
 
 ### 6.3.4 — Pruebas de ejecución controlada
+- [ ] (26/10) **Agregar la tercera corrección del conjunto de referencia**, hecha con el
+  piloto. Cinco referencias contaban como venta o compra un pedido cancelado, en contra
+  de la regla de dominio del prompt: C02, M04, M06, C07 y C09. Se alinearon. En todas
+  cambiaba el resultado, y siguen idénticas en los 4 motores (200/200). El piloto,
+  reevaluado sin volver a llamar al modelo, siguió en 37/40.
+
+  Fuente: `PREPARACION_EVALUACION_GEMINI.md` §9.
+
 - [x] (10/10) **Corregir** el párrafo de equivalencia (estaba en espera desde el 03/10). Hoy
   dice que se compararon conteos de filas; reemplazar por: se compara el **resultado
   completo (filas y valores)**, y las 50 dan resultados idénticos en los 4 motores. **Aplicado el 10/10** (segunda versión del Word, sin marcadores y con referencias enlazadas).
@@ -447,6 +485,17 @@ una sola nueva (10) pendiente.
   entrada del 08/10).
 
 ### 6.3.5 — Control de tiempo de ejecución e integridad de resultados
+- [ ] (26/10) **Agregar los nombres legibles para expresiones sin alias.** SQL Server
+  rechazaba un `COUNT(*)` sin nombre, y cada motor nombraba esas columnas a su manera.
+  Ahora:
+  - reciben un nombre legible, igual en los 4 motores (`cantidad`, `suma_total`,
+    `promedio_x`…);
+  - los nombres que escribe el usuario no se tocan;
+  - dos columnas con el mismo nombre se siguen rechazando.
+
+  Verificado: integridad 30/30, API 369/369.
+  Fuente: `RENDIMIENTO_E_INTEGRIDAD.md` §2.1.
+
 - [ ] (24/10) **Agregar a la verificación de integridad** los defectos que encontró la
   auditoría, ya corregidos y verificados en los 4 motores (19/19):
   - dos columnas con el mismo nombre mostraban un valor en lugar de otro (ahora se
@@ -486,6 +535,60 @@ una sola nueva (10) pendiente.
   Resuelve la entrada del 02/10 que la ubicaba en 6.7.
 
 ### Evaluación de la generación con Gemini (6.3.6 cuando se escriba)
+- [ ] (29/10) **Cifras después de la revisión a mano** (son las que van a la tesis;
+  las automáticas de abajo quedan como paso intermedio y se explican en una línea):
+
+  | Grupo | Correcto | Ambigüedad | Error de poda | Error del modelo |
+  |---|---|---|---|---|
+  | Originales (200) | 98,0 % | 4 | 0 | 0 |
+  | Paráfrasis (200) | 91,5 % | 6 | 6 | 5 |
+  | Total (400) | 94,8 % | 10 | 6 | 5 |
+
+  - por nivel: originales 100 / 95,0 / 100 % (simple / intermedio / complejo);
+    paráfrasis 100 / 88,8 / 86,7 %;
+  - por motor: Postgres 95 %, MySQL 96 %, MariaDB 93 %, SQL Server 95 %;
+  - consistencia entre motores: **94/100** con el criterio de David (no cuentan las
+    columnas no pedidas); automática 83/100; huella estricta 77/100;
+  - robustez: en 15 casos la original acierta y la paráfrasis no; las originales no
+    tienen errores;
+  - declarar el método: por qué muchos «distinto» eran correctos (la referencia trae una
+    columna informativa no pedida) y las dos decisiones de David (M08 original y M06
+    paráfrasis cuentan como correctas).
+
+  - **eficiencia (`EXPLAIN` sin `ANALYZE`, banco de 1,5 M de filas):** 374 de 400
+    (93,5 %) cuestan como mucho el doble que la referencia, 76 (19 %) son más
+    baratos y la mediana de la razón es 1,0 en los 4 motores. Los casos más caros
+    hacen más trabajo (traen el nombre o aplican la regla de cancelados) o son
+    particularidades del modelo de costos, con tiempos reales similares a los de los
+    otros motores. Ejecución por HTTP: mediana 415 ms, p95 3,5 s, máximo 9,6 s. Sirve
+    para el requisito de consultas eficientes con volumen. Aclarar que el costo
+    estimado está en unidades propias de cada motor: se compara contra la referencia
+    del mismo motor. Los índices compuestos no van al prompt, pero el sistema puede
+    mandarlos si una base los requiere (opción de configuración, 29/10).
+
+  Fuente:
+  `PREPARACION_EVALUACION_GEMINI.md` §9 («Revisión a mano») y
+  `evaluacion_gemini/revision_manual.json`.
+- [ ] (27/10; cifras al 29/10) **Corrida hecha: 400/400, $0.8132**, con los 6 errores de
+  generación ya reintentados (29/10). Cifras automáticas, antes de la revisión a mano:
+  - **Precisión:**
+
+    | Grupo | Exacto | Exacto + columnas extra |
+    |---|---|---|
+    | Originales | 59,5 % | 86,5 % |
+    | Paráfrasis | 56,5 % | 79,5 % |
+    | Simple / intermedio / complejo | 73,3 / 60,0 / 45,0 % | 100 / 85,0 / 75,0 % |
+
+  - consistencia entre motores: **83/100** (decisión de David, 29/10: no cuentan las
+    columnas extra que no se pidieron); con la medida estricta, 77/100. Reportar las
+    dos y explicar la diferencia en una línea;
+  - seguridad: 0 bloqueadas, 0 límites no pedidos, 0 errores de ejecución, 0 errores
+    de generación;
+  - en promedio, 712 tokens de entrada y 2,31 de 8 tablas enviadas;
+  - latencia en la tabla de 6.3.2: el promedio de 19,3 s mezcla tramos, así que no se
+    usa solo.
+
+  Fuente: `PREPARACION_EVALUACION_GEMINI.md` §9.
 - [ ] (10/10) **Redactar cuando termine la corrida** (pendiente: piloto y corrida
   completa). Métricas: precisión por ejecución (exacto / con columnas extra), por nivel
   y por motor; consistencia entre motores; robustez con paráfrasis; reducción de tokens;
@@ -623,6 +726,11 @@ una sola nueva (10) pendiente.
 
 ## Conclusiones y limitaciones
 
+- [ ] (26/10) **Limitación**: el tiempo de generación depende de la disponibilidad del
+  servicio de Google. En la corrida hubo tramos de saturación y 6 de 400 generaciones
+  no recibieron respuesta tras 3 intentos. El corte con reintento acota la espera, pero
+  no la elimina. Fuente: `PREPARACION_EVALUACION_GEMINI.md` §9.
+
 - [ ] (24/10) **Limitaciones**: agregar
   - la pérdida de precisión de DECIMAL/MONEY en el driver de SQL Server;
   - ~~que el CSV no neutraliza valores que Excel interpreta como fórmulas~~: ya no va
@@ -632,6 +740,14 @@ una sola nueva (10) pendiente.
 
   Fuente: `AUDITORIA_2026-10-24.md`.
 
+- [ ] (29/10) **Recomendación (David): capacitación a los usuarios** sobre cómo
+  formular sus solicitudes. La respaldan los datos de la evaluación: las preguntas
+  originales dieron 98,0 % y las paráfrasis 91,5 %. Además, las 10 ambigüedades (por
+  ejemplo, «la categoría que más vende»: ¿en unidades o en dinero?) y los 6 errores de
+  la poda vienen de cómo está redactada la pregunta. Contenido sugerido: nombrar la
+  medida (dinero o unidades), el período, si se incluyen los cancelados o los que no
+  compraron, y usar el vocabulario del negocio. Puede ir también como mitigación en
+  limitaciones. Fuente: `PREPARACION_EVALUACION_GEMINI.md` §9.
 - [ ] (25/09) **Reescribir las Conclusiones actuales**: afirman resultados que todavía
   no se midieron (mejora de precisión por la poda, Q712 al mes, ROI de 39,2 %).
   Reescribirlas con los datos de la evaluación y el costo medido.
@@ -644,7 +760,8 @@ una sola nueva (10) pendiente.
 - [ ] (09/10) **Limitación**: el diccionario de sinónimos de la poda se ajustó con las
   mismas 50 preguntas de la evaluación. Medido con las paráfrasis (antes de la corrida):
   en 2 de 50 la poda pierde tablas (M17, C08). Se decidió **no** ajustarlo para no
-  sesgar el resultado.
+  sesgar el resultado. **(29/10) Efecto medido:** 6 de los 11 errores de la corrida son
+  de la poda (M17 y C08 en paráfrasis), no del modelo.
 - [ ] (10/10) **Limitación**: las 50 consultas y sus paráfrasis las redactó el mismo
   asistente que conoce el esquema, no usuarios reales.
 - [ ] (08/10) **Limitación / riesgo**: dependencia de un modelo con fecha de retiro.

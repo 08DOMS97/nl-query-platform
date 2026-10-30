@@ -87,6 +87,9 @@ export interface GenerateSqlMetrics {
   tablesTotal: number;
   /** Tiempo por etapa en ms; `modelMs` es la espera al servicio del modelo. */
   stages?: { schemaMs: number; pruneMs: number; modelMs: number; checkMs: number };
+  /** Intentos hasta que el servicio del modelo respondió (se reintenta si está ocupado). */
+  attempts?: number;
+  firstChunkMs?: number | null;
 }
 
 export interface GenerateSqlResponse {

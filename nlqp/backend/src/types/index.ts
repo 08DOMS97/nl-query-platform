@@ -151,6 +151,10 @@ export interface GenerateSqlMetrics {
   tablesSent: number;
   tablesTotal: number;
   stages?: GenerationStages;
+  /** Intentos hasta que Vertex AI respondió (26/10: corte y reintento si está encolada). */
+  attempts?: number;
+  /** Espera hasta la primera parte de la respuesta, en el intento que funcionó. */
+  firstChunkMs?: number | null;
 }
 
 export interface GenerateSqlResponse {

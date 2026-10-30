@@ -37,14 +37,14 @@ la configuración, o agrega una función · **Aceptado**: riesgo conocido, con e
 | G5 | El 500 mostraba al no técnico errores crudos de Vertex AI, del motor o de Secret Manager. | Baja | **Corregido**: el detalle solo lo ve el técnico. |
 | G6 | La poda de esquema pierde tablas con algunos verbos conjugados (paráfrasis de M17: solo manda `orders`; «compraron», «vendieron», «sin pagar»). | Media | **Pendiente (David)**. No se ajusta el diccionario: las paráfrasis se escribieron sin ajustarlo a propósito (`parafrasis_50.json`). Se puede medir gratis la cobertura de tablas. |
 | G7 | Prompt: «el que más» con LIMIT 1 pierde empates. Las reglas de dominio de e-commerce se aplican a toda conexión. «Nunca SELECT *» recorta «todos los datos». La pregunta va sin delimitar (inyección de instrucciones). No exige alias únicos. «hola» manda el esquema completo. | Media | «hola» **corregido** (15589cb): «hola», «gracias», «asdf», «ok» y «¿?» reciben 422 `nlqp/no-content` sin llamar al modelo; las 100 preguntas del corpus pasan. El resto, **pendiente (David)**: cambia el prompt y, por lo tanto, la medición. |
-| G8 | Sin límite de llamadas ni de gasto por usuario (429), ni timeout en `generateContent`. | Media | **Decidido por David (24/10): no por ahora.** No se agrega el timeout con reintento ni el tope por usuario (`USO_Y_COSTOS.md`, tiempo por etapa). |
+| G8 | Sin límite de llamadas ni de gasto por usuario (429), ni timeout en `generateContent`. | Media | **Timeout: corregido el 26/10** con el «dale» de David, por la saturación de Vertex AI durante la corrida. La generación es por partes, con corte si no llega la primera parte en 20 / 40 / 80 s, reintento y tope de 120 s por intento (`USO_Y_COSTOS.md`). **Tope por usuario: decidido por David (24/10), no por ahora.** |
 | G9 | Tope de 20 tablas en la poda. | Baja | **Pendiente (David)**. |
 
 ## 2. Ejecución e integridad de los valores
 
 | # | Hallazgo | Severidad | Estado |
 |---|---|---|---|
-| E1 | Dos columnas con el mismo nombre (o sin nombre en SQL Server) mostraban un valor en lugar de otro. | Alta | **Corregido** (639614c): 422 con aviso en los 4 motores. |
+| E1 | Dos columnas con el mismo nombre (o sin nombre en SQL Server) mostraban un valor en lugar de otro. | Alta | **Corregido** (639614c): 422 con aviso en los 4 motores. **26/10:** las expresiones sin alias ya no se rechazan, reciben un nombre legible (`cantidad`, `suma_total`; `RENDIMIENTO_E_INTEGRIDAD.md` §2.1). Los nombres propios repetidos siguen dando 422. |
 | E2 | `TIMESTAMP` de Postgres corrido +6 h. | Alta | **Corregido**: se lee como UTC. `infinity` queda como texto. |
 | E3 | BIGINT de MySQL/MariaDB de más de 2^53 llegaba alterado. | Media | **Corregido**: `supportBigNumbers`. |
 | E4 | Si fallaba el `SET SESSION` del tope de tiempo de MySQL/MariaDB, la conexión quedaba sin tope (y el error, sin manejar). | Alta | **Corregido**: la conexión se descarta. |

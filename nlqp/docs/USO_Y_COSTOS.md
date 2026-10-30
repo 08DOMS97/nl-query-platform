@@ -112,12 +112,33 @@ Se evaluó y se descartó (revisión con agentes del 24/10):
 - **Priority PayGo / Provisioned Throughput:** no tiene cifras oficiales de mejora y la
   capacidad reservada exige un compromiso mínimo de una semana.
 - **Razonamiento MINIMAL:** el modelo lo rechaza; LOW ya es el mínimo.
-- **Timeout + reintento:** se cobra igual. David decidió no hacerlo.
+- **Timeout + reintento:** se cobra igual. David decidió no hacerlo. **Cambió el 26/10** (ver abajo).
 - **Tope de gasto por usuario y caché del rol:** David decidió no hacerlos.
 
 Para la tesis (decisión de David, 24/10): el tiempo de generación no es fijo. Depende de
 la consulta y del servicio del modelo, y se suman la conexión y el proceso; se reporta
 con la mediana y el p95 por etapa (`RESUMEN_PARA_DOC_TEORICO.md` 3.3.1.3 y 6.3.6).
+
+## Generación por partes con corte y reintento (26/10/2026)
+
+Durante la corrida de evaluación, Vertex AI estuvo saturado: hubo esperas de 2 a 5 min y
+un 429. David aprobó cortar y reintentar (`vertexAI.service.ts`):
+- `generateContentStream` con `includeThoughts`: la primera parte, aunque sea
+  razonamiento, prueba que el modelo está trabajando. El razonamiento no entra en el SQL.
+- Sin primera parte en **20 / 40 / 80 s** → nuevo intento. El tope por intento es
+  120 s, y un 429 o 503 se reintenta a los 2 s.
+- **Métricas nuevas** en la respuesta y en el evento de uso:
+  - `attempts`: intentos usados;
+  - `firstChunkMs`: tiempo hasta la primera parte del intento que respondió.
+
+  En Consultar, el técnico ve «Intentos». A los 20 s, cualquier usuario ve un aviso de
+  que el servicio está ocupado.
+- **Costo:** el costo registrado es el del intento que respondió. Falta verificar en la
+  facturación de GCP si Google cobra los intentos cortados.
+- **Medido en la corrida** (332 generaciones): mediana 4,9 s, p95 61 s y máximo 133 s.
+  Sin corte, con el servicio saturado, el p95 había sido 279 s y el máximo 303 s.
+  Intentos: 247 con uno, 68 con dos y 17 con tres. Detalle en
+  `PREPARACION_EVALUACION_GEMINI.md` §9.
 
 ## Endpoint
 

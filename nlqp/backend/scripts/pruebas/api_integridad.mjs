@@ -1,5 +1,6 @@
 // Integridad de los valores en los 4 motores (auditoría del 24/10): columnas con el mismo
-// nombre o sin nombre se rechazan (422) en vez de mostrar un valor en lugar de otro, el
+// nombre se rechazan (422) en vez de mostrar un valor en lugar de otro, las expresiones
+// sin alias reciben un nombre legible (26/10), el
 // TIMESTAMP de Postgres no se corre de hora y un BIGINT grande de MySQL llega exacto.
 // Solo SELECT, por /executeQuery (Query Safety Engine). Se corre con `npm run test:api`.
 import { readFileSync } from 'node:fs';
@@ -23,8 +24,16 @@ for (const m of MOTORES) {
   const bien = await run(m, 'SELECT c.customer_id, o.order_id FROM customers c JOIN orders o ON o.customer_id = c.customer_id WHERE c.customer_id = 1');
   check(`${m}: con nombres distintos se ejecuta`, bien.status === 200 && bien.json.columns.join() === 'customer_id,order_id', JSON.stringify(bien.json).slice(0, 160));
 }
-const sinNombre = await run('mssql', 'SELECT COUNT(*) FROM customers');
-check('mssql: columna sin nombre → 422', sinNombre.status === 422 && /sin nombre/.test(sinNombre.json.error), JSON.stringify(sinNombre.json));
+// Expresiones sin alias (26/10): nombre legible en los 4 motores, y dos sin alias no se pisan.
+for (const m of MOTORES) {
+  const sinNombre = await run(m, 'SELECT COUNT(*), COUNT(DISTINCT customer_id), SUM(total), MAX(order_date) FROM orders');
+  const cols = sinNombre.json.columns?.join();
+  const fila = sinNombre.json.rows?.[0] ?? {};
+  check(`${m}: expresiones sin alias con nombre legible`, sinNombre.status === 200 && cols === 'cantidad,cantidad_2,suma_total,maximo_order_date', JSON.stringify(sinNombre.json).slice(0, 200));
+  check(`${m}: dos conteos sin alias no se mezclan`, Number(fila.cantidad) > Number(fila.cantidad_2) && Number(fila.cantidad_2) > 0, JSON.stringify(fila));
+  const propio = await run(m, 'SELECT customer_id, COUNT(*) AS pedidos FROM orders WHERE customer_id = 1 GROUP BY customer_id');
+  check(`${m}: los nombres propios no se tocan`, propio.status === 200 && propio.json.columns.join() === 'customer_id,pedidos', JSON.stringify(propio.json).slice(0, 160));
+}
 const conAlias = await run('mssql', 'SELECT COUNT(*) AS n FROM customers');
 check('mssql: con alias se ejecuta', conAlias.status === 200 && Number.isInteger(conAlias.json.rows[0].n) && conAlias.json.rows[0].n > 0, JSON.stringify(conAlias.json).slice(0, 160));
 
