@@ -293,11 +293,32 @@ export async function runQuery(connectionId: string, sql: string): Promise<RawQu
   return runQueryOnPool(await getPool(connectionId), sql);
 }
 
+const NETWORK_ERRORS: Record<string, string> = {
+  ECONNREFUSED: 'el servidor rechazó la conexión (revise que el motor esté encendido y que el puerto sea correcto)',
+  ETIMEDOUT: 'el servidor no respondió a tiempo',
+  ENOTFOUND: 'no se encontró el servidor (revise el nombre o la dirección)',
+  EHOSTUNREACH: 'no hay ruta de red hasta el servidor',
+};
+
+/**
+ * Mensaje de un error del driver. Si el servidor rechaza la conexión, `pg` lanza un
+ * AggregateError sin mensaje (prueba de manejo de errores del 29/10): el usuario veía
+ * «No se pudo conectar:» vacío. Se describe por su código de red.
+ */
+export function driverErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message.trim()) return err.message;
+  const inner = err instanceof AggregateError ? err.errors?.[0] : undefined;
+  const code = (err as { code?: string } | null)?.code ?? (inner as { code?: string } | undefined)?.code;
+  if (code) return `No se pudo conectar con el servidor de base de datos: ${NETWORK_ERRORS[code] ?? code}.`;
+  return 'Error del motor de base de datos sin detalle.';
+}
+
 async function runQueryOnPool(h: PoolHandle, sql: string): Promise<RawQueryResult> {
   try {
     return await runQueryOnDriver(h, sql);
   } catch (err) {
     if (isTimeoutError(err)) throw new QueryTimeoutError(h.engine, h.timeoutMs);
+    if (err instanceof Error && !err.message.trim()) throw new Error(driverErrorMessage(err));
     throw err;
   }
 }
@@ -544,7 +565,7 @@ export async function testConnection(connectionId: string): Promise<TestConnecti
     await runQuery(connectionId, 'SELECT 1 AS ok');
     return { connectionId, ok: true, latencyMs: Date.now() - start };
   } catch (err) {
-    return { connectionId, ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { connectionId, ok: false, error: driverErrorMessage(err) };
   }
 }
 
@@ -569,7 +590,7 @@ export async function testConnectionConfig(
     await runQueryOnPool(h, 'SELECT 1 AS ok');
     return { ok: true, latencyMs: Date.now() - start };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, error: driverErrorMessage(err) };
   } finally {
     if (h) await closeHandle(h).catch(() => undefined);
   }

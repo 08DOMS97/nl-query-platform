@@ -1,6 +1,6 @@
 import * as functions from '@google-cloud/functions-framework';
 import type { Request, Response } from 'express';
-import { QueryTimeoutError, ResultShapeError } from '../services/connectionManager.service.js';
+import { driverErrorMessage, QueryTimeoutError, ResultShapeError } from '../services/connectionManager.service.js';
 import { createResult, readPage, ResultTooLargeError } from '../services/resultStore.service.js';
 import { validateQuerySafety } from '../services/querySafety.service.js';
 import { recordHistoryEntry } from '../services/queryHistory.service.js';
@@ -128,13 +128,13 @@ export const executeQueryHandler = async (req: Request, res: Response): Promise<
         origin,
         success: false,
         latencyMs: Date.now() - startedAt,
-        errorReason: err instanceof Error ? err.message : String(err),
+        errorReason: driverErrorMessage(err),
       }),
-      recordHistory({ success: false, errorReason: err instanceof Error ? err.message : String(err) }),
+      recordHistory({ success: false, errorReason: driverErrorMessage(err) }),
     ]);
     const status =
       err instanceof QueryTimeoutError ? 504 : err instanceof ResultTooLargeError ? 413 : err instanceof ResultShapeError ? 422 : 500;
-    res.status(status).json({ error: err instanceof Error ? err.message : String(err) });
+    res.status(status).json({ error: driverErrorMessage(err) });
   }
 };
 

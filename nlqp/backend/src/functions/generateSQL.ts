@@ -69,6 +69,15 @@ export const generateSQLHandler = async (req: Request, res: Response): Promise<v
     // Las corridas de evaluación leen siempre el esquema actual: la caché no altera la medición.
     const schema = await extractSchema(connection.id, { fresh: origin === 'evaluacion' });
     lap('schemaMs');
+    // Una base sin tablas visibles no tiene nada que consultar: sin esto el modelo
+    // recibía un esquema vacío e inventaba tablas (prueba de manejo de errores, 29/10).
+    if (schema.tables.length === 0) {
+      res.status(422).json({
+        code: 'nlqp/empty-schema',
+        error: 'La conexión no tiene tablas que se puedan consultar. Revise que la base de datos sea la correcta y que el usuario de la conexión tenga permiso de lectura sobre sus tablas.',
+      });
+      return;
+    }
     if (!questionHasContent(schema, body.naturalLanguageQuery)) {
       res.status(422).json({
         code: 'nlqp/no-content',
