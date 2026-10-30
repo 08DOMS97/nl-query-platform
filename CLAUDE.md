@@ -49,7 +49,18 @@ qué sigue. No hace falta leer nada más para responder "¿cómo vamos?".
 | Encuesta (35 participantes) | ❌ Sin coordinar (no depende de código) |
 | **Plan vs. real** (corte 29/10) | Plan 98 % · real 94 % · **−4,8 puntos** (27/10: −2,7; el plan sigue avanzando hacia el 31/10). La tarea 30, de evaluación, está al 100 % (29/10). Tareas nuevas: 54 (corte y reintento de la generación + nombres legibles, 100 %, 26/10), 47 (tope por conexión), 48 (usuarios, 100 % desde el 24/10), 49 (ajuste del documento por el on-premises, 80 %), 50 (auditoría, 100 %), 51 (Docker, 100 %) 52 (descarga en Excel, 100 %) y 53 (banco con volumen, 100 %). Detalle: `nlqp/docs/PLAN_DE_TRABAJO.md` |
 
-## Próximo paso (actualizado 2026-10-29)
+## Próximo paso (actualizado 2026-10-29, noche: pausa de David)
+
+**Al retomar (30/10), primero:** seguir `nlqp/docs/COBERTURA_JURADO.md`. Quedó corriendo
+toda la noche:
+- el monitor de disponibilidad y el backend, como procesos independientes (no cerrarlos
+  hasta el 31/10; `--resumen` para ver la cifra);
+- la cobertura con Gemini (`scripts/evaluacion_cobertura.mjs`, 160 casos, tope $1). Si
+  no terminó, relanzarla: es reanudable y no repite llamadas pagadas.
+
+Después: analizar repetición y variantes (puntos 4 a 6), pegar en `CAPITULO_6.md` el
+texto de 6.7.5 (borrador en `nlqp/docs/borrador_6.7.5.md`) y la encuesta con personas reales.
+
 
 La evaluación con Gemini está completa (29/10): corrida, reintentos, revisión a mano y `EXPLAIN`. Para la próxima sesión, en este orden. Antes de
 empezar: Docker con las bases levantado, y el backend con `npm run build` +
