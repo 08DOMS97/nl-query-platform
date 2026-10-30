@@ -6,6 +6,51 @@ el cuándo. **Al cerrar cada sesión de trabajo, agregar una entrada.**
 
 ---
 
+## 2026-10-29 (3) — Reportes elaborados en los 4 motores (12 pruebas)
+
+Pedido de David: un reporte «bastante elaborado», sin procedimientos almacenados (el
+Query Safety Engine solo deja pasar `SELECT`: se mantiene). Gasto aprobado: 12 llamadas,
+~$0.05, tope $0.10. **Real: $0.0614.**
+
+### Hecho
+- 3 reportes (E1 ventas por categoría y mes con `LAG`; E2 perfil por cliente con
+  rankings; E3 cohortes de 30 días) × 4 motores, comparados contra referencias escritas
+  a mano (iguales en los 4 motores).
+- **11/12 con los datos correctos.** E1 4/4. E2 4/4 con los mismos datos; Gemini usó
+  `DENSE_RANK` en lugar de `RANK`, que la pregunta admite. E3 3/4: en MySQL el `LEFT JOIN`
+  multiplica las filas (error del modelo); en MariaDB acierta, pero con un SQL enrevesado
+  que tardó 15,3 s.
+- Excel completo 12/12.
+- El conteo del Excel por streaming falló con archivos chicos (problema del script de
+  prueba, no del sistema); se pasó a lectura completa y se retomó sin repetir llamadas.
+- Gasto total en Gemini: ≈ **$0.94**.
+- Tabla en `RENDIMIENTO_E_INTEGRIDAD.md` («Reportes elaborados»).
+
+---
+
+## 2026-10-29 (2) — Reportes grandes en los 4 motores (20 pruebas)
+
+Pedido de David: 5 reportes grandes en cada motor para comparar resultados. Gasto
+aprobado («dale con fé»): 20 llamadas, ~$0.04, tope $0.10. **Real: $0.0443.** Antes se
+reinició el backend con el código del commit `c337a0d`.
+
+### Hecho
+- Recorrido completo por pregunta y motor: Gemini → Query Safety Engine → ejecución →
+  todas las páginas → Excel, más un conteo de control escrito a mano.
+- **Integridad 20/20:** las filas coinciden con el conteo de control y el Excel trae todas
+  (la mayor, 631 630 filas en 40–46 MB).
+- **Mismos datos en los 4 motores, 5/5.** Las huellas distintas de MySQL en R1, R3 y R4
+  eran columnas de más o de menos que eligió Gemini; con las columnas en común son
+  idénticas (verificado sin Gemini).
+- Generación + ejecución de 3 a 12 s; Excel de 631 630 filas en 19–21 s.
+- Tabla completa en `RENDIMIENTO_E_INTEGRIDAD.md` («Reportes grandes de punta a punta»).
+- Gasto total en Gemini: ≈ **$0.88**.
+
+### Qué sigue
+Cargar las cifras en la tesis (sin cambios en el orden).
+
+---
+
 ## 2026-10-29 — Reintento de los 6 errores, revisión a mano y `EXPLAIN`
 
 Gasto aprobado por David («dale»): 6 llamadas, ~$0.012, tope `--max-costo 0.05`.

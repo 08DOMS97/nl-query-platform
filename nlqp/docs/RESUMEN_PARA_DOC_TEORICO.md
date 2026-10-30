@@ -30,9 +30,11 @@ cambia lo que la tesis **afirma, mide o describe**; los detalles técnicos inter
 |---|---|---|---|
 | Preliminares y 1–4 | 6 | 1 | 22 |
 | 5 | 2 | 0 | 5 |
-| 6 | 13 | 0 | 42 |
+| 6 | 15 | 0 | 42 |
 | Conclusiones / limitaciones | 9 | 0 | 2 |
-| **Total** | **30** | **1** | **71** |
+| **Total** | **32** | **1** | **71** |
+
+> **29/10 (2) — Reportes grandes:** entrada nueva en 6.3.5 (20 pruebas, integridad 20/20).
 
 > **29/10 — Revisión a mano y `EXPLAIN` de la evaluación.** Entradas nuevas: cifras revisadas en
 > 6.3.6 (94,8 % correcto, consistencia 94/100, eficiencia 93,5 % ≤ 2 veces la referencia) y la recomendación de capacitación
@@ -485,6 +487,18 @@ una sola nueva (10) pendiente.
   entrada del 08/10).
 
 ### 6.3.5 — Control de tiempo de ejecución e integridad de resultados
+- [ ] (29/10) **Agregar la prueba de reportes grandes de punta a punta**: 5 reportes ×
+  4 motores, desde la pregunta en español hasta el Excel, en el banco de 1,5 M de filas.
+  Integridad 20/20 (filas = conteo de control = filas del Excel, sin truncar); mismos
+  datos en los 4 motores en los 5 reportes; generación + ejecución de 3 a 12 s; Excel de
+  631 630 filas (40–46 MB) en 19–21 s. $0.0443. Tabla en `RENDIMIENTO_E_INTEGRIDAD.md`
+  («Reportes grandes de punta a punta»).
+- [ ] (29/10) **Agregar la prueba de reportes elaborados** (CTE, funciones de ventana,
+  rankings, cohortes): 3 × 4 motores contra referencias escritas a mano. 11/12 con los
+  datos correctos; 1 error del modelo (E3 en MySQL: el `JOIN` multiplica filas), y un
+  SQL correcto pero lento (E3 en MariaDB, 15,3 s). Va con la limitación: en reportes
+  complejos, el técnico debe revisar el SQL. $0.0614. Tabla en
+  `RENDIMIENTO_E_INTEGRIDAD.md` («Reportes elaborados»).
 - [ ] (26/10) **Agregar los nombres legibles para expresiones sin alias.** SQL Server
   rechazaba un `COUNT(*)` sin nombre, y cada motor nombraba esas columnas a su manera.
   Ahora:

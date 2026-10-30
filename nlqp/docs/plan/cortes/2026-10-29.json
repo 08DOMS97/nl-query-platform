@@ -8,10 +8,10 @@
       "padre": null,
       "inicio": "2026-06-01",
       "fin": "2026-10-31",
-      "duracion": 183,
-      "plan": 0.9836,
-      "real_calc": 0.9355,
-      "dif": -0.0481
+      "duracion": 184,
+      "plan": 0.9837,
+      "real_calc": 0.9359,
+      "dif": -0.0478
     },
     {
       "no": 2,
@@ -277,10 +277,10 @@
       "padre": 1,
       "inicio": "2026-09-07",
       "fin": "2026-10-14",
-      "duracion": 63,
+      "duracion": 64,
       "plan": 1.0,
-      "real_calc": 0.9683,
-      "dif": -0.0317
+      "real_calc": 0.9688,
+      "dif": -0.0312
     },
     {
       "no": 22,
@@ -375,7 +375,7 @@
       "padre": 21,
       "inicio": "2026-09-21",
       "fin": "2026-10-02",
-      "duracion": 14,
+      "duracion": 15,
       "plan": 1.0,
       "real_calc": 1.0,
       "dif": 0.0
@@ -450,6 +450,24 @@
         "implementada": "2026-10-02"
       },
       "duracion": 2,
+      "plan": 1.0,
+      "real_calc": 1.0,
+      "dif": 0.0
+    },
+    {
+      "no": 55,
+      "tarea": "Pruebas de reportes grandes en los 4 motores",
+      "nivel": 3,
+      "padre": 26,
+      "inicio": "2026-10-29",
+      "fin": "2026-10-29",
+      "real": 1.0,
+      "comentario": "Agregada e implementada el 29/10 a pedido mío. 5 reportes grandes × 4 motores de punta a punta (pregunta en español → Gemini → Query Safety Engine → ejecución → Excel) en el banco de 1,5 M de filas, $0.0443. Integridad 20/20 (filas = conteo de control = Excel) y mismos datos en los 4 motores en los 5 reportes. Generación + ejecución de 3 a 12 s; Excel de 631 630 filas en 19–21 s. Además, 3 reportes elaborados (CTE, funciones de ventana, rankings, cohortes) × 4 motores contra referencias escritas a mano: 11/12 correctos, 1 error del modelo, $0.0614.",
+      "nueva": {
+        "agregada": "2026-10-29",
+        "implementada": "2026-10-29"
+      },
+      "duracion": 1,
       "plan": 1.0,
       "real_calc": 1.0,
       "dif": 0.0

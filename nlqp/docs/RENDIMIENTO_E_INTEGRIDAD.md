@@ -212,6 +212,57 @@ a 1,5 s tras las optimizaciones (lotes de cursor más grandes, esperar solo cuan
 el consumidor pide pausa, escritura del snapshot en bloques de 256 KB). Cualquier
 otra página: ~5 ms. CSV completo: ~1 s.
 
+### Reportes grandes de punta a punta (29/10/2026)
+A pedido de David: 5 reportes grandes en los 4 motores (20 pruebas), con preguntas en
+español y el recorrido completo de Consultar: `/generateSQL` (Gemini) → Query Safety
+Engine → `/executeQuery` → todas las páginas → descarga del Excel. 20 llamadas a Gemini,
+**$0.0443** (aprobado por David). Banco de volumen (1,5 M de filas).
+
+| Reporte | Filas | Generación (s) | Ejecución (s) | Excel (s) | Excel (MB) |
+|---|---|---|---|---|---|
+| R1 líneas de pedido con pedido, fecha, cliente, producto, categoría, cantidad y subtotal | 631 630 | 5,5 / 2,9 / 2,4 / 2,5 | 6,6 / 4,3 / 3,9 / 6,2 | 19,0 / 21,2 / 18,7 / 18,6 | 44,6 / 45,9 / 40,1 / 40,8 |
+| R2 pedidos con fecha, cliente, estado y total | 250 000 | 2,3 / 1,7 / 2,0 / 2,6 | 2,0 / 1,5 / 1,5 / 2,3 | 6,4 / 6,3 / 6,2 / 6,2 | 13,4 / 13,4 / 13,4 / 13,8 |
+| R3 por cliente: gastado, pedidos y última compra, sin cancelados | 30 897 | 4,9 / 2,0 / 2,4 / 3,1 | 0,7 / 1,5 / 1,1 / 0,7 | 0,8 / 1,5 / 1,9 / 2,0 | 1,5 / 1,8 / 1,5 / 1,5 |
+| R4 unidades y monto por producto y mes de 2025, sin cancelados | 16 082 | 3,0 / 3,4 / 3,0 / 2,7 | 0,9 / 2,1 / 1,6 / 0,5 | 0,9 / 0,5 / 0,8 / 0,8 | 1,0 / 0,7 / 0,7 / 0,8 |
+| R5 pagos completados con pedido, cliente, método, monto y fecha | 215 962 | 1,9 / 2,1 / 4,3 / 7,5 | 2,9 / 1,4 / 1,4 / 3,2 | 8,4 / 5,6 / 5,7 / 13,8 | 12,0 / 12,0 / 12,0 / 12,1 |
+
+Orden de los motores en cada celda: PostgreSQL / MySQL / MariaDB / SQL Server.
+
+- **Integridad: 20/20.** En los 20, las filas leídas coinciden con un conteo de control
+  escrito a mano y el Excel trae todas las filas, más la hoja «Detalles». Ninguno se
+  truncó.
+- **Mismo resultado en los 4 motores: 5/5 reportes.** Se comparó con una huella
+  independiente del orden de las filas. En R1, R3 y R4, MySQL dio otra huella porque
+  Gemini armó otras columnas (agregó `order_item_id` en R1 y `customer_id` en R3; en R4
+  no puso el año, que los otros incluyen). Comparando solo las columnas en común, los
+  datos son idénticos (verificado volviendo a ejecutar el SQL guardado, sin Gemini).
+- **Tiempo para el usuario:** generación + ejecución de 3 a 12 s incluso en el reporte
+  de 631 630 filas. El Excel de 631 630 filas (40–46 MB) se descarga en 19–21 s. Recorrer
+  las 632 páginas por HTTP tardó 66–84 s, pero eso lo hizo el script de prueba: en la
+  pantalla, cada página se pide cuando el usuario la abre.
+- El SQL generado de los 20 está en `evaluacion_gemini/reportes_grandes.md` (script temporal, no versionado).
+
+### Reportes elaborados (29/10/2026)
+A pedido de David: 3 reportes del tipo que se haría con un procedimiento almacenado,
+pero como un solo `SELECT` (CTE, funciones de ventana, rankings, aritmética de fechas),
+en los 4 motores, con el mismo recorrido hasta el Excel. Cada resultado se comparó
+completo contra una referencia escrita a mano por motor; las 3 referencias dan lo mismo
+en los 4. 12 llamadas a Gemini, **$0.0614** (aprobado por David).
+
+| Reporte | Filas | Resultado |
+|---|---|---|
+| E1 por categoría y mes de 2025: monto, pedidos, ticket promedio, % del mes y variación frente al mes anterior | 172 | **4/4 correctos** (con `category_id` de más); `LAG` y `SUM OVER` bien en los 4 |
+| E2 por cliente: gasto, pedidos, primera y última compra, categoría y método de pago preferidos, lugar en el ranking de su país | 30 897 | **4/4 con los mismos datos**. Los 4 usaron `DENSE_RANK` y la referencia `RANK`: la pregunta («los empates comparten lugar») admite los dos, así que es una ambigüedad de la pregunta. Todas las demás columnas coinciden |
+| E3 cohortes de 2024: registrados por mes, cuántos compraron en sus primeros 30 días y qué porcentaje | 12 | **3/4 correctos.** MySQL: error del modelo, porque el `LEFT JOIN` con los pedidos multiplica las filas y cuenta pedidos en lugar de clientes (1 144 registrados en enero en lugar de 989). MariaDB acierta, pero con un SQL enrevesado (un `JOIN ... ON 1 = 0` y un autojoin inútiles) que tardó 15,3 s, frente a menos de 1 s en los demás |
+
+- **11 de 12 con los datos correctos**, 1 error del modelo (E3 en MySQL). El SQL de los 12 está en
+  `evaluacion_gemini/reportes_grandes.md`.
+- **Integridad 12/12:** el Excel trae todas las filas.
+- Generación de 2,4 a 6,7 s; ejecución de 0,2 a 6,6 s, salvo E3 en MariaDB (15,3 s).
+- Lección para la capacitación y para la tesis: en reportes elaborados conviene que el
+  técnico revise el SQL. La garantía del sistema es que no modifica datos (Query
+  Safety Engine), no que todo reporte complejo sea correcto.
+
 ## Bugs encontrados por las pruebas (corregidos)
 
 1. **Un resultado demasiado grande tumbaba el backend completo.** Al descartar el
